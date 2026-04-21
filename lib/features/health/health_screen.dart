@@ -7,10 +7,16 @@ import '../../core/theme/app_typography.dart';
 import '../nutrition/food_lens/food_lens_flow.dart';
 import '../nutrition/nutrition_detail_screen.dart';
 import 'blood_pressure_detail_screen.dart';
+import 'blood_sugar_detail_screen.dart';
 import 'bmi_detail_screen.dart';
+import 'cgm_detail_screen.dart';
+import 'heart_rate_detail_screen.dart';
+import 'sleep_detail_screen.dart';
+import 'spo2_detail_screen.dart';
+import 'temperature_detail_screen.dart';
+import 'waist_detail_screen.dart';
 import 'data/health_data.dart';
 import 'widgets/active_energy_card.dart';
-import 'widgets/custom_tab_bar.dart';
 import 'widgets/meal_card.dart';
 import 'widgets/metric_card.dart';
 import 'widgets/mini_activity_card.dart';
@@ -27,7 +33,6 @@ class HealthScreen extends StatefulWidget {
 
 class _HealthScreenState extends State<HealthScreen>
     with SingleTickerProviderStateMixin {
-  int _tabIndex = 1;
   late final AnimationController _entryCtrl;
   final HealthRepository _repo = HealthRepository(seed: 7);
   late HealthData _data;
@@ -115,22 +120,6 @@ class _HealthScreenState extends State<HealthScreen>
                 ),
               ),
             ],
-          ),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: CustomTabBar(
-              currentIndex: _tabIndex,
-              onTap: (i) => setState(() => _tabIndex = i),
-              items: const [
-                TabItem(CupertinoIcons.house, 'หน้าหลัก'),
-                TabItem(CupertinoIcons.heart, 'สุขภาพ'),
-                TabItem(CupertinoIcons.paperclip, 'ทานยา'),
-                TabItem(CupertinoIcons.person_2, 'ครอบครัว'),
-                TabItem(CupertinoIcons.person_crop_circle, 'ฉัน'),
-              ],
-            ),
           ),
         ],
       ),
@@ -289,7 +278,7 @@ class _BloodPressureCard extends StatelessWidget {
       icon: CupertinoIcons.heart_fill,
       iconColor: const Color(0xFFB7185E),
       label: 'ความดันโลหิต',
-      value: '${sys.todayValue.round()}/${dia.todayValue.round()}',
+      value: '${sys.points[sys.latestIndex].value.round()}/${dia.points[dia.latestIndex].value.round()}',
       unit: 'mmHg',
       chartHeight: 72,
       chart: DualLineChart(
@@ -411,8 +400,15 @@ class _TemperatureCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = data.temperature;
     return _LiveValue(
-      initialIndex: s.todayIndex,
+      initialIndex: s.latestIndex,
       builder: (idx, onTouch) => MetricCard(
+        onTap: () {
+          Navigator.of(context).push(
+            CupertinoPageRoute(
+              builder: (_) => const TemperatureDetailScreen(),
+            ),
+          );
+        },
         icon: CupertinoIcons.thermometer,
         iconColor: AppColors.mindfulness,
         label: 'อุณหภูมิ',
@@ -426,7 +422,7 @@ class _TemperatureCard extends StatelessWidget {
           showDots: true,
           unit: '°C',
           indicatorIndex: idx,
-          onTouch: onTouch,
+          interactive: false,
         ),
         bottom: WeekLabels(labels: WeekLabels.fromDates(s.dates)),
       ),
@@ -442,8 +438,15 @@ class _SleepCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = data.sleep;
     return _LiveValue(
-      initialIndex: s.todayIndex,
+      initialIndex: s.latestIndex,
       builder: (idx, onTouch) => MetricCard(
+        onTap: () {
+          Navigator.of(context).push(
+            CupertinoPageRoute(
+              builder: (_) => const SleepDetailScreen(),
+            ),
+          );
+        },
         icon: CupertinoIcons.moon_fill,
         iconColor: AppColors.sleep,
         label: 'Sleep',
@@ -455,7 +458,7 @@ class _SleepCard extends StatelessWidget {
           dates: s.dates,
           color: AppColors.sleep,
           unit: ' hrs',
-          onTouch: onTouch,
+          interactive: false,
         ),
         bottom: WeekLabels(labels: WeekLabels.fromDates(s.dates)),
       ),
@@ -471,8 +474,15 @@ class _HeartRateCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = data.heartRate;
     return _LiveValue(
-      initialIndex: s.todayIndex,
+      initialIndex: s.latestIndex,
       builder: (idx, onTouch) => MetricCard(
+        onTap: () {
+          Navigator.of(context).push(
+            CupertinoPageRoute(
+              builder: (_) => const HeartRateDetailScreen(),
+            ),
+          );
+        },
         icon: CupertinoIcons.waveform_path_ecg,
         iconColor: AppColors.health,
         label: 'Heart Rate',
@@ -485,7 +495,7 @@ class _HeartRateCard extends StatelessWidget {
           color: AppColors.health,
           indicatorIndex: idx,
           unit: ' bpm',
-          onTouch: onTouch,
+          interactive: false,
         ),
         bottom: WeekLabels(labels: WeekLabels.fromDates(s.dates)),
       ),
@@ -501,8 +511,15 @@ class _CgmCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = data.cgm;
     return _LiveValue(
-      initialIndex: s.todayIndex,
+      initialIndex: s.latestIndex,
       builder: (idx, onTouch) => MetricCard(
+        onTap: () {
+          Navigator.of(context).push(
+            CupertinoPageRoute(
+              builder: (_) => const CgmDetailScreen(),
+            ),
+          );
+        },
         icon: CupertinoIcons.drop_fill,
         iconColor: AppColors.sleep,
         label: 'CGM',
@@ -515,7 +532,7 @@ class _CgmCard extends StatelessWidget {
           color: AppColors.sleep,
           indicatorIndex: idx,
           unit: ' mg/dl',
-          onTouch: onTouch,
+          interactive: false,
         ),
         bottom: WeekLabels(labels: WeekLabels.fromDates(s.dates)),
       ),
@@ -531,8 +548,15 @@ class _WaistCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = data.waist;
     return _LiveValue(
-      initialIndex: s.todayIndex,
+      initialIndex: s.latestIndex,
       builder: (idx, onTouch) => MetricCard(
+        onTap: () {
+          Navigator.of(context).push(
+            CupertinoPageRoute(
+              builder: (_) => const WaistDetailScreen(),
+            ),
+          );
+        },
         icon: CupertinoIcons.circle_fill,
         iconColor: AppColors.nutrition,
         label: 'รอบเอว',
@@ -545,7 +569,7 @@ class _WaistCard extends StatelessWidget {
           color: AppColors.nutrition,
           indicatorIndex: idx,
           unit: ' in',
-          onTouch: onTouch,
+          interactive: false,
         ),
         bottom: WeekLabels(labels: WeekLabels.fromDates(s.dates)),
       ),
@@ -561,8 +585,15 @@ class _SpO2Card extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = data.spO2;
     return _LiveValue(
-      initialIndex: s.todayIndex,
+      initialIndex: s.latestIndex,
       builder: (idx, onTouch) => MetricCard(
+        onTap: () {
+          Navigator.of(context).push(
+            CupertinoPageRoute(
+              builder: (_) => const Spo2DetailScreen(),
+            ),
+          );
+        },
         icon: CupertinoIcons.wind,
         iconColor: AppColors.mindfulness,
         label: 'SpO₂',
@@ -576,7 +607,7 @@ class _SpO2Card extends StatelessWidget {
           highlightIndex: idx,
           barWidth: 4,
           unit: '%',
-          onTouch: onTouch,
+          interactive: false,
         ),
         bottom: WeekLabels(labels: WeekLabels.fromDates(s.dates)),
       ),
@@ -592,8 +623,15 @@ class _BloodSugarCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = data.bloodSugar;
     return _LiveValue(
-      initialIndex: s.todayIndex,
+      initialIndex: s.latestIndex,
       builder: (idx, onTouch) => MetricCard(
+        onTap: () {
+          Navigator.of(context).push(
+            CupertinoPageRoute(
+              builder: (_) => const BloodSugarDetailScreen(),
+            ),
+          );
+        },
         icon: CupertinoIcons.drop_fill,
         iconColor: AppColors.health,
         label: 'น้ำตาลในเลือด',
@@ -606,7 +644,7 @@ class _BloodSugarCard extends StatelessWidget {
           color: AppColors.health,
           indicatorIndex: idx,
           unit: ' mg/dl',
-          onTouch: onTouch,
+          interactive: false,
         ),
         bottom: WeekLabels(labels: WeekLabels.fromDates(s.dates)),
       ),
@@ -631,7 +669,7 @@ class _HighlightsSection extends StatelessWidget {
         ),
         const SizedBox(height: spacing),
         _LiveValue(
-          initialIndex: data.activeEnergy.todayIndex,
+          initialIndex: data.activeEnergy.latestIndex,
           builder: (idx, onTouch) => ActiveEnergyCard(
             kcal: data.activeEnergy.values[idx].round(),
             weekly: data.activeEnergy.values,
@@ -664,7 +702,7 @@ class _StepsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = data.steps;
     return _LiveValue(
-      initialIndex: s.todayIndex,
+      initialIndex: s.latestIndex,
       builder: (idx, onTouch) => MetricCard(
         icon: Icons.directions_walk,
         iconColor: const Color(0xFFE32616),

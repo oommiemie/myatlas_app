@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 
 import 'core/theme/app_theme.dart';
-import 'features/health/health_screen.dart';
+import 'features/shell/main_shell.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,7 +24,7 @@ class MyAtlasApp extends StatelessWidget {
         Locale('th', 'TH'),
         Locale('en', 'US'),
       ],
-      home: const HealthScreen(),
+      home: const MainShell(),
     );
   }
 }

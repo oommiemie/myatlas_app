@@ -19,49 +19,59 @@ class _BpSample {
     required this.sys,
     required this.dia,
     required this.xLabels,
+    required this.xLabelIndices,
     required this.pointLabels,
     required this.markerIndex,
   });
   final List<double> sys;
   final List<double> dia;
   final List<String> xLabels;
+  final List<int> xLabelIndices;
   final List<String> pointLabels;
   final int markerIndex;
 }
 
 const _bpSamples = <_BpSample>[
+  // Day — 16 readings at 1.5hr intervals. Realistic healthy adult:
+  // lowest during sleep (~108/68), higher during waking (~120/78), a small
+  // post-exercise bump in the evening.
   _BpSample(
-    sys: [160, 155, 150, 148, 152, 158, 165, 162, 158, 155, 152, 150, 155, 160, 165, 164],
-    dia: [85, 82, 78, 75, 80, 85, 88, 85, 78, 70, 65, 62, 65, 70, 75, 77],
+    sys: [114, 112, 110, 108, 110, 114, 118, 122, 120, 118, 120, 124, 128, 122, 118, 116],
+    dia: [72, 70, 68, 68, 70, 72, 74, 78, 76, 74, 76, 78, 82, 78, 74, 72],
     xLabels: ['12 AM', '6', '12 PM', '6'],
+    xLabelIndices: [0, 4, 8, 12],
     pointLabels: [
       '00:00', '01:30', '03:00', '04:30', '06:00', '07:30', '09:00', '10:30',
       '12:00', '13:30', '15:00', '16:30', '18:00', '19:30', '21:00', '22:30',
     ],
-    markerIndex: 14,
+    markerIndex: 12,
   ),
+  // Week — daily averages; a slightly stressful Friday (higher)
   _BpSample(
-    sys: [142, 148, 155, 150, 158, 152, 145],
-    dia: [78, 80, 85, 82, 88, 80, 76],
+    sys: [120, 118, 122, 119, 126, 121, 117],
+    dia: [76, 74, 78, 75, 82, 77, 74],
     xLabels: ['จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส', 'อา'],
+    xLabelIndices: [0, 1, 2, 3, 4, 5, 6],
     pointLabels: [
       'จ 5 เม.ย.', 'อ 6 เม.ย.', 'พ 7 เม.ย.', 'พฤ 8 เม.ย.',
       'ศ 9 เม.ย.', 'ส 10 เม.ย.', 'อา 11 เม.ย.',
     ],
     markerIndex: 4,
   ),
+  // Month — 30 daily averages with a mid-month stress peak and recovery
   _BpSample(
     sys: [
-      135, 140, 138, 142, 145, 148, 152, 150, 155, 158,
-      155, 152, 148, 150, 152, 155, 160, 165, 162, 158,
-      155, 150, 148, 145, 150, 155, 158, 160, 155, 150,
+      118, 120, 119, 122, 120, 118, 116, 118, 121, 124,
+      122, 120, 118, 120, 122, 125, 128, 130, 126, 122,
+      120, 117, 118, 120, 123, 126, 122, 119, 118, 120,
     ],
     dia: [
-      72, 75, 73, 78, 80, 82, 85, 82, 86, 88,
-      85, 82, 80, 82, 84, 86, 90, 92, 88, 85,
-      82, 78, 76, 75, 78, 82, 85, 86, 82, 80,
+      74, 76, 74, 78, 76, 74, 72, 74, 77, 80,
+      78, 76, 74, 76, 78, 80, 82, 84, 80, 78,
+      76, 73, 74, 76, 78, 80, 77, 75, 74, 76,
     ],
     xLabels: ['1', '8', '15', '22', '29'],
+    xLabelIndices: [0, 7, 14, 21, 28],
     pointLabels: [
       '1 เม.ย.', '2 เม.ย.', '3 เม.ย.', '4 เม.ย.', '5 เม.ย.', '6 เม.ย.',
       '7 เม.ย.', '8 เม.ย.', '9 เม.ย.', '10 เม.ย.', '11 เม.ย.', '12 เม.ย.',
@@ -71,17 +81,21 @@ const _bpSamples = <_BpSample>[
     ],
     markerIndex: 17,
   ),
+  // Year — 12 monthly averages with hot-season slight dip
   _BpSample(
-    sys: [148, 152, 155, 150, 145, 142, 146, 150, 155, 158, 154, 152],
-    dia: [80, 82, 85, 82, 78, 76, 80, 82, 86, 88, 84, 82],
+    sys: [122, 121, 120, 118, 116, 117, 119, 121, 123, 124, 122, 121],
+    dia: [78, 77, 76, 74, 72, 73, 75, 77, 79, 80, 78, 77],
     xLabels: ['ม.ค.', 'เม.ย.', 'ก.ค.', 'ต.ค.'],
+    xLabelIndices: [0, 3, 6, 9],
     pointLabels: [
-      'ม.ค. 68', 'ก.พ. 68', 'มี.ค. 68', 'เม.ย. 68', 'พ.ค. 68', 'มิ.ย. 68',
-      'ก.ค. 68', 'ส.ค. 68', 'ก.ย. 68', 'ต.ค. 68', 'พ.ย. 68', 'ธ.ค. 68',
+      'ม.ค. 69', 'ก.พ. 69', 'มี.ค. 69', 'เม.ย. 69', 'พ.ค. 69', 'มิ.ย. 69',
+      'ก.ค. 69', 'ส.ค. 69', 'ก.ย. 69', 'ต.ค. 69', 'พ.ย. 69', 'ธ.ค. 69',
     ],
-    markerIndex: 9,
+    markerIndex: 3,
   ),
 ];
+
+int _currentBpMarker(int tab, int n) => (n - 1).clamp(0, n - 1);
 
 class _BloodPressureDetailScreenState
     extends State<BloodPressureDetailScreen> {
@@ -298,8 +312,9 @@ class _ChartCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final sample = _bpSamples[tabIndex];
-    final activeIdx = (selectedIndex ?? sample.markerIndex)
-        .clamp(0, sample.sys.length - 1);
+    final activeIdx =
+        (selectedIndex ?? _currentBpMarker(tabIndex, sample.sys.length))
+            .clamp(0, sample.sys.length - 1);
     final sysV = sample.sys[activeIdx].round();
     final diaV = sample.dia[activeIdx].round();
     final valueLabel = '$sysV/$diaV';
@@ -407,7 +422,7 @@ class _ChartCard extends StatelessWidget {
               height: 224,
               child: _BpLineChart(
                 sample: sample,
-                selectedIndex: selectedIndex,
+                selectedIndex: activeIdx,
                 onSelect: onSelect,
               ),
             ),
@@ -561,7 +576,7 @@ class _BpLineChart extends StatefulWidget {
     required this.onSelect,
   });
   final _BpSample sample;
-  final int? selectedIndex;
+  final int selectedIndex;
   final ValueChanged<int?> onSelect;
 
   @override
@@ -612,51 +627,118 @@ class _BpLineChartState extends State<_BpLineChart>
     super.dispose();
   }
 
-  int _nearest(double x, double width) {
-    const leftPad = 16.0;
-    const rightPad = 56.0;
-    final chartWidth = width - leftPad - rightPad;
-    if (chartWidth <= 0) return 0;
-    final n = widget.sample.sys.length;
-    final rel = ((x - leftPad) / chartWidth).clamp(0.0, 1.0);
-    return (rel * (n - 1)).round().clamp(0, n - 1);
+  static const double _leftPad = 16.0;
+  static const double _rightPad = 16.0;
+  static const double _axisWidth = 48.0;
+
+  int _nearestIndexByX(double x, List<double> xs) {
+    if (xs.isEmpty) return 0;
+    int best = 0;
+    double bestDist = (xs[0] - x).abs();
+    for (int i = 1; i < xs.length; i++) {
+      final d = (xs[i] - x).abs();
+      if (d < bestDist) {
+        bestDist = d;
+        best = i;
+      }
+    }
+    return best;
   }
 
   @override
   Widget build(BuildContext context) {
+    final n = widget.sample.sys.length;
     return LayoutBuilder(
       builder: (context, constraints) {
-        final width = constraints.maxWidth;
-        return GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTapDown: (d) =>
-              widget.onSelect(_nearest(d.localPosition.dx, width)),
-          onPanStart: (d) =>
-              widget.onSelect(_nearest(d.localPosition.dx, width)),
-          onPanUpdate: (d) =>
-              widget.onSelect(_nearest(d.localPosition.dx, width)),
-          child: AnimatedBuilder(
-            animation: Listenable.merge([_ctrl, _entryCtrl]),
-            builder: (_, __) {
-              final t = Curves.fastEaseInToSlowEaseOut.transform(_ctrl.value);
-              final entry =
-                  Curves.easeOutCubic.transform(_entryCtrl.value);
-              return CustomPaint(
-                painter: _BpChartPainter(
-                  from: _from,
-                  to: _to,
-                  t: t,
-                  entry: entry,
-                  overrideMarker: widget.selectedIndex,
+        final visibleWidth = constraints.maxWidth - _axisWidth;
+        final contentWidth = visibleWidth;
+        final chartWidth = contentWidth - _leftPad - _rightPad;
+        final xPositions = [
+          for (int i = 0; i < n; i++)
+            n == 1
+                ? _leftPad + chartWidth / 2
+                : _leftPad + (i / (n - 1)) * chartWidth,
+        ];
+        return Row(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                reverse: true,
+                physics: const BouncingScrollPhysics(),
+                child: SizedBox(
+                  width: contentWidth,
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTapDown: (d) => widget.onSelect(
+                        _nearestIndexByX(d.localPosition.dx, xPositions)),
+                    onPanStart: (d) => widget.onSelect(
+                        _nearestIndexByX(d.localPosition.dx, xPositions)),
+                    onPanUpdate: (d) => widget.onSelect(
+                        _nearestIndexByX(d.localPosition.dx, xPositions)),
+                    child: AnimatedBuilder(
+                      animation: Listenable.merge([_ctrl, _entryCtrl]),
+                      builder: (_, __) {
+                        final t = Curves.fastEaseInToSlowEaseOut
+                            .transform(_ctrl.value);
+                        final entry = Curves.easeOutCubic
+                            .transform(_entryCtrl.value);
+                        return CustomPaint(
+                          painter: _BpChartPainter(
+                            from: _from,
+                            to: _to,
+                            t: t,
+                            entry: entry,
+                            overrideMarker: widget.selectedIndex,
+                            xPositions: xPositions,
+                          ),
+                          size: Size.infinite,
+                        );
+                      },
+                    ),
+                  ),
                 ),
+              ),
+            ),
+            SizedBox(
+              width: _axisWidth,
+              child: CustomPaint(
+                painter: _BpAxisLabelsPainter(),
                 size: Size.infinite,
-              );
-            },
-          ),
+              ),
+            ),
+          ],
         );
       },
     );
   }
+}
+
+class _BpAxisLabelsPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    const topPad = 8.0;
+    const bottomPad = 22.0;
+    final chartHeight = size.height - topPad - bottomPad;
+    final yLabels = [200, 150, 100, 50, 0];
+    final labelStyle = TextStyle(
+      color: const Color(0xFF6D756E),
+      fontSize: 10,
+      letterSpacing: 0.6,
+    );
+    for (int i = 0; i < yLabels.length; i++) {
+      final t = i / (yLabels.length - 1);
+      final y = topPad + t * chartHeight;
+      final tp = TextPainter(
+        text: TextSpan(text: yLabels[i].toString(), style: labelStyle),
+        textDirection: TextDirection.ltr,
+      )..layout();
+      tp.paint(canvas, Offset(8, y - tp.height / 2));
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _BpAxisLabelsPainter oldDelegate) => false;
 }
 
 class _BpChartPainter extends CustomPainter {
@@ -665,6 +747,7 @@ class _BpChartPainter extends CustomPainter {
     required this.to,
     required this.t,
     required this.entry,
+    required this.xPositions,
     this.overrideMarker,
   });
   final int? overrideMarker;
@@ -672,29 +755,24 @@ class _BpChartPainter extends CustomPainter {
   final _BpSample from;
   final _BpSample to;
   final double t;
+  final List<double> xPositions;
   _BpSample get sample => to;
 
   @override
   void paint(Canvas canvas, Size size) {
     const leftPad = 16.0;
-    const rightPad = 56.0;
+    const rightPad = 16.0;
     const topPad = 8.0;
     const bottomPad = 22.0;
 
     final chartWidth = size.width - leftPad - rightPad;
     final chartHeight = size.height - topPad - bottomPad;
 
-    final yLabels = [200, 150, 100, 50, 0];
-    final labelStyle = TextStyle(
-      color: const Color(0xFF6D756E),
-      fontSize: 10,
-      letterSpacing: 0.6,
-    );
-
     final gridPaint = Paint()
       ..color = const Color(0xFFE5E7EB)
       ..strokeWidth = 0.5;
 
+    final yLabels = [200, 150, 100, 50, 0];
     for (int i = 0; i < yLabels.length; i++) {
       final t = i / (yLabels.length - 1);
       final y = topPad + t * chartHeight;
@@ -714,14 +792,6 @@ class _BpChartPainter extends CustomPainter {
           gapWidth: 3,
         );
       }
-      final tp = TextPainter(
-        text: TextSpan(text: yLabels[i].toString(), style: labelStyle),
-        textDirection: TextDirection.ltr,
-      )..layout();
-      tp.paint(
-        canvas,
-        Offset(leftPad + chartWidth + 8, y - tp.height / 2),
-      );
     }
 
     final sysColor = const Color(0xFFF06C8C);
@@ -810,18 +880,29 @@ class _BpChartPainter extends CustomPainter {
       );
     }
 
-    // X labels: cross-fade between from and to
-    void drawXLabels(_BpSample s, double opacity) {
+    // X labels: cross-fade between from and to. Position each label at its
+    // point's x (using xLabelIndices).
+    void drawXLabels(
+      _BpSample s,
+      double opacity, {
+      List<double>? positions,
+    }) {
       if (opacity <= 0.001) return;
       final xLabels = s.xLabels;
-      final xSlots = xLabels.length;
+      final labelIdxs = s.xLabelIndices;
       final style = TextStyle(
         color: const Color(0xFF6D756E).withValues(alpha: opacity),
         fontSize: 10,
         letterSpacing: 0.6,
       );
-      for (int i = 0; i < xSlots; i++) {
-        final x = leftPad + (i + 0.5) * (chartWidth / xSlots);
+      final pointCount = s.sys.length;
+      for (int i = 0; i < xLabels.length; i++) {
+        final pointIdx = labelIdxs[i].clamp(0, pointCount - 1);
+        final x = positions != null && pointIdx < positions.length
+            ? positions[pointIdx]
+            : (pointCount == 1
+                ? leftPad + chartWidth / 2
+                : leftPad + (pointIdx / (pointCount - 1)) * chartWidth);
         final tp = TextPainter(
           text: TextSpan(text: xLabels[i], style: style),
           textDirection: TextDirection.ltr,
@@ -835,7 +916,7 @@ class _BpChartPainter extends CustomPainter {
     }
 
     if (from != to) drawXLabels(from, 1 - t);
-    drawXLabels(to, t);
+    drawXLabels(to, t, positions: xPositions);
   }
 
   static List<double> _resample(List<double> values, int n) {
@@ -890,11 +971,22 @@ class _BpChartPainter extends CustomPainter {
       );
       path.cubicTo(c1.dx, c1.dy, c2.dx, c2.dy, p2.dx, p2.dy);
     }
+    // Soft glow under the line
+    canvas.drawPath(
+      path,
+      Paint()
+        ..color = color.withValues(alpha: 0.22)
+        ..strokeWidth = 6
+        ..style = PaintingStyle.stroke
+        ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.round
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4),
+    );
     canvas.drawPath(
       path,
       Paint()
         ..color = color
-        ..strokeWidth = 2
+        ..strokeWidth = 2.5
         ..style = PaintingStyle.stroke
         ..strokeCap = StrokeCap.round
         ..strokeJoin = StrokeJoin.round,
@@ -930,7 +1022,8 @@ class _BpChartPainter extends CustomPainter {
       oldDelegate.to != to ||
       oldDelegate.t != t ||
       oldDelegate.entry != entry ||
-      oldDelegate.overrideMarker != overrideMarker;
+      oldDelegate.overrideMarker != overrideMarker ||
+      oldDelegate.xPositions != xPositions;
 }
 
 class _AboutCard extends StatelessWidget {

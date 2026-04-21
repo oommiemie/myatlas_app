@@ -205,15 +205,31 @@ class _LineChartPainter extends CustomPainter {
         ..shader = LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [color.withValues(alpha: 0.30), color.withValues(alpha: 0)],
+          colors: [
+            color.withValues(alpha: 0.35),
+            color.withValues(alpha: 0.12),
+            color.withValues(alpha: 0),
+          ],
+          stops: const [0.0, 0.55, 1.0],
         ).createShader(Offset.zero & size);
       canvas.drawPath(fillPath, fillPaint);
     }
 
+    // Soft glow under the line
+    canvas.drawPath(
+      path,
+      Paint()
+        ..color = color.withValues(alpha: 0.22)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 5
+        ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.round
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3),
+    );
     final strokePaint = Paint()
       ..color = color
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 2
+      ..strokeWidth = 2.5
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round;
     canvas.drawPath(path, strokePaint);
@@ -240,17 +256,11 @@ class _LineChartPainter extends CustomPainter {
         ..strokeWidth = 1.2;
       _drawDashedLine(canvas, Offset(p.dx, p.dy + 6),
           Offset(p.dx, size.height), dashPaint);
-      canvas.drawCircle(p, 6,
+      canvas.drawCircle(p, 9,
           Paint()..color = color.withValues(alpha: 0.18));
-      canvas.drawCircle(p, 4,
-          Paint()..color = const Color(0xFFFFFFFF));
-      canvas.drawCircle(
-          p,
-          4,
-          Paint()
-            ..color = color
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = 2.2);
+      canvas.drawCircle(p, 5.5, Paint()..color = const Color(0xFFFFFFFF));
+      canvas.drawCircle(p, 4, Paint()..color = color);
+      canvas.drawCircle(p, 1.6, Paint()..color = const Color(0xFFFFFFFF));
     }
   }
 
@@ -450,13 +460,25 @@ class _DualLinePainter extends CustomPainter {
         ),
     ];
 
+    final linePath = _smoothPathThrough(points);
     canvas.drawPath(
-      _smoothPathThrough(points),
+      linePath,
+      Paint()
+        ..color = color.withValues(alpha: 0.22)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 5
+        ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.round
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3),
+    );
+    canvas.drawPath(
+      linePath,
       Paint()
         ..color = color
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 2.2
-        ..strokeCap = StrokeCap.round,
+        ..strokeWidth = 2.5
+        ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.round,
     );
   }
 
@@ -472,14 +494,10 @@ class _DualLinePainter extends CustomPainter {
     final p = Offset(
         idx * slot + slot / 2,
         pad + plotH - ((data[idx] - minV) / range) * plotH);
-    canvas.drawCircle(p, 5, Paint()..color = const Color(0xFFFFFFFF));
-    canvas.drawCircle(
-        p,
-        5,
-        Paint()
-          ..color = color
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 2.2);
+    canvas.drawCircle(p, 9, Paint()..color = color.withValues(alpha: 0.18));
+    canvas.drawCircle(p, 5.5, Paint()..color = const Color(0xFFFFFFFF));
+    canvas.drawCircle(p, 4, Paint()..color = color);
+    canvas.drawCircle(p, 1.6, Paint()..color = const Color(0xFFFFFFFF));
   }
 
   void _dashedLine(Canvas canvas, Offset p1, Offset p2, Paint paint) {
@@ -675,13 +693,29 @@ class _BarPainter extends CustomPainter {
       );
       final isHighlight = i == highlightIndex;
       final paint = Paint();
-      if (isHighlight) {
-        paint.color = highlightColor;
+      if (isHighlight && h > 0) {
+        paint.shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            highlightColor.withValues(alpha: 0.85),
+            highlightColor,
+          ],
+        ).createShader(rect.outerRect);
       } else if (useDimGradient && h > 0) {
         paint.shader = LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: dimGradient,
+        ).createShader(rect.outerRect);
+      } else if (h > 0) {
+        paint.shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            color.withValues(alpha: dimAlpha * 0.75),
+            color.withValues(alpha: dimAlpha),
+          ],
         ).createShader(rect.outerRect);
       } else {
         paint.color = color.withValues(alpha: dimAlpha);
@@ -855,11 +889,17 @@ class _PillBarPainter extends CustomPainter {
         Radius.circular(barWidth / 2),
       );
       final isHighlight = i == highlightIndex;
-      canvas.drawRRect(
-        rect,
-        Paint()
-          ..color = isHighlight ? color : color.withValues(alpha: 0.85),
-      );
+      final shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: isHighlight
+            ? [color, color.withValues(alpha: 0.80)]
+            : [
+                color.withValues(alpha: 0.75),
+                color.withValues(alpha: 0.95),
+              ],
+      ).createShader(rect.outerRect);
+      canvas.drawRRect(rect, Paint()..shader = shader);
       if (isHighlight) {
         canvas.drawRRect(
           rect.inflate(2),

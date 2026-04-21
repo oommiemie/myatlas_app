@@ -6,69 +6,118 @@ import 'package:flutter/material.dart' show Icons;
 
 import '../../core/theme/app_typography.dart';
 
-class _BmiPoint {
-  const _BmiPoint({
-    required this.day,
-    required this.month,
-    required this.weight,
-    required this.height,
+class _BgSample {
+  const _BgSample({
+    required this.values,
+    required this.xLabels,
+    required this.xLabelIndices,
+    required this.pointLabels,
+    required this.dateLabel,
+    required this.markerIndex,
   });
-  final int day;
-  final String month;
-  final double weight;
-  final double height;
-
-  String get dateLabel => '$day $month';
-
-  int get absoluteDay {
-    const monthIndex = {
-      'ม.ค. 69': 0,
-      'ก.พ. 69': 31,
-      'มี.ค. 69': 59,
-      'เม.ย. 69': 90,
-      'พ.ค. 69': 120,
-      'มิ.ย. 69': 151,
-      'ก.ค. 69': 181,
-      'ส.ค. 69': 212,
-      'ก.ย. 69': 243,
-      'ต.ค. 69': 273,
-      'พ.ย. 69': 304,
-      'ธ.ค. 69': 334,
-    };
-    return (monthIndex[month] ?? 0) + day;
-  }
+  final List<double> values;
+  final List<String> xLabels;
+  final List<int> xLabelIndices;
+  final List<String> pointLabels;
+  final String dateLabel;
+  final int markerIndex;
 }
 
-const _bmiPoints = <_BmiPoint>[
-  _BmiPoint(day: 5, month: 'ก.พ. 69', weight: 64, height: 174),
-  _BmiPoint(day: 12, month: 'ก.พ. 69', weight: 63, height: 174),
-  _BmiPoint(day: 19, month: 'ก.พ. 69', weight: 63, height: 174),
-  _BmiPoint(day: 26, month: 'ก.พ. 69', weight: 62, height: 175),
-  _BmiPoint(day: 4, month: 'มี.ค. 69', weight: 62, height: 175),
-  _BmiPoint(day: 10, month: 'มี.ค. 69', weight: 61, height: 175),
-  _BmiPoint(day: 16, month: 'มี.ค. 69', weight: 61, height: 175),
-  _BmiPoint(day: 23, month: 'มี.ค. 69', weight: 62, height: 175),
-  _BmiPoint(day: 29, month: 'มี.ค. 69', weight: 60, height: 175),
-  _BmiPoint(day: 1, month: 'เม.ย. 69', weight: 58, height: 175),
-  _BmiPoint(day: 3, month: 'เม.ย. 69', weight: 59, height: 175),
-  _BmiPoint(day: 5, month: 'เม.ย. 69', weight: 62, height: 175),
-  _BmiPoint(day: 7, month: 'เม.ย. 69', weight: 61, height: 175),
-  _BmiPoint(day: 9, month: 'เม.ย. 69', weight: 60, height: 175),
-  _BmiPoint(day: 11, month: 'เม.ย. 69', weight: 60, height: 175),
+final _bgSamples = <_BgSample>[
+  // Day — 24 hourly glucose readings following typical meal spikes:
+  // fasting 85-95, breakfast spike (9AM) to 145, lunch (1PM) to 160,
+  // afternoon snack dip, dinner (7PM) spike to 170, back to 100 at bedtime.
+  _BgSample(
+    values: [
+      92, 90, 88, 86, 85, 86, 90, 100,
+      138, 145, 128, 112, 128, 158, 142, 118,
+      104, 108, 150, 172, 148, 120, 104, 96,
+    ].map((e) => e.toDouble()).toList(),
+    xLabels: const ['12 AM', '6', '12 PM', '6'],
+    xLabelIndices: const [0, 6, 12, 18],
+    pointLabels: const [
+      '00:00', '01:00', '02:00', '03:00', '04:00', '05:00',
+      '06:00', '07:00', '08:00', '09:00', '10:00', '11:00',
+      '12:00', '13:00', '14:00', '15:00', '16:00', '17:00',
+      '18:00', '19:00', '20:00', '21:00', '22:00', '23:00',
+    ],
+    dateLabel: '11 เม.ย. 69',
+    markerIndex: 19,
+  ),
+  // Week — 7 daily average glucose readings
+  _BgSample(
+    values: [118, 124, 120, 116, 128, 132, 122]
+        .map((e) => e.toDouble())
+        .toList(),
+    xLabels: const ['จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.', 'อา.'],
+    xLabelIndices: const [0, 1, 2, 3, 4, 5, 6],
+    pointLabels: const [
+      'จ. 7 เม.ย.',
+      'อ. 8 เม.ย.',
+      'พ. 9 เม.ย.',
+      'พฤ. 10 เม.ย.',
+      'ศ. 11 เม.ย.',
+      'ส. 12 เม.ย.',
+      'อา. 13 เม.ย.',
+    ],
+    dateLabel: 'สัปดาห์ที่ 15',
+    markerIndex: 4,
+  ),
+  // Month — 30 daily averages with small drift
+  _BgSample(
+    values: [
+      118, 122, 120, 116, 124, 128, 122, 118, 120, 124,
+      126, 122, 118, 116, 120, 124, 128, 132, 130, 126,
+      122, 118, 120, 124, 128, 124, 120, 118, 122, 124,
+    ].map((e) => e.toDouble()).toList(),
+    xLabels: const ['1', '8', '15', '22', '29'],
+    xLabelIndices: const [0, 7, 14, 21, 28],
+    pointLabels: const [
+      '1 เม.ย. 69', '2 เม.ย. 69', '3 เม.ย. 69', '4 เม.ย. 69', '5 เม.ย. 69',
+      '6 เม.ย. 69', '7 เม.ย. 69', '8 เม.ย. 69', '9 เม.ย. 69', '10 เม.ย. 69',
+      '11 เม.ย. 69', '12 เม.ย. 69', '13 เม.ย. 69', '14 เม.ย. 69', '15 เม.ย. 69',
+      '16 เม.ย. 69', '17 เม.ย. 69', '18 เม.ย. 69', '19 เม.ย. 69', '20 เม.ย. 69',
+      '21 เม.ย. 69', '22 เม.ย. 69', '23 เม.ย. 69', '24 เม.ย. 69', '25 เม.ย. 69',
+      '26 เม.ย. 69', '27 เม.ย. 69', '28 เม.ย. 69', '29 เม.ย. 69', '30 เม.ย. 69',
+    ],
+    dateLabel: 'เม.ย. 69',
+    markerIndex: 10,
+  ),
+  // Year — 12 monthly average glucose
+  _BgSample(
+    values: [120, 122, 124, 122, 118, 120, 124, 128, 130, 126, 122, 120]
+        .map((e) => e.toDouble())
+        .toList(),
+    xLabels: const ['ม.ค.', 'เม.ย.', 'ก.ค.', 'ต.ค.'],
+    xLabelIndices: const [0, 3, 6, 9],
+    pointLabels: const [
+      'ม.ค. 69', 'ก.พ. 69', 'มี.ค. 69', 'เม.ย. 69',
+      'พ.ค. 69', 'มิ.ย. 69', 'ก.ค. 69', 'ส.ค. 69',
+      'ก.ย. 69', 'ต.ค. 69', 'พ.ย. 69', 'ธ.ค. 69',
+    ],
+    dateLabel: '2569',
+    markerIndex: 3,
+  ),
 ];
 
-class BmiDetailScreen extends StatefulWidget {
-  const BmiDetailScreen({super.key});
+const _yLabels = [250, 200, 150, 100, 50];
+const _yMax = 250.0;
+const _yMin = 50.0;
+
+int _currentMarker(int tab, int n) => (n - 1).clamp(0, n - 1);
+
+class BloodSugarDetailScreen extends StatefulWidget {
+  const BloodSugarDetailScreen({super.key});
 
   @override
-  State<BmiDetailScreen> createState() => _BmiDetailScreenState();
+  State<BloodSugarDetailScreen> createState() => _BloodSugarDetailScreenState();
 }
 
-class _BmiDetailScreenState extends State<BmiDetailScreen> {
-  int _metricTab = 0;
+class _BloodSugarDetailScreenState extends State<BloodSugarDetailScreen> {
+  int _tab = 0;
   int? _selectedIndex;
 
-  void _showBmiInfoSheet(BuildContext context) {
+  void _showBgInfoSheet() {
     Navigator.of(context, rootNavigator: true).push(
       PageRouteBuilder(
         opaque: false,
@@ -76,7 +125,7 @@ class _BmiDetailScreenState extends State<BmiDetailScreen> {
         barrierDismissible: true,
         transitionDuration: const Duration(milliseconds: 420),
         reverseTransitionDuration: const Duration(milliseconds: 280),
-        pageBuilder: (_, __, ___) => const _BmiInfoSheet(),
+        pageBuilder: (_, __, ___) => const _BgInfoSheet(),
         transitionsBuilder: (_, anim, __, child) {
           return SlideTransition(
             position: Tween<Offset>(
@@ -102,12 +151,12 @@ class _BmiDetailScreenState extends State<BmiDetailScreen> {
       backgroundColor: const Color(0xFFF4F8F5),
       child: Stack(
         children: [
-          Positioned(
+          const Positioned(
             top: 0,
             left: 0,
             right: 0,
             height: 250,
-            child: const _HeaderBackground(),
+            child: _HeaderBackground(),
           ),
           SafeArea(
             bottom: false,
@@ -130,18 +179,15 @@ class _BmiDetailScreenState extends State<BmiDetailScreen> {
                       physics: const BouncingScrollPhysics(),
                       padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
                       children: [
-                        _BmiChartCard(
-                          metricTab: _metricTab,
-                          onMetricChange: (i) =>
-                              setState(() => _metricTab = i),
+                        _BgChartCard(
+                          tab: _tab,
+                          onTabChange: (i) => setState(() => _tab = i),
                           selectedIndex: _selectedIndex,
                           onSelect: (idx) =>
                               setState(() => _selectedIndex = idx),
                         ),
                         const SizedBox(height: 16),
-                        _AboutBmiCard(
-                          onTap: () => _showBmiInfoSheet(context),
-                        ),
+                        _AboutBgCard(onTap: _showBgInfoSheet),
                         const SizedBox(height: 16),
                         const _OptionLabel(),
                         const SizedBox(height: 10),
@@ -172,9 +218,9 @@ class _HeaderBackground extends StatelessWidget {
           center: Alignment(-0.2, -0.5),
           radius: 1.2,
           colors: [
-            Color(0xFF6FC2A0),
-            Color(0xFF3FA880),
-            Color(0xFF1D8B6B),
+            Color(0xFFE882B4),
+            Color(0xFFC43A7B),
+            Color(0xFF8B1E55),
           ],
           stops: [0.0, 0.55, 1.0],
         ),
@@ -200,7 +246,7 @@ class _TopBar extends StatelessWidget {
           ),
           const SizedBox(width: 10),
           Text(
-            'Body Mass Index',
+            'น้ำตาลในเลือด',
             style: AppTypography.title3(CupertinoColors.white).copyWith(
               fontSize: 20,
               fontWeight: FontWeight.w700,
@@ -264,23 +310,28 @@ class _LiquidGlassButton extends StatelessWidget {
   }
 }
 
-class _BmiChartCard extends StatelessWidget {
-  const _BmiChartCard({
-    required this.metricTab,
-    required this.onMetricChange,
+class _BgChartCard extends StatelessWidget {
+  const _BgChartCard({
+    required this.tab,
+    required this.onTabChange,
     required this.selectedIndex,
     required this.onSelect,
   });
-  final int metricTab;
-  final ValueChanged<int> onMetricChange;
+  final int tab;
+  final ValueChanged<int> onTabChange;
   final int? selectedIndex;
   final ValueChanged<int?> onSelect;
 
   @override
   Widget build(BuildContext context) {
-    final latest = _bmiPoints.last;
+    final sample = _bgSamples[tab];
+    final fallback = _currentMarker(tab, sample.values.length);
     final activeIdx =
-        (selectedIndex ?? _bmiPoints.length - 1).clamp(0, _bmiPoints.length - 1);
+        (selectedIndex ?? fallback).clamp(0, sample.values.length - 1);
+    final value = sample.values[activeIdx];
+    final activeLabel = selectedIndex != null
+        ? sample.pointLabels[activeIdx]
+        : sample.dateLabel;
     return Container(
       decoration: BoxDecoration(
         color: CupertinoColors.white,
@@ -289,33 +340,33 @@ class _BmiChartCard extends StatelessWidget {
       child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-            child: _BmiGaugeSection(
-              bmi: _computeBmi(latest.weight, latest.height),
-              weight: latest.weight.round(),
-              height: latest.height.round(),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            padding: const EdgeInsets.all(16),
             child: _SegmentedTabs(
-              tabs: const ['น้ำหนัก', 'ส่วนสูง'],
-              selected: metricTab,
-              onChange: onMetricChange,
+              tabs: const ['วัน', 'สัปดาห์', 'เดือน', 'ปี'],
+              selected: tab,
+              onChange: onTabChange,
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-            child: _MetricValueDisplay(
-              metricTab: metricTab,
-              activeIdx: activeIdx,
-              isSelected: selectedIndex != null,
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: _ValueDisplay(
+                    value: value,
+                    dateLabel: activeLabel,
+                    isSelected: selectedIndex != null,
+                  ),
+                ),
+                const _StatusBadge(label: 'ปกติ'),
+              ],
             ),
           ),
           SizedBox(
             height: 216,
-            child: _MetricAreaChart(
-              metricTab: metricTab,
+            child: _BgAreaChart(
+              tab: tab,
               selectedIndex: selectedIndex,
               onSelect: onSelect,
             ),
@@ -325,209 +376,6 @@ class _BmiChartCard extends StatelessWidget {
       ),
     );
   }
-
-  static double _computeBmi(double weight, double height) {
-    final h = height / 100;
-    return weight / (h * h);
-  }
-}
-
-class _BmiGaugeSection extends StatelessWidget {
-  const _BmiGaugeSection({
-    required this.bmi,
-    required this.weight,
-    required this.height,
-  });
-  final double bmi;
-  final int weight;
-  final int height;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        SizedBox(
-          width: 236,
-          height: 132,
-          child: CustomPaint(
-            painter: _BmiGaugePainter(bmi: bmi),
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 14),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      bmi.toStringAsFixed(1),
-                      style: AppTypography.title2(CupertinoColors.black)
-                          .copyWith(
-                        fontSize: 28,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: -0.6,
-                        height: 1,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    _GaugeBadge(
-                      label: bmi < 18.5 || bmi > 23 ? 'ผิดปกติ' : 'ปกติ',
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 12),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: Row(
-            children: [
-              Expanded(
-                child: _StatItem(
-                  value: weight.toString(),
-                  label: 'น้ำหนัก (kg)',
-                ),
-              ),
-              Container(
-                width: 1,
-                height: 28,
-                color: const Color(0xFFE5E5E5),
-              ),
-              Expanded(
-                child: _StatItem(
-                  value: height.toString(),
-                  label: 'ส่วนสูง (cm)',
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _GaugeBadge extends StatelessWidget {
-  const _GaugeBadge({required this.label});
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(100),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(
-            color: const Color(0xFF4CA30D).withValues(alpha: 0.20),
-            borderRadius: BorderRadius.circular(100),
-            border: Border.all(
-              color: CupertinoColors.white.withValues(alpha: 0.1),
-              width: 1,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFFA6EF67).withValues(alpha: 0.1),
-                blurRadius: 4,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Text(
-            label,
-            style: AppTypography.caption1(
-              const Color(0xFF4CA30D),
-            ).copyWith(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              letterSpacing: 0.275,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _StatItem extends StatelessWidget {
-  const _StatItem({required this.value, required this.label});
-  final String value;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: AppTypography.headline(CupertinoColors.black).copyWith(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-            letterSpacing: -0.6,
-            height: 1,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: AppTypography.caption2(const Color(0xFF737373))
-              .copyWith(fontSize: 8),
-        ),
-      ],
-    );
-  }
-}
-
-class _BmiGaugePainter extends CustomPainter {
-  _BmiGaugePainter({required this.bmi});
-  final double bmi;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final strokeWidth = 14.0;
-    final center = Offset(size.width / 2, size.height);
-    final radius = size.width / 2 - strokeWidth / 2;
-    final rect = Rect.fromCircle(center: center, radius: radius);
-
-    const startAngle = pi;
-    const sweepAngle = pi;
-
-    // Background arc
-    final bgPaint = Paint()
-      ..color = const Color(0xFFEDEDED)
-      ..strokeWidth = strokeWidth
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
-    canvas.drawArc(rect, startAngle, sweepAngle, false, bgPaint);
-
-    // BMI range: 10-40 mapped to 0-1
-    final progress = ((bmi - 10) / 30).clamp(0.0, 1.0);
-
-    // Gradient arc
-    final gradient = const SweepGradient(
-      startAngle: pi,
-      endAngle: 2 * pi,
-      colors: [
-        Color(0xFFE5D64B), // yellow
-        Color(0xFFA3D65C), // lime
-        Color(0xFF35B94A), // green
-        Color(0xFF1C8A3A), // dark green
-      ],
-      stops: [0.0, 0.35, 0.7, 1.0],
-    );
-    final arcPaint = Paint()
-      ..shader = gradient.createShader(rect)
-      ..strokeWidth = strokeWidth
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
-    canvas.drawArc(rect, startAngle, sweepAngle * progress, false, arcPaint);
-  }
-
-  @override
-  bool shouldRepaint(covariant _BmiGaugePainter oldDelegate) =>
-      oldDelegate.bmi != bmi;
 }
 
 class _SegmentedTabs extends StatelessWidget {
@@ -616,23 +464,18 @@ class _SegmentedTabs extends StatelessWidget {
   }
 }
 
-class _MetricValueDisplay extends StatelessWidget {
-  const _MetricValueDisplay({
-    required this.metricTab,
-    required this.activeIdx,
+class _ValueDisplay extends StatelessWidget {
+  const _ValueDisplay({
+    required this.value,
+    required this.dateLabel,
     required this.isSelected,
   });
-  final int metricTab;
-  final int activeIdx;
+  final double value;
+  final String dateLabel;
   final bool isSelected;
 
   @override
   Widget build(BuildContext context) {
-    final isWeight = metricTab == 0;
-    final point = _bmiPoints[activeIdx];
-    final value = isWeight
-        ? point.weight.round().toString()
-        : point.height.round().toString();
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 220),
       switchInCurve: Curves.easeOutCubic,
@@ -647,27 +490,23 @@ class _MetricValueDisplay extends StatelessWidget {
         ),
       ),
       child: Column(
-        key: ValueKey('$metricTab-$activeIdx'),
+        key: ValueKey('$value-$dateLabel-$isSelected'),
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (isSelected)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 6),
-              child: Text(
-                'ค่าที่เลือก',
-                style: AppTypography.caption1(const Color(0xFF6D756E))
-                    .copyWith(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  letterSpacing: 0.275,
-                ),
-              ),
+          Text(
+            isSelected ? 'ค่าที่เลือก' : 'Value',
+            style: AppTypography.caption1(const Color(0xFF6D756E)).copyWith(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              letterSpacing: 0.275,
             ),
+          ),
+          const SizedBox(height: 8),
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                value,
+                value.round().toString(),
                 style: AppTypography.title2(CupertinoColors.black).copyWith(
                   fontSize: 24,
                   fontWeight: FontWeight.w500,
@@ -679,7 +518,7 @@ class _MetricValueDisplay extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(bottom: 2),
                 child: Text(
-                  isWeight ? 'kg' : 'cm',
+                  'mg/dl',
                   style: AppTypography.caption2(const Color(0xFF737373))
                       .copyWith(fontSize: 10),
                 ),
@@ -688,7 +527,7 @@ class _MetricValueDisplay extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            point.dateLabel,
+            dateLabel,
             style: AppTypography.caption2(const Color(0xFF737373))
                 .copyWith(fontSize: 10),
           ),
@@ -698,61 +537,99 @@ class _MetricValueDisplay extends StatelessWidget {
   }
 }
 
-class _MetricAreaChart extends StatefulWidget {
-  const _MetricAreaChart({
-    required this.metricTab,
+class _StatusBadge extends StatelessWidget {
+  const _StatusBadge({required this.label});
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(100),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(
+            color: const Color(0xFF4CA30D).withValues(alpha: 0.20),
+            borderRadius: BorderRadius.circular(100),
+            border: Border.all(
+              color: CupertinoColors.white.withValues(alpha: 0.1),
+              width: 1,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFFA6EF67).withValues(alpha: 0.1),
+                blurRadius: 4,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Text(
+            label,
+            style: AppTypography.caption1(
+              const Color(0xFF4CA30D),
+            ).copyWith(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              letterSpacing: 0.275,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BgAreaChart extends StatefulWidget {
+  const _BgAreaChart({
+    required this.tab,
     required this.selectedIndex,
     required this.onSelect,
   });
-  final int metricTab;
+  final int tab;
   final int? selectedIndex;
   final ValueChanged<int?> onSelect;
 
   @override
-  State<_MetricAreaChart> createState() => _MetricAreaChartState();
+  State<_BgAreaChart> createState() => _BgAreaChartState();
 }
 
-class _MetricAreaChartState extends State<_MetricAreaChart>
+class _BgAreaChartState extends State<_BgAreaChart>
     with TickerProviderStateMixin {
-  final ScrollController _scrollCtrl = ScrollController();
-  static const double _pointWidth = 44.0;
   static const double _leftPad = 16.0;
+  static const double _rightPad = 16.0;
   static const double _axisWidth = 48.0;
+  static const int _resampleN = 60;
 
   late AnimationController _entryCtrl;
   late AnimationController _tabCtrl;
-  late List<double> _fromValues;
-  late List<double> _toValues;
+  late _BgSample _from;
+  late _BgSample _to;
 
   @override
   void initState() {
     super.initState();
-    _fromValues = _currentValues();
-    _toValues = _fromValues;
+    _from = _bgSamples[widget.tab];
+    _to = _from;
     _entryCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1100),
     );
     _tabCtrl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 420),
+      duration: const Duration(milliseconds: 520),
     )..value = 1;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _entryCtrl.forward();
     });
   }
 
-  List<double> _currentValues() => [
-        for (final p in _bmiPoints)
-          widget.metricTab == 0 ? p.weight : p.height,
-      ];
-
   @override
-  void didUpdateWidget(covariant _MetricAreaChart oldWidget) {
+  void didUpdateWidget(covariant _BgAreaChart oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.metricTab != widget.metricTab) {
-      _fromValues = _toValues;
-      _toValues = _currentValues();
+    if (oldWidget.tab != widget.tab) {
+      _from = _to;
+      _to = _bgSamples[widget.tab];
       _tabCtrl
         ..reset()
         ..forward();
@@ -761,7 +638,6 @@ class _MetricAreaChartState extends State<_MetricAreaChart>
 
   @override
   void dispose() {
-    _scrollCtrl.dispose();
     _entryCtrl.dispose();
     _tabCtrl.dispose();
     super.dispose();
@@ -781,25 +657,29 @@ class _MetricAreaChartState extends State<_MetricAreaChart>
     return best;
   }
 
+  List<double> _resample(List<double> src) {
+    if (src.length == _resampleN) return List.of(src);
+    final out = <double>[];
+    for (int i = 0; i < _resampleN; i++) {
+      final t = i / (_resampleN - 1);
+      final pos = t * (src.length - 1);
+      final lo = pos.floor();
+      final hi = (lo + 1).clamp(0, src.length - 1);
+      final f = pos - lo;
+      out.add(src[lo] + (src[hi] - src[lo]) * f);
+    }
+    return out;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final values = [
-      for (final p in _bmiPoints)
-        widget.metricTab == 0 ? p.weight : p.height,
-    ];
-    final xLabels = [for (final p in _bmiPoints) p.day.toString()];
-    final yLabels = widget.metricTab == 0
-        ? const [120, 90, 60, 30, 10]
-        : const [200, 180, 160, 140, 120];
+    final current = _bgSamples[widget.tab];
     return LayoutBuilder(
       builder: (context, constraints) {
-        const rightPad = 16.0;
         final visibleWidth = constraints.maxWidth - _axisWidth;
-        final contentWidth =
-            (values.length * _pointWidth + _leftPad + rightPad)
-                .clamp(visibleWidth, double.infinity);
-        final chartWidth = contentWidth - _leftPad - rightPad;
-        final n = values.length;
+        final contentWidth = visibleWidth;
+        final chartWidth = contentWidth - _leftPad - _rightPad;
+        final n = current.values.length;
         final xPositions = [
           for (int i = 0; i < n; i++)
             n == 1
@@ -808,56 +688,85 @@ class _MetricAreaChartState extends State<_MetricAreaChart>
         ];
         return Row(
           children: [
-            Expanded(
-              child: SingleChildScrollView(
-                controller: _scrollCtrl,
-                scrollDirection: Axis.horizontal,
-                reverse: true,
-                physics: const BouncingScrollPhysics(),
-                child: SizedBox(
-                  width: contentWidth,
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTapDown: (d) => widget
-                        .onSelect(_nearestIndexByX(d.localPosition.dx, xPositions)),
-                    onPanUpdate: (d) => widget
-                        .onSelect(_nearestIndexByX(d.localPosition.dx, xPositions)),
-                    child: AnimatedBuilder(
-                      animation:
-                          Listenable.merge([_entryCtrl, _tabCtrl]),
-                      builder: (_, __) {
-                        final entry = Curves.easeOutCubic
-                            .transform(_entryCtrl.value);
-                        final tab = Curves.fastEaseInToSlowEaseOut
-                            .transform(_tabCtrl.value);
-                        final morphed = <double>[
-                          for (int i = 0; i < values.length; i++)
-                            _fromValues[i] +
-                                (_toValues[i] - _fromValues[i]) * tab,
-                        ];
-                        return CustomPaint(
-                          painter: _AreaChartPainter(
-                            values: morphed,
-                            yLabels: yLabels,
-                            xLabels: xLabels,
-                            xPositions: xPositions,
-                            markerIndex: (widget.selectedIndex ??
-                                    values.length - 1)
-                                .clamp(0, values.length - 1),
-                            entry: entry,
-                          ),
-                          size: Size.infinite,
-                        );
-                      },
-                    ),
-                  ),
+            SizedBox(
+              width: contentWidth,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTapDown: (d) => widget.onSelect(
+                    _nearestIndexByX(d.localPosition.dx, xPositions)),
+                onPanUpdate: (d) => widget.onSelect(
+                    _nearestIndexByX(d.localPosition.dx, xPositions)),
+                child: AnimatedBuilder(
+                  animation: Listenable.merge([_entryCtrl, _tabCtrl]),
+                  builder: (_, __) {
+                    final entry =
+                        Curves.easeOutCubic.transform(_entryCtrl.value);
+                    final tabT = Curves.fastEaseInToSlowEaseOut
+                        .transform(_tabCtrl.value);
+                    final isMorphing = tabT < 1.0 && !identical(_from, _to);
+                    List<double> morphValues;
+                    List<double> morphXPositions;
+                    List<String> xLabels;
+                    List<int> xLabelIndices;
+                    if (isMorphing) {
+                      final a = _resample(_from.values);
+                      final b = _resample(_to.values);
+                      morphValues = [
+                        for (int i = 0; i < _resampleN; i++)
+                          a[i] + (b[i] - a[i]) * tabT,
+                      ];
+                      morphXPositions = [
+                        for (int i = 0; i < _resampleN; i++)
+                          _leftPad + (i / (_resampleN - 1)) * chartWidth,
+                      ];
+                      xLabels = tabT < 0.5 ? _from.xLabels : _to.xLabels;
+                      xLabelIndices = tabT < 0.5
+                          ? [
+                              for (final idx in _from.xLabelIndices)
+                                ((idx / (_from.values.length - 1)) *
+                                        (_resampleN - 1))
+                                    .round(),
+                            ]
+                          : [
+                              for (final idx in _to.xLabelIndices)
+                                ((idx / (_to.values.length - 1)) *
+                                        (_resampleN - 1))
+                                    .round(),
+                            ];
+                    } else {
+                      morphValues = List.of(current.values);
+                      morphXPositions = xPositions;
+                      xLabels = current.xLabels;
+                      xLabelIndices = current.xLabelIndices;
+                    }
+                    final mIdx = (widget.selectedIndex ??
+                            _currentMarker(widget.tab, current.values.length))
+                        .clamp(0, n - 1);
+                    final markerX = n == 1
+                        ? _leftPad + chartWidth / 2
+                        : _leftPad + (mIdx / (n - 1)) * chartWidth;
+                    final markerY = current.values[mIdx];
+                    return CustomPaint(
+                      painter: _BgChartPainter(
+                        values: morphValues,
+                        xPositions: morphXPositions,
+                        xLabels: xLabels,
+                        xLabelIndices: xLabelIndices,
+                        markerX: markerX,
+                        markerY: markerY,
+                        entry: entry,
+                        tabT: tabT,
+                      ),
+                      size: Size.infinite,
+                    );
+                  },
                 ),
               ),
             ),
             SizedBox(
               width: _axisWidth,
               child: CustomPaint(
-                painter: _AxisLabelsPainter(yLabels: yLabels),
+                painter: _AxisLabelsPainter(),
                 size: Size.infinite,
               ),
             ),
@@ -869,9 +778,6 @@ class _MetricAreaChartState extends State<_MetricAreaChart>
 }
 
 class _AxisLabelsPainter extends CustomPainter {
-  _AxisLabelsPainter({required this.yLabels});
-  final List<int> yLabels;
-
   @override
   void paint(Canvas canvas, Size size) {
     const topPad = 8.0;
@@ -882,11 +788,11 @@ class _AxisLabelsPainter extends CustomPainter {
       fontSize: 10,
       letterSpacing: 0.6,
     );
-    for (int i = 0; i < yLabels.length; i++) {
-      final t = i / (yLabels.length - 1);
+    for (int i = 0; i < _yLabels.length; i++) {
+      final t = i / (_yLabels.length - 1);
       final y = topPad + t * chartHeight;
       final tp = TextPainter(
-        text: TextSpan(text: yLabels[i].toString(), style: labelStyle),
+        text: TextSpan(text: _yLabels[i].toString(), style: labelStyle),
         textDirection: TextDirection.ltr,
       )..layout();
       tp.paint(canvas, Offset(8, y - tp.height / 2));
@@ -894,25 +800,28 @@ class _AxisLabelsPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _AxisLabelsPainter oldDelegate) =>
-      oldDelegate.yLabels != yLabels;
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-class _AreaChartPainter extends CustomPainter {
-  _AreaChartPainter({
+class _BgChartPainter extends CustomPainter {
+  _BgChartPainter({
     required this.values,
-    required this.yLabels,
-    required this.xLabels,
-    required this.markerIndex,
     required this.xPositions,
-    this.entry = 1,
+    required this.xLabels,
+    required this.xLabelIndices,
+    required this.markerX,
+    required this.markerY,
+    required this.entry,
+    required this.tabT,
   });
   final List<double> values;
-  final List<int> yLabels;
-  final List<String> xLabels;
-  final int markerIndex;
   final List<double> xPositions;
+  final List<String> xLabels;
+  final List<int> xLabelIndices;
+  final double markerX;
+  final double markerY;
   final double entry;
+  final double tabT;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -934,10 +843,10 @@ class _AreaChartPainter extends CustomPainter {
       ..color = const Color(0xFFE5E7EB)
       ..strokeWidth = 0.5;
 
-    for (int i = 0; i < yLabels.length; i++) {
-      final t = i / (yLabels.length - 1);
+    for (int i = 0; i < _yLabels.length; i++) {
+      final t = i / (_yLabels.length - 1);
       final y = topPad + t * chartHeight;
-      final isLast = i == yLabels.length - 1;
+      final isLast = i == _yLabels.length - 1;
       if (isLast) {
         canvas.drawLine(
           Offset(leftPad, y),
@@ -959,7 +868,8 @@ class _AreaChartPainter extends CustomPainter {
     }
 
     for (int i = 0; i < xLabels.length; i++) {
-      final x = xPositions[i];
+      final pointIdx = xLabelIndices[i].clamp(0, xPositions.length - 1);
+      final x = xPositions[pointIdx];
       final tp = TextPainter(
         text: TextSpan(text: xLabels[i], style: labelStyle),
         textDirection: TextDirection.ltr,
@@ -970,22 +880,18 @@ class _AreaChartPainter extends CustomPainter {
       );
     }
 
-    final yMax = yLabels.first.toDouble();
-    final yMin = yLabels.last.toDouble();
-    double xFor(int i) => xPositions[i];
     double yFor(double v) =>
-        topPad + (1 - (v - yMin) / (yMax - yMin)) * chartHeight;
+        topPad + (1 - (v - _yMin) / (_yMax - _yMin)) * chartHeight;
 
-    final lineColor = const Color(0xFF34C759);
+    const lineColor = Color(0xFFFF2D55);
+    final isMorphing = tabT < 1.0;
 
     final points = [
-      for (int i = 0; i < values.length; i++) Offset(xFor(i), yFor(values[i])),
+      for (int i = 0; i < values.length; i++)
+        Offset(xPositions[i], yFor(values[i])),
     ];
 
-    // Draw smooth line path
     final linePath = _smoothPath(points);
-
-    // Area fill path
     final areaPath = Path.from(linePath)
       ..lineTo(points.last.dx, topPad + chartHeight)
       ..lineTo(points.first.dx, topPad + chartHeight)
@@ -993,11 +899,10 @@ class _AreaChartPainter extends CustomPainter {
     final areaShader = const LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
-      colors: [Color(0x5534C759), Color(0x1F34C759), Color(0x0034C759)],
+      colors: [Color(0x66FF2D55), Color(0x1FFF2D55), Color(0x00FF2D55)],
       stops: [0.0, 0.55, 1.0],
     ).createShader(Rect.fromLTWH(leftPad, topPad, chartWidth, chartHeight));
 
-    // Entry-reveal clip: left-to-right wipe
     canvas.save();
     final revealWidth = chartWidth * entry.clamp(0.0, 1.0);
     canvas.clipRect(
@@ -1030,10 +935,7 @@ class _AreaChartPainter extends CustomPainter {
     );
     canvas.restore();
 
-    // Dashed marker line
-    final mIdx = markerIndex.clamp(0, values.length - 1);
-    final markerX = xFor(mIdx);
-    if (markerX - leftPad <= revealWidth + 0.5) {
+    if (!isMorphing && markerX - leftPad <= revealWidth + 0.5) {
       final markerOpacity = ((entry - 0.85) / 0.15).clamp(0.0, 1.0);
       _drawDashed(
         canvas,
@@ -1046,19 +948,24 @@ class _AreaChartPainter extends CustomPainter {
         gap: 3,
       );
       canvas.drawCircle(
-        Offset(markerX, yFor(values[mIdx])),
+        Offset(markerX, yFor(markerY)),
         10,
         Paint()..color = lineColor.withValues(alpha: 0.18 * markerOpacity),
       );
       canvas.drawCircle(
-        Offset(markerX, yFor(values[mIdx])),
-        5.5,
+        Offset(markerX, yFor(markerY)),
+        6,
         Paint()..color = CupertinoColors.white.withValues(alpha: markerOpacity),
       );
       canvas.drawCircle(
-        Offset(markerX, yFor(values[mIdx])),
-        4,
+        Offset(markerX, yFor(markerY)),
+        4.5,
         Paint()..color = lineColor.withValues(alpha: markerOpacity),
+      );
+      canvas.drawCircle(
+        Offset(markerX, yFor(markerY)),
+        1.8,
+        Paint()..color = CupertinoColors.white.withValues(alpha: markerOpacity),
       );
     }
   }
@@ -1111,16 +1018,17 @@ class _AreaChartPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _AreaChartPainter oldDelegate) =>
+  bool shouldRepaint(covariant _BgChartPainter oldDelegate) =>
       oldDelegate.values != values ||
-      oldDelegate.xLabels != xLabels ||
       oldDelegate.xPositions != xPositions ||
-      oldDelegate.markerIndex != markerIndex ||
-      oldDelegate.entry != entry;
+      oldDelegate.markerX != markerX ||
+      oldDelegate.markerY != markerY ||
+      oldDelegate.entry != entry ||
+      oldDelegate.tabT != tabT;
 }
 
-class _AboutBmiCard extends StatelessWidget {
-  const _AboutBmiCard({this.onTap});
+class _AboutBgCard extends StatelessWidget {
+  const _AboutBgCard({this.onTap});
   final VoidCallback? onTap;
 
   @override
@@ -1129,102 +1037,102 @@ class _AboutBmiCard extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: ClipRRect(
-      borderRadius: BorderRadius.circular(24),
-      child: Stack(
-        children: [
-          const Positioned.fill(
-            child: ColoredBox(color: CupertinoColors.white),
-          ),
-          Positioned(
-            right: 0,
-            top: 2,
-            child: SizedBox(
-              width: 102,
-              height: 102,
-              child: Image.asset(
-                'assets/images/vital_bmi.png',
-                fit: BoxFit.contain,
-              ),
+        borderRadius: BorderRadius.circular(24),
+        child: Stack(
+          children: [
+            const Positioned.fill(
+              child: ColoredBox(color: CupertinoColors.white),
             ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        'เกี่ยวกับ BMI',
-                        style: AppTypography.headline(
-                          const Color(0xFF1A1A1A),
-                        ).copyWith(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                    Container(
-                      width: 16,
-                      height: 16,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Color(0xFFE5E5E5),
-                      ),
-                      alignment: Alignment.center,
-                      child: Text(
-                        'i',
-                        style: AppTypography.caption2(
-                          const Color(0xFF6D756E),
-                        ).copyWith(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                          height: 1,
-                        ),
-                      ),
-                    ),
-                  ],
+            Positioned(
+              right: 0,
+              top: 2,
+              child: SizedBox(
+                width: 102,
+                height: 102,
+                child: Image.asset(
+                  'assets/images/vital_bloodsugar.png',
+                  fit: BoxFit.contain,
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: CupertinoColors.white.withValues(alpha: 0.55),
-                        border: Border.all(
-                          color: CupertinoColors.white.withValues(alpha: 0.5),
-                          width: 0.5,
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'เกี่ยวกับน้ำตาลในเลือด',
+                          style: AppTypography.headline(
+                            const Color(0xFF1A1A1A),
+                          ).copyWith(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
-                        borderRadius: BorderRadius.circular(16),
                       ),
-                      child: Text(
-                        'BMI (Body Mass Index) คือ ดัชนีมวลกาย\nใช้ประเมินว่า "น้ำหนักตัวเหมาะสมกับส่วนสูงหรือไม่"',
-                        maxLines: 5,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppTypography.subheadline(
-                          const Color(0xFF1A1A1A),
-                        ).copyWith(
-                          fontSize: 14,
-                          height: 1.43,
-                          letterSpacing: 0.14,
+                      Container(
+                        width: 16,
+                        height: 16,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Color(0xFFE5E5E5),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          'i',
+                          style: AppTypography.caption2(
+                            const Color(0xFF6D756E),
+                          ).copyWith(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            height: 1,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: CupertinoColors.white.withValues(alpha: 0.55),
+                          border: Border.all(
+                            color: CupertinoColors.white.withValues(alpha: 0.5),
+                            width: 0.5,
+                          ),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Text(
+                          'CGM (Continuous Glucose Monitoring) คือ\nระบบติดตามระดับน้ำตาลในเลือดแบบต่อเนื่อง 24 ชั่วโมง',
+                          maxLines: 5,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.subheadline(
+                            const Color(0xFF1A1A1A),
+                          ).copyWith(
+                            fontSize: 14,
+                            height: 1.43,
+                            letterSpacing: 0.14,
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            ],
-          ),
-        ],
-      ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1318,23 +1226,30 @@ class _SettingsCard extends StatelessWidget {
       ),
       clipBehavior: Clip.antiAlias,
       padding: const EdgeInsets.all(16),
-      child: Row(
+      child: Column(
         children: [
-          Expanded(
-            child: Text(
-              'แสดงข้อมูลทั้งหมด',
-              style: AppTypography.subheadline(
-                const Color(0xFF1A1A1A),
-              ).copyWith(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
+          Row(
+            children: const [
+              Expanded(child: _SettingsRowText('แสดงข้อมูลทั้งหมด')),
+              Icon(
+                CupertinoIcons.chevron_right,
+                color: Color(0xFF6D756E),
+                size: 14,
               ),
-            ),
+            ],
           ),
-          const Icon(
-            CupertinoIcons.chevron_right,
-            color: Color(0xFF6D756E),
-            size: 14,
+          const SizedBox(height: 16),
+          Container(height: 0.5, color: const Color(0xFFE5E5E5)),
+          const SizedBox(height: 16),
+          Row(
+            children: const [
+              Expanded(child: _SettingsRowText('การเชื่อมต่ออุปกรณ์')),
+              Icon(
+                CupertinoIcons.chevron_right,
+                color: Color(0xFF6D756E),
+                size: 14,
+              ),
+            ],
           ),
         ],
       ),
@@ -1342,8 +1257,24 @@ class _SettingsCard extends StatelessWidget {
   }
 }
 
-class _BmiInfoSheet extends StatelessWidget {
-  const _BmiInfoSheet();
+class _SettingsRowText extends StatelessWidget {
+  const _SettingsRowText(this.text);
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: AppTypography.subheadline(const Color(0xFF1A1A1A)).copyWith(
+        fontSize: 14,
+        fontWeight: FontWeight.w500,
+      ),
+    );
+  }
+}
+
+class _BgInfoSheet extends StatelessWidget {
+  const _BgInfoSheet();
 
   @override
   Widget build(BuildContext context) {
@@ -1390,7 +1321,7 @@ class _BmiInfoSheet extends StatelessWidget {
                           Expanded(
                             child: Center(
                               child: Text(
-                                'เกี่ยวกับ BMI',
+                                'เกี่ยวกับน้ำตาลในเลือด',
                                 style: AppTypography.headline(
                                   const Color(0xFF1A1A1A),
                                 ).copyWith(
@@ -1424,92 +1355,139 @@ class _BmiInfoSheet extends StatelessWidget {
                     Expanded(
                       child: ListView(
                         physics: const BouncingScrollPhysics(),
-                        padding:
-                            const EdgeInsets.fromLTRB(16, 4, 16, 24),
+                        padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
                         children: const [
-                          _BmiHeroHeader(),
-                          _BmiInfoCard(
+                          _BgHeroHeader(),
+                          _BgInfoCard(
                             children: [
-                              _BmiSection(
-                                title: 'BMI คืออะไร?',
+                              _BgSection(
+                                title: 'น้ำตาลในเลือดคืออะไร?',
                                 children: [
-                                  _BmiBodyText(
-                                    'BMI (Body Mass Index) คือ ดัชนีมวลกาย\nใช้ประเมินว่า "น้ำหนักตัวเหมาะสมกับส่วนสูงหรือไม่"',
+                                  _BgBodyText(
+                                    'น้ำตาลในเลือด (Blood Glucose) คือ ระดับน้ำตาลกลูโคสในกระแสเลือด ซึ่งเป็นแหล่งพลังงานสำคัญของเซลล์ และสะท้อนการทำงานของฮอร์โมนอินซูลิน',
                                   ),
-                                  _BmiBodyText(
-                                      'เป็นตัวชี้วัดพื้นฐานด้านสุขภาพ'),
                                 ],
                               ),
                               SizedBox(height: 16),
-                              _BmiSection(
-                                title: 'เกณฑ์ BMI (สำหรับคนเอเชีย)',
+                              _BgSection(
+                                title: 'ค่าที่ควรทราบ',
                                 children: [
-                                  _BmiStatusRow(
-                                    icon: CupertinoIcons.info_circle_fill,
-                                    color: Color(0xFF0EA5E9),
-                                    text: 'ผอม < 18.5 น้ำหนักน้อย',
+                                  _BgBodyText(
+                                    'หน่วยวัดที่ใช้ทั่วไป: mg/dL',
                                   ),
-                                  _BmiStatusRow(
-                                    icon:
-                                        CupertinoIcons.checkmark_circle_fill,
+                                  SizedBox(height: 6),
+                                  _BgSubheading('ระดับน้ำตาลขณะอดอาหาร'),
+                                  SizedBox(height: 4),
+                                  _BgStatusRow(
+                                    icon: CupertinoIcons.checkmark_circle_fill,
                                     color: Color(0xFF22C55E),
-                                    text: 'ปกติ 18.5 – 22.9 สุขภาพดี',
+                                    text: 'ปกติ 70 – 99 mg/dL',
                                   ),
-                                  _BmiStatusRow(
+                                  _BgStatusRow(
                                     icon: CupertinoIcons
                                         .exclamationmark_circle_fill,
                                     color: Color(0xFFEAB308),
-                                    text: 'เริ่มอ้วน 23 – 24.9 เสี่ยง',
+                                    text: 'ก่อนเบาหวาน 100 – 125 mg/dL',
                                   ),
-                                  _BmiStatusRow(
-                                    icon: CupertinoIcons
-                                        .exclamationmark_circle_fill,
-                                    color: Color(0xFFF97316),
-                                    text: 'อ้วน 25 – 29.9 เสี่ยงสูง',
-                                  ),
-                                  _BmiStatusRow(
+                                  _BgStatusRow(
                                     icon: CupertinoIcons
                                         .exclamationmark_circle_fill,
                                     color: Color(0xFFEF4444),
-                                    text: 'อ้วนมาก ≥ 30 อันตราย',
+                                    text: 'เบาหวาน ≥ 126 mg/dL',
+                                  ),
+                                  SizedBox(height: 8),
+                                  _BgSubheading('ระดับน้ำตาลหลังอาหาร 2 ชม.'),
+                                  SizedBox(height: 4),
+                                  _BgStatusRow(
+                                    icon: CupertinoIcons.checkmark_circle_fill,
+                                    color: Color(0xFF22C55E),
+                                    text: 'ปกติ < 140 mg/dL',
+                                  ),
+                                  _BgStatusRow(
+                                    icon: CupertinoIcons
+                                        .exclamationmark_circle_fill,
+                                    color: Color(0xFFEAB308),
+                                    text: 'เสี่ยง 140 – 199 mg/dL',
+                                  ),
+                                  _BgStatusRow(
+                                    icon: CupertinoIcons
+                                        .exclamationmark_circle_fill,
+                                    color: Color(0xFFEF4444),
+                                    text: 'เบาหวาน ≥ 200 mg/dL',
                                   ),
                                 ],
                               ),
                               SizedBox(height: 16),
-                              _BmiSection(
-                                title: 'ข้อจำกัดของ BMI',
+                              _BgSection(
+                                title: 'ทำไมน้ำตาลถึงเปลี่ยนแปลง?',
                                 children: [
-                                  _BmiBodyText(
-                                    '  - ไม่แยก "ไขมัน vs กล้ามเนื้อ"\n  - คนออกกำลังกายอาจ BMI สูงแต่สุขภาพดี\n  - ไม่บอกตำแหน่งไขมัน (เช่น พุง)',
+                                  _BgStatusRow(
+                                    icon: Icons.restaurant_rounded,
+                                    color: Color(0xFF6D756E),
+                                    text: 'อาหาร – คาร์โบไฮเดรต / น้ำตาล',
+                                  ),
+                                  _BgStatusRow(
+                                    icon: Icons.directions_run_rounded,
+                                    color: Color(0xFF6D756E),
+                                    text: 'การออกกำลังกาย',
+                                  ),
+                                  _BgStatusRow(
+                                    icon: Icons.sentiment_very_dissatisfied,
+                                    color: Color(0xFF6D756E),
+                                    text: 'ความเครียด / ฮอร์โมน',
+                                  ),
+                                  _BgStatusRow(
+                                    icon: CupertinoIcons.moon_zzz_fill,
+                                    color: Color(0xFF6D756E),
+                                    text: 'การนอนหลับ',
+                                  ),
+                                  _BgStatusRow(
+                                    icon: CupertinoIcons.bandage_fill,
+                                    color: Color(0xFF6D756E),
+                                    text: 'ยา / การเจ็บป่วย',
                                   ),
                                 ],
                               ),
                               SizedBox(height: 16),
-                              _BmiSection(
-                                title: 'คำแนะนำตามค่า BMI',
+                              _BgSection(
+                                title: 'วิธีวัดให้แม่นยำ',
                                 children: [
-                                  _BmiStatusRow(
+                                  _BgBodyText(
+                                    '  - ล้างมือก่อนเจาะเลือด\n  - วัดในเวลาที่สม่ำเสมอ (ก่อน/หลังอาหาร)\n  - หลีกเลี่ยงคาเฟอีน/น้ำหวานก่อนวัด\n  - จดบันทึกพร้อมบริบท (อาหาร/กิจกรรม)',
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 16),
+                              _BgSection(
+                                title: 'ดูแลน้ำตาลให้สมดุล',
+                                children: [
+                                  _BgStatusRow(
+                                    icon: Icons.local_florist_rounded,
+                                    color: Color(0xFF22C55E),
+                                    text: 'กินผัก / ธัญพืชไม่ขัดสี',
+                                  ),
+                                  _BgStatusRow(
+                                    icon: Icons.no_food_rounded,
+                                    color: Color(0xFFF97316),
+                                    text: 'ลดน้ำตาล / เครื่องดื่มหวาน',
+                                  ),
+                                  _BgStatusRow(
                                     icon: Icons.directions_run_rounded,
                                     color: Color(0xFF0EA5E9),
-                                    text: 'ผอม → เพิ่มโปรตีน / ออกกำลังกาย',
+                                    text: 'ออกกำลังกายสม่ำเสมอ',
                                   ),
-                                  _BmiStatusRow(
-                                    icon: Icons.self_improvement_rounded,
-                                    color: Color(0xFF22C55E),
-                                    text: 'ปกติ → รักษาสมดุล',
-                                  ),
-                                  _BmiStatusRow(
-                                    icon: Icons.restaurant_rounded,
-                                    color: Color(0xFFF97316),
-                                    text: 'สูง → คุมอาหาร + ออกกำลังกาย',
+                                  _BgStatusRow(
+                                    icon: Icons.medical_services_rounded,
+                                    color: Color(0xFFE11D48),
+                                    text: 'ตรวจสุขภาพเมื่อค่าผิดปกติต่อเนื่อง',
                                   ),
                                 ],
                               ),
                             ],
                           ),
                           SizedBox(height: 12),
-                          _BmiInfoCard(
-                            children: [_BmiReferenceRow()],
+                          _BgInfoCard(
+                            children: [_BgReferenceRow()],
                           ),
                         ],
                       ),
@@ -1525,8 +1503,8 @@ class _BmiInfoSheet extends StatelessWidget {
   }
 }
 
-class _BmiHeroHeader extends StatelessWidget {
-  const _BmiHeroHeader();
+class _BgHeroHeader extends StatelessWidget {
+  const _BgHeroHeader();
 
   @override
   Widget build(BuildContext context) {
@@ -1544,9 +1522,9 @@ class _BmiHeroHeader extends StatelessWidget {
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    Color(0x554FB896),
-                    Color(0x224FB896),
-                    Color(0x004FB896),
+                    Color(0x55C43A7B),
+                    Color(0x22C43A7B),
+                    Color(0x00C43A7B),
                   ],
                   stops: [0.0, 0.55, 1.0],
                 ),
@@ -1556,11 +1534,11 @@ class _BmiHeroHeader extends StatelessWidget {
               width: 180,
               height: 180,
               child: Image.asset(
-                'assets/images/bmi_hero_anim.gif',
+                'assets/images/bg_hero_anim.gif',
                 fit: BoxFit.contain,
                 gaplessPlayback: true,
                 errorBuilder: (_, __, ___) => Image.asset(
-                  'assets/images/vital_bmi.png',
+                  'assets/images/vital_bloodsugar.png',
                   fit: BoxFit.contain,
                 ),
               ),
@@ -1572,8 +1550,8 @@ class _BmiHeroHeader extends StatelessWidget {
   }
 }
 
-class _BmiInfoCard extends StatelessWidget {
-  const _BmiInfoCard({required this.children});
+class _BgInfoCard extends StatelessWidget {
+  const _BgInfoCard({required this.children});
   final List<Widget> children;
 
   @override
@@ -1598,8 +1576,8 @@ class _BmiInfoCard extends StatelessWidget {
   }
 }
 
-class _BmiSection extends StatelessWidget {
-  const _BmiSection({required this.title, required this.children});
+class _BgSection extends StatelessWidget {
+  const _BgSection({required this.title, required this.children});
   final String title;
   final List<Widget> children;
 
@@ -1617,34 +1595,55 @@ class _BmiSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        ...children
-            .expand((c) => [c, const SizedBox(height: 4)])
-            .toList()
-          ..removeLast(),
+        ...children,
       ],
     );
   }
 }
 
-class _BmiBodyText extends StatelessWidget {
-  const _BmiBodyText(this.text);
+class _BgBodyText extends StatelessWidget {
+  const _BgBodyText(this.text);
   final String text;
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: AppTypography.subheadline(const Color(0xFF1A1A1A)).copyWith(
-        fontSize: 14,
-        height: 1.43,
-        letterSpacing: 0.14,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Text(
+        text,
+        style: AppTypography.subheadline(const Color(0xFF1A1A1A)).copyWith(
+          fontSize: 14,
+          height: 1.43,
+          letterSpacing: 0.14,
+        ),
       ),
     );
   }
 }
 
-class _BmiStatusRow extends StatelessWidget {
-  const _BmiStatusRow({
+class _BgSubheading extends StatelessWidget {
+  const _BgSubheading(this.text);
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 2, bottom: 2),
+      child: Text(
+        text,
+        style: AppTypography.subheadline(const Color(0xFF1A1A1A)).copyWith(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          height: 1.43,
+          letterSpacing: 0.14,
+        ),
+      ),
+    );
+  }
+}
+
+class _BgStatusRow extends StatelessWidget {
+  const _BgStatusRow({
     required this.icon,
     required this.color,
     required this.text,
@@ -1656,21 +1655,17 @@ class _BmiStatusRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 8),
+      padding: const EdgeInsets.only(left: 8, top: 2, bottom: 2),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Opacity(
-            opacity: 0.85,
-            child: Icon(icon, color: color, size: 14),
-          ),
+          Icon(icon, color: color.withValues(alpha: 0.8), size: 14),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               text,
-              style: AppTypography.subheadline(
-                const Color(0xFF1A1A1A),
-              ).copyWith(
+              style:
+                  AppTypography.subheadline(const Color(0xFF1A1A1A)).copyWith(
                 fontSize: 14,
                 height: 1.43,
                 letterSpacing: 0.14,
@@ -1683,8 +1678,8 @@ class _BmiStatusRow extends StatelessWidget {
   }
 }
 
-class _BmiReferenceRow extends StatelessWidget {
-  const _BmiReferenceRow();
+class _BgReferenceRow extends StatelessWidget {
+  const _BgReferenceRow();
 
   @override
   Widget build(BuildContext context) {
@@ -1693,17 +1688,13 @@ class _BmiReferenceRow extends StatelessWidget {
         Expanded(
           child: Text(
             'แหล่งอ้างอิง',
-            style: AppTypography.subheadline(
-              const Color(0xFF1A1A1A),
-            ).copyWith(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
+            style: AppTypography.subheadline(const Color(0xFF1A1A1A))
+                .copyWith(fontSize: 14, fontWeight: FontWeight.w500),
           ),
         ),
         const Icon(
-          CupertinoIcons.arrow_up_right_square,
-          color: Color(0xFF1A1A1A),
+          CupertinoIcons.arrow_up_right_square_fill,
+          color: Color(0xFF6D756E),
           size: 16,
         ),
       ],
