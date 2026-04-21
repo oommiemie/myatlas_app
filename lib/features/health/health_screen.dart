@@ -1,0 +1,709 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart' show Icons;
+
+import '../../core/responsive/responsive.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_typography.dart';
+import '../nutrition/food_lens/food_lens_flow.dart';
+import '../nutrition/nutrition_detail_screen.dart';
+import 'blood_pressure_detail_screen.dart';
+import 'bmi_detail_screen.dart';
+import 'data/health_data.dart';
+import 'widgets/active_energy_card.dart';
+import 'widgets/custom_tab_bar.dart';
+import 'widgets/meal_card.dart';
+import 'widgets/metric_card.dart';
+import 'widgets/mini_activity_card.dart';
+import 'widgets/mini_charts.dart';
+import 'widgets/tip_card.dart';
+import 'widgets/week_labels.dart';
+
+class HealthScreen extends StatefulWidget {
+  const HealthScreen({super.key});
+
+  @override
+  State<HealthScreen> createState() => _HealthScreenState();
+}
+
+class _HealthScreenState extends State<HealthScreen>
+    with SingleTickerProviderStateMixin {
+  int _tabIndex = 1;
+  late final AnimationController _entryCtrl;
+  final HealthRepository _repo = HealthRepository(seed: 7);
+  late HealthData _data;
+
+  @override
+  void initState() {
+    super.initState();
+    _data = _repo.load();
+    _entryCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    )..forward();
+  }
+
+  @override
+  void dispose() {
+    _entryCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _refresh() async {
+    await Future<void>.delayed(const Duration(milliseconds: 500));
+    setState(() => _data = _repo.load());
+  }
+
+  Widget _staggered(int index, int total, Widget child) {
+    final start = (index / (total * 1.6)).clamp(0.0, 0.9);
+    final end = (start + 0.55).clamp(0.0, 1.0);
+    return AnimatedBuilder(
+      animation: _entryCtrl,
+      builder: (_, c) {
+        final t = CurvedAnimation(
+          parent: _entryCtrl,
+          curve: Interval(start, end, curve: Curves.easeOutCubic),
+        ).value;
+        return Opacity(
+          opacity: t,
+          child: Transform.translate(
+            offset: Offset(0, (1 - t) * 24),
+            child: c,
+          ),
+        );
+      },
+      child: child,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = CupertinoTheme.brightnessOf(context) == Brightness.dark;
+    final bg = isDark ? AppColors.backgroundDark : AppColors.background;
+    final padding = Responsive.pagePadding(context);
+
+    return CupertinoPageScaffold(
+      backgroundColor: bg,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          CustomScrollView(
+            physics: const BouncingScrollPhysics(
+              parent: AlwaysScrollableScrollPhysics(),
+            ),
+            slivers: [
+              CupertinoSliverNavigationBar(
+                largeTitle: const Text('สรุปสุขภาพ'),
+                backgroundColor: bg.withValues(alpha: 0.85),
+                border: null,
+              ),
+              CupertinoSliverRefreshControl(onRefresh: _refresh),
+              SliverPadding(
+                padding: EdgeInsets.fromLTRB(
+                  padding.horizontal / 2,
+                  8,
+                  padding.horizontal / 2,
+                  110,
+                ),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate.fixed([
+                    _staggered(0, 3, _NutritionSection(data: _data)),
+                    const SizedBox(height: 24),
+                    _staggered(1, 3, _VitalSignSection(data: _data)),
+                    const SizedBox(height: 24),
+                    _staggered(2, 3, _HighlightsSection(data: _data)),
+                  ]),
+                ),
+              ),
+            ],
+          ),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: CustomTabBar(
+              currentIndex: _tabIndex,
+              onTap: (i) => setState(() => _tabIndex = i),
+              items: const [
+                TabItem(CupertinoIcons.house, 'หน้าหลัก'),
+                TabItem(CupertinoIcons.heart, 'สุขภาพ'),
+                TabItem(CupertinoIcons.paperclip, 'ทานยา'),
+                TabItem(CupertinoIcons.person_2, 'ครอบครัว'),
+                TabItem(CupertinoIcons.person_crop_circle, 'ฉัน'),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+String _formatInt(num v) {
+  final i = v.round();
+  final s = i.toString();
+  final buf = StringBuffer();
+  for (int k = 0; k < s.length; k++) {
+    if (k > 0 && (s.length - k) % 3 == 0) buf.write(',');
+    buf.write(s[k]);
+  }
+  return buf.toString();
+}
+
+class _LiveValue extends StatefulWidget {
+  const _LiveValue({required this.initialIndex, required this.builder});
+  final int initialIndex;
+  final Widget Function(int index, ValueChanged<int?> onTouch) builder;
+
+  @override
+  State<_LiveValue> createState() => _LiveValueState();
+}
+
+class _LiveValueState extends State<_LiveValue> {
+  int? _touched;
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.builder(_touched ?? widget.initialIndex, (i) {
+      if (i == _touched) return;
+      setState(() => _touched = i);
+    });
+  }
+}
+
+Widget _sectionTitle(BuildContext context, String text) {
+  final isDark = CupertinoTheme.brightnessOf(context) == Brightness.dark;
+  final primary = isDark ? AppColors.labelDark : const Color(0xFF1A1A1A);
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 10),
+    child: Text(
+      text,
+      style: AppTypography.callout(primary).copyWith(
+        fontSize: 16,
+        fontWeight: FontWeight.w700,
+      ),
+    ),
+  );
+}
+
+class _NutritionSection extends StatelessWidget {
+  const _NutritionSection({required this.data});
+  final HealthData data;
+
+  @override
+  Widget build(BuildContext context) {
+    final meal = data.meal;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _sectionTitle(context, 'Nutrition'),
+        GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => Navigator.of(context).push(
+            CupertinoPageRoute(
+              builder: (_) => NutritionDetailScreen(data: data),
+            ),
+          ),
+          child: MealCard(
+            tagline: meal.tagline,
+            name: meal.name,
+            calories: _formatInt(meal.calories),
+            carbs: '${meal.mealsEaten}',
+            onScan: () => openFoodLens(context),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _VitalSignSection extends StatelessWidget {
+  const _VitalSignSection({required this.data});
+  final HealthData data;
+
+  @override
+  Widget build(BuildContext context) {
+    const spacing = 12.0;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _sectionTitle(context, 'Vital Sign'),
+        _BloodPressureCard(data: data),
+        const SizedBox(height: spacing),
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(child: _BmiCard(data: data)),
+              const SizedBox(width: spacing),
+              Expanded(child: _TemperatureCard(data: data)),
+            ],
+          ),
+        ),
+        const SizedBox(height: spacing),
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(child: _SleepCard(data: data)),
+              const SizedBox(width: spacing),
+              Expanded(child: _HeartRateCard(data: data)),
+            ],
+          ),
+        ),
+        const SizedBox(height: spacing),
+        _CgmCard(data: data),
+        const SizedBox(height: spacing),
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(child: _WaistCard(data: data)),
+              const SizedBox(width: spacing),
+              Expanded(child: _SpO2Card(data: data)),
+            ],
+          ),
+        ),
+        const SizedBox(height: spacing),
+        _BloodSugarCard(data: data),
+      ],
+    );
+  }
+}
+
+class _BloodPressureCard extends StatelessWidget {
+  const _BloodPressureCard({required this.data});
+  final HealthData data;
+
+  @override
+  Widget build(BuildContext context) {
+    final sys = data.bloodPressure.primary;
+    final dia = data.bloodPressure.secondary;
+    return MetricCard(
+      onTap: () {
+        Navigator.of(context).push(
+          CupertinoPageRoute(
+            builder: (_) => const BloodPressureDetailScreen(),
+          ),
+        );
+      },
+      icon: CupertinoIcons.heart_fill,
+      iconColor: const Color(0xFFB7185E),
+      label: 'ความดันโลหิต',
+      value: '${sys.todayValue.round()}/${dia.todayValue.round()}',
+      unit: 'mmHg',
+      chartHeight: 72,
+      chart: DualLineChart(
+        primary: sys.values,
+        secondary: dia.values,
+        dates: sys.dates,
+        primaryColor: const Color(0xFFF06C8C),
+        secondaryColor: const Color(0xFF4A6CF7),
+        primaryLabel: 'Sys',
+        secondaryLabel: 'Dia',
+        primaryUnit: ' mmHg',
+        interactive: false,
+      ),
+      bottom: WeekLabels(labels: WeekLabels.fromDates(sys.dates)),
+    );
+  }
+}
+
+class _BmiCard extends StatelessWidget {
+  const _BmiCard({required this.data});
+  final HealthData data;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = CupertinoTheme.brightnessOf(context) == Brightness.dark;
+    final primary = isDark ? AppColors.labelDark : AppColors.label;
+    final secondary =
+        isDark ? AppColors.secondaryLabelDark : AppColors.secondaryLabel;
+    return MetricCard(
+      onTap: () {
+        Navigator.of(context).push(
+          CupertinoPageRoute(
+            builder: (_) => const BmiDetailScreen(),
+          ),
+        );
+      },
+      icon: CupertinoIcons.chart_pie_fill,
+      iconColor: AppColors.nutrition,
+      label: 'BMI',
+      value: '',
+      unit: '',
+      chart: Stack(
+        alignment: Alignment.center,
+        children: [
+          Positioned.fill(
+            child: BmiGauge(value: data.bmi, color: AppColors.nutrition),
+          ),
+          Positioned(
+            bottom: 0,
+            child: Text(
+              data.bmi.toStringAsFixed(1),
+              style: AppTypography.title1(primary)
+                  .copyWith(fontWeight: FontWeight.w700),
+            ),
+          ),
+        ],
+      ),
+      chartHeight: 70,
+      bottom: Row(
+        children: [
+          Expanded(
+            child: _Stat(
+              label: 'น้ำหนัก (kg)',
+              value: data.weightKg.toStringAsFixed(0),
+              primary: primary,
+              secondary: secondary,
+            ),
+          ),
+          Container(
+            width: 1,
+            height: 20,
+            color: AppColors.separator.withValues(alpha: 0.4),
+          ),
+          Expanded(
+            child: _Stat(
+              label: 'ส่วนสูง (cm)',
+              value: data.heightCm.toStringAsFixed(0),
+              primary: primary,
+              secondary: secondary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Stat extends StatelessWidget {
+  const _Stat({
+    required this.label,
+    required this.value,
+    required this.primary,
+    required this.secondary,
+  });
+  final String label;
+  final String value;
+  final Color primary;
+  final Color secondary;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(value,
+            style: AppTypography.subheadline(primary)
+                .copyWith(fontWeight: FontWeight.w600)),
+        const SizedBox(height: 2),
+        Text(label, style: AppTypography.caption2(secondary)),
+      ],
+    );
+  }
+}
+
+class _TemperatureCard extends StatelessWidget {
+  const _TemperatureCard({required this.data});
+  final HealthData data;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = data.temperature;
+    return _LiveValue(
+      initialIndex: s.todayIndex,
+      builder: (idx, onTouch) => MetricCard(
+        icon: CupertinoIcons.thermometer,
+        iconColor: AppColors.mindfulness,
+        label: 'อุณหภูมิ',
+        value: s.values[idx].toStringAsFixed(1),
+        unit: '°C',
+        chartHeight: 56,
+        chart: MiniLineChart(
+          data: s.values,
+          dates: s.dates,
+          color: AppColors.mindfulness,
+          showDots: true,
+          unit: '°C',
+          indicatorIndex: idx,
+          onTouch: onTouch,
+        ),
+        bottom: WeekLabels(labels: WeekLabels.fromDates(s.dates)),
+      ),
+    );
+  }
+}
+
+class _SleepCard extends StatelessWidget {
+  const _SleepCard({required this.data});
+  final HealthData data;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = data.sleep;
+    return _LiveValue(
+      initialIndex: s.todayIndex,
+      builder: (idx, onTouch) => MetricCard(
+        icon: CupertinoIcons.moon_fill,
+        iconColor: AppColors.sleep,
+        label: 'Sleep',
+        value: s.values[idx].toStringAsFixed(1),
+        unit: 'hrs',
+        chartHeight: 56,
+        chart: PillBarChart(
+          values: s.values,
+          dates: s.dates,
+          color: AppColors.sleep,
+          unit: ' hrs',
+          onTouch: onTouch,
+        ),
+        bottom: WeekLabels(labels: WeekLabels.fromDates(s.dates)),
+      ),
+    );
+  }
+}
+
+class _HeartRateCard extends StatelessWidget {
+  const _HeartRateCard({required this.data});
+  final HealthData data;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = data.heartRate;
+    return _LiveValue(
+      initialIndex: s.todayIndex,
+      builder: (idx, onTouch) => MetricCard(
+        icon: CupertinoIcons.waveform_path_ecg,
+        iconColor: AppColors.health,
+        label: 'Heart Rate',
+        value: s.values[idx].round().toString(),
+        unit: 'bpm',
+        chartHeight: 56,
+        chart: MiniLineChart(
+          data: s.values,
+          dates: s.dates,
+          color: AppColors.health,
+          indicatorIndex: idx,
+          unit: ' bpm',
+          onTouch: onTouch,
+        ),
+        bottom: WeekLabels(labels: WeekLabels.fromDates(s.dates)),
+      ),
+    );
+  }
+}
+
+class _CgmCard extends StatelessWidget {
+  const _CgmCard({required this.data});
+  final HealthData data;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = data.cgm;
+    return _LiveValue(
+      initialIndex: s.todayIndex,
+      builder: (idx, onTouch) => MetricCard(
+        icon: CupertinoIcons.drop_fill,
+        iconColor: AppColors.sleep,
+        label: 'CGM',
+        value: s.values[idx].round().toString(),
+        unit: 'mg/dl',
+        chartHeight: 76,
+        chart: MiniLineChart(
+          data: s.values,
+          dates: s.dates,
+          color: AppColors.sleep,
+          indicatorIndex: idx,
+          unit: ' mg/dl',
+          onTouch: onTouch,
+        ),
+        bottom: WeekLabels(labels: WeekLabels.fromDates(s.dates)),
+      ),
+    );
+  }
+}
+
+class _WaistCard extends StatelessWidget {
+  const _WaistCard({required this.data});
+  final HealthData data;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = data.waist;
+    return _LiveValue(
+      initialIndex: s.todayIndex,
+      builder: (idx, onTouch) => MetricCard(
+        icon: CupertinoIcons.circle_fill,
+        iconColor: AppColors.nutrition,
+        label: 'รอบเอว',
+        value: s.values[idx].toStringAsFixed(1),
+        unit: 'in',
+        chartHeight: 56,
+        chart: MiniLineChart(
+          data: s.values,
+          dates: s.dates,
+          color: AppColors.nutrition,
+          indicatorIndex: idx,
+          unit: ' in',
+          onTouch: onTouch,
+        ),
+        bottom: WeekLabels(labels: WeekLabels.fromDates(s.dates)),
+      ),
+    );
+  }
+}
+
+class _SpO2Card extends StatelessWidget {
+  const _SpO2Card({required this.data});
+  final HealthData data;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = data.spO2;
+    return _LiveValue(
+      initialIndex: s.todayIndex,
+      builder: (idx, onTouch) => MetricCard(
+        icon: CupertinoIcons.wind,
+        iconColor: AppColors.mindfulness,
+        label: 'SpO₂',
+        value: s.values[idx].round().toString(),
+        unit: '%',
+        chartHeight: 56,
+        chart: MiniBarChart(
+          values: s.values,
+          dates: s.dates,
+          color: AppColors.mindfulness,
+          highlightIndex: idx,
+          barWidth: 4,
+          unit: '%',
+          onTouch: onTouch,
+        ),
+        bottom: WeekLabels(labels: WeekLabels.fromDates(s.dates)),
+      ),
+    );
+  }
+}
+
+class _BloodSugarCard extends StatelessWidget {
+  const _BloodSugarCard({required this.data});
+  final HealthData data;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = data.bloodSugar;
+    return _LiveValue(
+      initialIndex: s.todayIndex,
+      builder: (idx, onTouch) => MetricCard(
+        icon: CupertinoIcons.drop_fill,
+        iconColor: AppColors.health,
+        label: 'น้ำตาลในเลือด',
+        value: s.values[idx].round().toString(),
+        unit: 'mg/dl',
+        chartHeight: 76,
+        chart: MiniLineChart(
+          data: s.values,
+          dates: s.dates,
+          color: AppColors.health,
+          indicatorIndex: idx,
+          unit: ' mg/dl',
+          onTouch: onTouch,
+        ),
+        bottom: WeekLabels(labels: WeekLabels.fromDates(s.dates)),
+      ),
+    );
+  }
+}
+
+class _HighlightsSection extends StatelessWidget {
+  const _HighlightsSection({required this.data});
+  final HealthData data;
+
+  @override
+  Widget build(BuildContext context) {
+    const spacing = 12.0;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _sectionTitle(context, 'Highlights'),
+        TipCard(
+          title: 'ขอสรุปเกี่ยวกับสุขภาพของคุณ',
+          content: data.aiTip,
+        ),
+        const SizedBox(height: spacing),
+        _LiveValue(
+          initialIndex: data.activeEnergy.todayIndex,
+          builder: (idx, onTouch) => ActiveEnergyCard(
+            kcal: data.activeEnergy.values[idx].round(),
+            weekly: data.activeEnergy.values,
+            dates: data.activeEnergy.dates,
+            highlightIndex: idx,
+            onTouch: onTouch,
+          ),
+        ),
+        const SizedBox(height: spacing),
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(child: _StepsCard(data: data)),
+              const SizedBox(width: spacing),
+              Expanded(child: _ActivityMini(data: data)),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _StepsCard extends StatelessWidget {
+  const _StepsCard({required this.data});
+  final HealthData data;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = data.steps;
+    return _LiveValue(
+      initialIndex: s.todayIndex,
+      builder: (idx, onTouch) => MetricCard(
+        icon: Icons.directions_walk,
+        iconColor: const Color(0xFFE32616),
+        label: 'Steps',
+        value: _formatInt(s.values[idx]),
+        unit: 'Steps',
+        chartHeight: 56,
+        showChevron: false,
+        chart: MiniBarChart(
+          values: s.values,
+          dates: s.dates,
+          color: const Color(0xFFE32616),
+          highlightIndex: idx,
+          barWidth: 6,
+          unit: ' steps',
+          dimAlpha: 0.2,
+          useDimGradient: true,
+          onTouch: onTouch,
+        ),
+        bottom: WeekLabels(labels: WeekLabels.fromDates(s.dates)),
+      ),
+    );
+  }
+}
+
+class _ActivityMini extends StatelessWidget {
+  const _ActivityMini({required this.data});
+  final HealthData data;
+
+  @override
+  Widget build(BuildContext context) {
+    final a = data.activity;
+    return MiniActivityCard(
+      move: a.move,
+      moveGoal: a.moveGoal,
+      exercise: a.exercise,
+      exerciseGoal: a.exerciseGoal,
+      stand: a.stand,
+      standGoal: a.standGoal,
+    );
+  }
+}
