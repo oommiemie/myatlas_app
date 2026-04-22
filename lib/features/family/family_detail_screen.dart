@@ -1,15 +1,82 @@
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_typography.dart';
 import '../health/widgets/mini_charts.dart';
+import 'call_screen.dart';
 import 'care_giver_screen.dart';
+import '../../core/widgets/liquid_glass_button.dart';
 
-class FamilyDetailScreen extends StatelessWidget {
+// Bangkok example coordinate for the family home.
+const double _homeLat = 13.7563;
+const double _homeLon = 100.5018;
+
+Future<void> _openDirectionsInMaps() async {
+  final uri = Uri.parse(
+    'https://www.google.com/maps/dir/?api=1'
+    '&destination=$_homeLat,$_homeLon'
+    '&travelmode=driving',
+  );
+  await launchUrl(uri, mode: LaunchMode.externalApplication);
+}
+
+class FamilyDetailScreen extends StatefulWidget {
   const FamilyDetailScreen({super.key, required this.member});
   final FamilyMember member;
+
+  @override
+  State<FamilyDetailScreen> createState() => _FamilyDetailScreenState();
+}
+
+class _FamilyDetailScreenState extends State<FamilyDetailScreen>
+    with SingleTickerProviderStateMixin {
+  final ValueNotifier<double> _scrollOffset = ValueNotifier<double>(0);
+  late final AnimationController _enter;
+
+  @override
+  void initState() {
+    super.initState();
+    _enter = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) => _enter.forward());
+  }
+
+  @override
+  void dispose() {
+    _enter.dispose();
+    _scrollOffset.dispose();
+    super.dispose();
+  }
+
+  FamilyMember get member => widget.member;
+
+  Widget _stagger(int index, int total, Widget child) {
+    final start = (index / total) * 0.5;
+    final end = (start + 0.55).clamp(0.0, 1.0);
+    final anim = CurvedAnimation(
+      parent: _enter,
+      curve: Interval(start, end, curve: Curves.easeOutCubic),
+    );
+    return AnimatedBuilder(
+      animation: anim,
+      builder: (_, c) {
+        final t = anim.value;
+        return Opacity(
+          opacity: t,
+          child: Transform.translate(
+            offset: Offset(0, (1 - t) * 18),
+            child: c,
+          ),
+        );
+      },
+      child: child,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,56 +101,61 @@ class FamilyDetailScreen extends StatelessWidget {
               ),
             ),
           ),
-          CustomScrollView(
+          NotificationListener<ScrollNotification>(
+            onNotification: (n) {
+              if (n is ScrollUpdateNotification || n is ScrollStartNotification) {
+                _scrollOffset.value = n.metrics.pixels;
+              }
+              return false;
+            },
+            child: CustomScrollView(
             physics: const BouncingScrollPhysics(
               parent: AlwaysScrollableScrollPhysics(),
             ),
             slivers: [
-              SliverToBoxAdapter(
+              const SliverToBoxAdapter(
                 child: SafeArea(
                   bottom: false,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                    child: Row(
-                      children: [
-                        _LiquidGlassButton(
-                          icon: CupertinoIcons.chevron_back,
-                          onTap: () => Navigator.of(context).pop(),
-                          size: 36,
-                          iconSize: 18,
-                        ),
-                        const SizedBox(width: 10),
-                        Text(
-                          'ข้อมูลคนในครอบครัว',
-                          style: AppTypography.title3(
-                            const Color(0xFF1A1A1A),
-                          ).copyWith(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  child: SizedBox(height: 56),
                 ),
               ),
               SliverPadding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 110),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate.fixed([
-                    _ProfileCard(member: member),
+                    _stagger(0, 5, _ProfileCard(member: member)),
                     const SizedBox(height: 16),
-                    _MetricsGrid(member: member),
+                    _stagger(1, 5, _MetricsGrid(member: member)),
                     const SizedBox(height: 16),
-                    const _LocationCard(),
+                    _stagger(2, 5, const _LocationCard()),
                     const SizedBox(height: 16),
-                    const _RecentEventsSection(),
+                    _stagger(3, 5, const _RecentEventsSection()),
                     const SizedBox(height: 16),
-                    const _EmergencyContactsSection(),
+                    _stagger(4, 5, const _EmergencyContactsSection()),
                   ]),
                 ),
               ),
             ],
+          ),
+          ),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: ValueListenableBuilder<double>(
+              valueListenable: _scrollOffset,
+              builder: (_, offset, __) => _PinnedTopBar(
+                title: 'ข้อมูลคนในครอบครัว',
+                scrollOffset: offset,
+                onBack: () => Navigator.of(context).pop(),
+                onCall: () => showCallScreen(
+                  context,
+                  member: widget.member,
+                  type: CallType.voice,
+                  direction: CallDirection.outgoing,
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -91,59 +163,94 @@ class FamilyDetailScreen extends StatelessWidget {
   }
 }
 
-class _LiquidGlassButton extends StatelessWidget {
-  const _LiquidGlassButton({
-    required this.icon,
-    required this.onTap,
-    this.size = 44,
-    this.iconSize = 20,
+class _PinnedTopBar extends StatelessWidget {
+  const _PinnedTopBar({
+    required this.title,
+    required this.scrollOffset,
+    required this.onBack,
+    required this.onCall,
   });
-  final IconData icon;
-  final VoidCallback onTap;
-  final double size;
-  final double iconSize;
+  final String title;
+  final double scrollOffset;
+  final VoidCallback onBack;
+  final VoidCallback onCall;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: CupertinoColors.black.withValues(alpha: 0.12),
-              blurRadius: 40,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: ClipOval(
+    final top = MediaQuery.paddingOf(context).top;
+    final progress = (scrollOffset / 60).clamp(0.0, 1.0);
+    final barHeight = top + 6 + 44 + 6;
+    return Stack(
+      children: [
+        ClipRect(
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+            filter: ImageFilter.blur(
+              sigmaX: 22 * progress,
+              sigmaY: 22 * progress,
+            ),
             child: Container(
-              decoration: BoxDecoration(
-                color: CupertinoColors.white.withValues(alpha: 0.65),
-                border: Border.all(
-                  color: CupertinoColors.white.withValues(alpha: 0.4),
-                  width: 0.5,
-                ),
-              ),
-              child: Icon(
-                icon,
-                color: const Color(0xFF1A1A1A),
-                size: iconSize,
-              ),
+              height: barHeight,
+              color: const Color(0xFFF4F8F5)
+                  .withValues(alpha: 0.80 * progress),
             ),
           ),
         ),
-      ),
+        Positioned(
+          left: 0,
+          right: 0,
+          bottom: 0,
+          child: Opacity(
+            opacity: progress,
+            child: Container(
+              height: 0.5,
+              color: CupertinoColors.black.withValues(alpha: 0.06),
+            ),
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.only(top: top + 6, left: 14, right: 14),
+          child: SizedBox(
+            height: 44,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Color(0xFF1A1A1A),
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.2,
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: LiquidGlassButton(
+                    icon: CupertinoIcons.chevron_back,
+                    onTap: onBack,
+                    size: 40,
+                    iconSize: 18,
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: LiquidGlassButton(
+                    icon: CupertinoIcons.phone_fill,
+                    onTap: onCall,
+                    size: 40,
+                    iconSize: 18,
+                    iconColor: const Color(0xFF2CA989),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
+
 
 class _ProfileCard extends StatelessWidget {
   const _ProfileCard({required this.member});
@@ -152,30 +259,16 @@ class _ProfileCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isAttention = member.status == FamilyMemberStatus.attentionNeeded;
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(24),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: Container(
-          decoration: BoxDecoration(
-            color: CupertinoColors.white.withValues(alpha: 0.6),
-            border: Border.all(color: CupertinoColors.white, width: 1),
-            borderRadius: BorderRadius.circular(24),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        FamilyMemberCard(member: member),
+        if (isAttention)
+          Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: _FallAlertBanner(),
           ),
-          padding: const EdgeInsets.all(10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              FamilyMemberCard(member: member),
-              if (isAttention)
-                Padding(
-                  padding: const EdgeInsets.only(top: 10),
-                  child: _FallAlertBanner(),
-                ),
-            ],
-          ),
-        ),
-      ),
+      ],
     );
   }
 }
@@ -553,7 +646,7 @@ class _LocationCard extends StatelessWidget {
                           ),
                           _CircleIconButton(
                             icon: CupertinoIcons.map_fill,
-                            onTap: () {},
+                            onTap: _openDirectionsInMaps,
                           ),
                         ],
                       ),
@@ -562,15 +655,111 @@ class _LocationCard extends StatelessWidget {
                 ),
               ),
             ),
-            Center(
-              child: Icon(
-                CupertinoIcons.location_solid,
-                color: AppColors.health,
-                size: 36,
-              ),
+            const Align(
+              alignment: Alignment(0, -0.4),
+              child: _MapPin(),
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _MapPin extends StatefulWidget {
+  const _MapPin();
+
+  @override
+  State<_MapPin> createState() => _MapPinState();
+}
+
+class _MapPinState extends State<_MapPin>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _pulse;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulse = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1800),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _pulse.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 96,
+      height: 96,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          AnimatedBuilder(
+            animation: _pulse,
+            builder: (_, __) {
+              final t = Curves.easeOut.transform(_pulse.value);
+              final size = 40 + 56 * t;
+              final alpha = (1 - t) * 0.35;
+              return Container(
+                width: size,
+                height: size,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: const Color(0xFFFF2D55).withValues(alpha: alpha),
+                ),
+              );
+            },
+          ),
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: const Color(0xFFFF2D55).withValues(alpha: 0.18),
+            ),
+          ),
+          Container(
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: CupertinoColors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: CupertinoColors.black.withValues(alpha: 0.25),
+                  blurRadius: 8,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            width: 20,
+            height: 20,
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Color(0xFFFF5A74), Color(0xFFFF2D55)],
+              ),
+            ),
+          ),
+          Container(
+            width: 7,
+            height: 7,
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              color: CupertinoColors.white,
+            ),
+          ),
+        ],
       ),
     );
   }

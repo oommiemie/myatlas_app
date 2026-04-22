@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Icons;
 
 import '../../core/theme/app_typography.dart';
+import '../../core/widgets/liquid_glass_button.dart';
 
 class _SleepSample {
   const _SleepSample({
@@ -235,7 +236,7 @@ class _TopBar extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 6, 16, 16),
       child: Row(
         children: [
-          _LiquidGlassButton(
+          LiquidGlassButton(
             icon: CupertinoIcons.chevron_back,
             onTap: onBack,
           ),
@@ -248,7 +249,7 @@ class _TopBar extends StatelessWidget {
             ),
           ),
           const Spacer(),
-          _LiquidGlassButton(
+          LiquidGlassButton(
             icon: CupertinoIcons.plus,
             onTap: onAdd,
           ),
@@ -258,52 +259,6 @@ class _TopBar extends StatelessWidget {
   }
 }
 
-class _LiquidGlassButton extends StatelessWidget {
-  const _LiquidGlassButton({required this.icon, required this.onTap});
-  final IconData icon;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        width: 44,
-        height: 44,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: CupertinoColors.black.withValues(alpha: 0.12),
-              blurRadius: 40,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: ClipOval(
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-            child: Container(
-              decoration: BoxDecoration(
-                color: CupertinoColors.white.withValues(alpha: 0.65),
-                border: Border.all(
-                  color: CupertinoColors.white.withValues(alpha: 0.4),
-                  width: 0.5,
-                ),
-              ),
-              child: Icon(
-                icon,
-                color: const Color(0xFF1A1A1A),
-                size: 20,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 class _SleepChartCard extends StatelessWidget {
   const _SleepChartCard({
@@ -1229,24 +1184,11 @@ class _SleepInfoSheet extends StatelessWidget {
                               ),
                             ),
                           ),
-                          GestureDetector(
-                            onTap: () => Navigator.of(context).pop(),
-                            behavior: HitTestBehavior.opaque,
-                            child: Container(
-                              width: 40,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: const Color(0xFF1A1A1A)
-                                    .withValues(alpha: 0.06),
-                              ),
-                              child: const Icon(
-                                CupertinoIcons.xmark,
-                                color: Color(0xFF1A1A1A),
-                                size: 16,
-                              ),
-                            ),
-                          ),
+                          LiquidGlassButton(
+  icon: CupertinoIcons.xmark,
+  iconColor: const Color(0xFF1A1A1A),
+  onTap: () => Navigator.of(context).pop(),
+),
                         ],
                       ),
                     ),

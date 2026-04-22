@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'core/theme/app_theme.dart';
+import 'features/family/mini_call_overlay.dart';
 import 'features/shell/main_shell.dart';
 
 void main() {
@@ -34,7 +35,7 @@ class MyAtlasApp extends StatelessWidget {
       builder: (context, child) => ScaffoldMessenger(
         child: Material(
           type: MaterialType.transparency,
-          child: child ?? const SizedBox.shrink(),
+          child: MiniCallOverlay(child: child ?? const SizedBox.shrink()),
         ),
       ),
       home: const MainShell(),

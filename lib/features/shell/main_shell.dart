@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import '../family/care_giver_screen.dart';
 import '../health/health_screen.dart';
 import '../health/widgets/custom_tab_bar.dart';
+import '../me/me_screen.dart';
 import '../medicine/medicine_screen.dart';
 
 class MainShell extends StatefulWidget {
@@ -24,6 +25,9 @@ class _MainShellState extends State<MainShell> {
         break;
       case 3:
         body = const CareGiverScreen();
+        break;
+      case 4:
+        body = const MeScreen();
         break;
       default:
         body = const HealthScreen();
