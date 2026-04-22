@@ -3,7 +3,9 @@ import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 
 import '../../core/theme/app_typography.dart';
+import 'add_family_member_sheet.dart';
 import 'family_detail_screen.dart';
+import '../../core/widgets/liquid_glass_button.dart';
 
 enum FamilyMemberStatus { allSafe, attentionNeeded }
 
@@ -153,9 +155,9 @@ class _CareGiverScreenState extends State<CareGiverScreen>
             largeTitle: const Text('Care Giver'),
             backgroundColor: bg.withValues(alpha: 0.85),
             border: null,
-            trailing: _LiquidGlassButton(
+            trailing: LiquidGlassButton(
               icon: CupertinoIcons.plus,
-              onTap: () {},
+              onTap: () => showAddFamilyMemberSheet(context),
               size: 36,
               iconSize: 20,
               iconColor: const Color(0xFF1D8B6B),
@@ -170,31 +172,763 @@ class _CareGiverScreenState extends State<CareGiverScreen>
               ),
             ),
           ),
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 110),
-            sliver: SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, i) {
-                  if (i >= _members.length) return null;
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: _staggered(
-                      i,
-                      _members.length,
-                      FamilyMemberCard(
-                        member: _members[i],
-                        onTap: () => Navigator.of(context).push(
-                          CupertinoPageRoute(
-                            builder: (_) =>
-                                FamilyDetailScreen(member: _members[i]),
+          if (_topTab == 0)
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 110),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, i) {
+                    if (i >= _members.length) return null;
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: _staggered(
+                        i,
+                        _members.length,
+                        FamilyMemberCard(
+                          member: _members[i],
+                          onTap: () => Navigator.of(context).push(
+                            CupertinoPageRoute(
+                              builder: (_) =>
+                                  FamilyDetailScreen(member: _members[i]),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  );
-                },
-                childCount: _members.length,
+                    );
+                  },
+                  childCount: _members.length,
+                ),
               ),
+            )
+          else
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 110),
+                child: _SecurityContent(stagger: _staggered),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+typedef _StaggerWrap = Widget Function(int index, int total, Widget child);
+
+class _SecurityContent extends StatelessWidget {
+  const _SecurityContent({required this.stagger});
+  final _StaggerWrap stagger;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        stagger(0, 4, const _SecurityStatsRow()),
+        const SizedBox(height: 12),
+        stagger(1, 4, const _CurrentTaskCard()),
+        const SizedBox(height: 24),
+        stagger(
+          2,
+          4,
+          Text(
+            'Incident Queue',
+            style: AppTypography.headline(const Color(0xFF1A1A1A)).copyWith(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        stagger(3, 4, const _IncidentQueueCard()),
+        const SizedBox(height: 8),
+        stagger(3, 4, const _NewIncidentCard()),
+      ],
+    );
+  }
+}
+
+class _SecurityStatsRow extends StatelessWidget {
+  const _SecurityStatsRow();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: const [
+        Expanded(
+          child: _StatTile(
+            value: '2',
+            label: 'Active',
+            colors: [Color(0xFFF2A288), Color(0xFFB95A48)],
+            glowColor: Color(0xFFD97963),
+          ),
+        ),
+        SizedBox(width: 10),
+        Expanded(
+          child: _StatTile(
+            value: '2',
+            label: 'My Task',
+            colors: [Color(0xFFB9AEE8), Color(0xFF6F63B5)],
+            glowColor: Color(0xFF8C80CD),
+          ),
+        ),
+        SizedBox(width: 10),
+        Expanded(
+          child: _StatTile(
+            value: '1',
+            label: 'Resolved',
+            colors: [Color(0xFF85D5B1), Color(0xFF3E9371)],
+            glowColor: Color(0xFF5FB491),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _StatTile extends StatelessWidget {
+  const _StatTile({
+    required this.value,
+    required this.label,
+    required this.colors,
+    required this.glowColor,
+  });
+  final String value;
+  final String label;
+  final List<Color> colors;
+  final Color glowColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: colors,
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Positioned(
+            right: -30,
+            top: -30,
+            child: Container(
+              width: 110,
+              height: 110,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    glowColor.withValues(alpha: 0.45),
+                    glowColor.withValues(alpha: 0.0),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  value,
+                  textAlign: TextAlign.center,
+                  style: AppTypography.title2(CupertinoColors.white).copyWith(
+                    fontSize: 26,
+                    fontWeight: FontWeight.w700,
+                    height: 1,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  style: AppTypography.caption1(
+                    const Color(0xFFF5F5F5),
+                  ).copyWith(fontSize: 12, height: 1),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CurrentTaskCard extends StatelessWidget {
+  const _CurrentTaskCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: CupertinoColors.white,
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Color(0xFFB95A48),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  'Current Task',
+                  style: AppTypography.caption1(const Color(0xFFB95A48))
+                      .copyWith(fontSize: 12),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                gradient: const LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Color(0xFFF2A288), Color(0xFFB95A48)],
+                ),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      _AvatarWithAlert(
+                        imagePath: 'assets/images/family/somchai.png',
+                        alertIcon:
+                            CupertinoIcons.exclamationmark_triangle_fill,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    'สมชาย วงศ์สุวรรณ',
+                                    style: AppTypography.headline(
+                                      CupertinoColors.white,
+                                    ).copyWith(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                                const _SeverityBadge(
+                                  text: 'HIGH',
+                                  color: Color(0xFFB85936),
+                                  onDark: true,
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 6),
+                            Row(
+                              children: const [
+                                Icon(
+                                  CupertinoIcons.location_solid,
+                                  size: 10,
+                                  color: CupertinoColors.white,
+                                ),
+                                SizedBox(width: 4),
+                                Text(
+                                  'บ้านเลขที่ 42/5 ซอย 3  โซน A',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: CupertinoColors.white,
+                                    height: 1.6,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _ActionButton(
+                          icon: CupertinoIcons.location_solid,
+                          label: 'Arrived On Site',
+                          background: const Color(0xFF2CA989),
+                          foreground: CupertinoColors.white,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _ActionButton(
+                          icon: CupertinoIcons.phone_fill,
+                          label: 'Call Family',
+                          background: CupertinoColors.white,
+                          foreground: const Color(0xFF2CA989),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AvatarWithAlert extends StatelessWidget {
+  const _AvatarWithAlert({
+    required this.imagePath,
+    required this.alertIcon,
+    this.alertColor = const Color(0xFFB95A48),
+  });
+  final String imagePath;
+  final IconData alertIcon;
+  final Color alertColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 48,
+      height: 48,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              color: CupertinoColors.white,
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: Image.asset(imagePath, fit: BoxFit.cover),
+          ),
+          Positioned(
+            left: 0,
+            bottom: -2,
+            child: Container(
+              width: 18,
+              height: 18,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                color: CupertinoColors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Color(0x0D000000),
+                    blurRadius: 4,
+                    offset: Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Icon(alertIcon, size: 10, color: alertColor),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SeverityBadge extends StatelessWidget {
+  const _SeverityBadge({
+    required this.text,
+    required this.color,
+    this.onDark = false,
+  });
+  final String text;
+  final Color color;
+  final bool onDark;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 20,
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: onDark
+            ? CupertinoColors.white
+            : color.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        text,
+        style: TextStyle(
+          color: color,
+          fontSize: 10,
+          letterSpacing: 0.5,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+}
+
+class _ActionButton extends StatelessWidget {
+  const _ActionButton({
+    required this.icon,
+    required this.label,
+    required this.background,
+    required this.foreground,
+  });
+  final IconData icon;
+  final String label;
+  final Color background;
+  final Color foreground;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 48,
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      alignment: Alignment.center,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 16, color: foreground),
+          const SizedBox(width: 10),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 14,
+              color: foreground,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _IncidentQueueCard extends StatelessWidget {
+  const _IncidentQueueCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: CupertinoColors.white.withValues(alpha: 0.6),
+        border: Border.all(color: CupertinoColors.white),
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: CupertinoColors.white,
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: Row(
+              children: [
+                _AvatarWithAlert(
+                  imagePath: 'assets/images/family/somsri.png',
+                  alertIcon: CupertinoIcons.exclamationmark_triangle_fill,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'สมศรี วงศ์สุวรรณ',
+                              style: AppTypography.subheadline(
+                                CupertinoColors.black,
+                              ).copyWith(fontSize: 14, height: 16 / 14),
+                            ),
+                          ),
+                          const _SeverityBadge(
+                            text: 'HIGH',
+                            color: Color(0xFFCE8434),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: const [
+                          Icon(
+                            CupertinoIcons.location_solid,
+                            size: 10,
+                            color: Color(0xFF1A1A1A),
+                          ),
+                          SizedBox(width: 4),
+                          Text(
+                            'บ้านเลขที่ 42/5 ซอย 3  โซน A',
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: Color(0xFF1A1A1A),
+                              height: 1.6,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                const Icon(
+                  CupertinoIcons.clock,
+                  size: 12,
+                  color: Color(0xFF3E453F),
+                ),
+                const SizedBox(width: 4),
+                const Text(
+                  '05:20 PM',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: Color(0xFF3E453F),
+                    height: 1.5,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(width: 1, height: 8, color: const Color(0xFFE5E5E5)),
+                const SizedBox(width: 8),
+                const Text(
+                  'Fall Detected',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: Color(0xFF3E453F),
+                    height: 1.5,
+                  ),
+                ),
+                const Spacer(),
+                const _StatusPill(
+                  text: 'En Route',
+                  color: Color(0xFF6E92D6),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StatusPill extends StatelessWidget {
+  const _StatusPill({required this.text, required this.color});
+  final String text;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.16),
+        borderRadius: BorderRadius.circular(100),
+        border: Border.all(
+          color: color.withValues(alpha: 0.35),
+          width: 0.8,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 6,
+            height: 6,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: color,
+            ),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            text,
+            style: TextStyle(
+              color: color,
+              fontSize: 11,
+              letterSpacing: 0.275,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _NewIncidentCard extends StatelessWidget {
+  const _NewIncidentCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: CupertinoColors.white.withValues(alpha: 0.6),
+        border: Border.all(color: CupertinoColors.white),
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: CupertinoColors.white,
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: Row(
+              children: [
+                _AvatarWithAlert(
+                  imagePath: 'assets/images/family/somchai.png',
+                  alertIcon: CupertinoIcons.bolt_fill,
+                  alertColor: const Color(0xFFB95A48),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'สมชาย วงศ์สุวรรณ',
+                              style: AppTypography.subheadline(
+                                CupertinoColors.black,
+                              ).copyWith(fontSize: 14, height: 16 / 14),
+                            ),
+                          ),
+                          const _SeverityBadge(
+                            text: 'CRITICAL',
+                            color: Color(0xFFB95A48),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: const [
+                          Icon(
+                            CupertinoIcons.location_solid,
+                            size: 10,
+                            color: Color(0xFF1A1A1A),
+                          ),
+                          SizedBox(width: 4),
+                          Text(
+                            'บ้านเลขที่ 43/3 ซอย 3  โซน B',
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: Color(0xFF1A1A1A),
+                              height: 1.6,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    const Icon(
+                      CupertinoIcons.clock,
+                      size: 12,
+                      color: Color(0xFF3E453F),
+                    ),
+                    const SizedBox(width: 4),
+                    const Text(
+                      '05:20 PM',
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Color(0xFF3E453F),
+                        height: 1.5,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      width: 1,
+                      height: 8,
+                      color: const Color(0xFFE5E5E5),
+                    ),
+                    const SizedBox(width: 8),
+                    const Text(
+                      'SOS',
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Color(0xFF3E453F),
+                        height: 1.5,
+                      ),
+                    ),
+                    const Spacer(),
+                    const _StatusPill(
+                      text: 'New',
+                      color: Color(0xFF6E92D6),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFD15E46),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  alignment: Alignment.center,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Icon(
+                        CupertinoIcons.person_add_solid,
+                        color: CupertinoColors.white,
+                        size: 20,
+                      ),
+                      SizedBox(width: 10),
+                      Text(
+                        'Accept Case',
+                        style: TextStyle(
+                          color: CupertinoColors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -289,61 +1023,6 @@ class _FamilySecurityTabs extends StatelessWidget {
   }
 }
 
-class _LiquidGlassButton extends StatelessWidget {
-  const _LiquidGlassButton({
-    required this.icon,
-    required this.onTap,
-    this.size = 44,
-    this.iconSize = 20,
-    this.iconColor = const Color(0xFF1A1A1A),
-  });
-  final IconData icon;
-  final VoidCallback onTap;
-  final double size;
-  final double iconSize;
-  final Color iconColor;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: CupertinoColors.black.withValues(alpha: 0.12),
-              blurRadius: 40,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: ClipOval(
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-            child: Container(
-              decoration: BoxDecoration(
-                color: CupertinoColors.white.withValues(alpha: 0.65),
-                border: Border.all(
-                  color: CupertinoColors.white.withValues(alpha: 0.4),
-                  width: 0.5,
-                ),
-              ),
-              child: Icon(
-                icon,
-                color: iconColor,
-                size: iconSize,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 class FamilyMemberCard extends StatelessWidget {
   const FamilyMemberCard({super.key, required this.member, this.onTap});

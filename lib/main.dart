@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'core/theme/app_theme.dart';
+import 'features/family/mini_call_overlay.dart';
 import 'features/shell/main_shell.dart';
 
 void main() {
@@ -24,7 +26,14 @@ class MyAtlasApp extends StatelessWidget {
         Locale('th', 'TH'),
         Locale('en', 'US'),
       ],
+      localizationsDelegates: const [
+        GlobalCupertinoLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ],
       home: const MainShell(),
+      builder: (context, child) =>
+          MiniCallOverlay(child: child ?? const SizedBox.shrink()),
     );
   }
 }

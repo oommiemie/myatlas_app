@@ -377,6 +377,8 @@ class _WeeklyCaloriesCardState extends State<_WeeklyCaloriesCard> {
                       const SizedBox(height: 8),
                       AnimatedSwitcher(
                         duration: const Duration(milliseconds: 180),
+                        layoutBuilder: (current, _) =>
+                            current ?? const SizedBox.shrink(),
                         child: Text(
                           displayLabel,
                           key: ValueKey('lbl-$displayLabel'),

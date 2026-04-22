@@ -1,10 +1,10 @@
 import 'dart:math';
-import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Icons;
 
 import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/liquid_glass_button.dart';
 
 class MealCard extends StatefulWidget {
   const MealCard({
@@ -232,7 +232,7 @@ class _TopRow extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 10),
-          _LiquidGlassButton(
+          LiquidGlassButton(
             icon: CupertinoIcons.camera_fill,
             onTap: onScan,
           ),
@@ -242,58 +242,6 @@ class _TopRow extends StatelessWidget {
   }
 }
 
-class _LiquidGlassButton extends StatelessWidget {
-  const _LiquidGlassButton({required this.icon, this.onTap});
-
-  final IconData icon;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        width: 44,
-        height: 44,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x1F000000),
-              blurRadius: 40,
-              offset: Offset(0, 8),
-            ),
-          ],
-        ),
-        child: ClipOval(
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-            child: Container(
-              decoration: BoxDecoration(
-                color: CupertinoColors.white.withValues(alpha: 0.22),
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: CupertinoColors.white.withValues(alpha: 0.35),
-                  width: 0.5,
-                ),
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    CupertinoColors.white.withValues(alpha: 0.30),
-                    CupertinoColors.white.withValues(alpha: 0.05),
-                  ],
-                ),
-              ),
-              child: Icon(icon, size: 24, color: CupertinoColors.white),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 class _Nutrient extends StatelessWidget {
   const _Nutrient({
