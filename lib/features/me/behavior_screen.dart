@@ -237,6 +237,7 @@ class _DayPie extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Stack(
+      clipBehavior: Clip.none,
       children: const [
         // Top-left: Morning
         Positioned(
@@ -248,7 +249,6 @@ class _DayPie extends StatelessWidget {
             gradientEnd: Alignment.topLeft,
             colors: [Color(0xFFB9E6FE), Color(0xFF7CD4FD)],
             orb: _OrbStyle.sun,
-            timeLabel: 'เมื้อเช้า  06:20 น.',
           ),
         ),
         // Top-right: Noon
@@ -261,7 +261,6 @@ class _DayPie extends StatelessWidget {
             gradientEnd: Alignment.topRight,
             colors: [Color(0xFFFFD6AE), Color(0xFFFF9C66)],
             orb: _OrbStyle.noon,
-            timeLabel: 'เมื้อกลางวัน  12:00 น.',
           ),
         ),
         // Bottom-left: Night (sleep)
@@ -274,8 +273,6 @@ class _DayPie extends StatelessWidget {
             gradientEnd: Alignment.bottomLeft,
             colors: [Color(0xFF065986), Color(0xFF0B4A6F)],
             orb: _OrbStyle.moon,
-            timeLabel: 'เวลานอน  22:00 น.',
-            isDark: true,
           ),
         ),
         // Bottom-right: Evening
@@ -288,8 +285,33 @@ class _DayPie extends StatelessWidget {
             gradientEnd: Alignment.bottomRight,
             colors: [Color(0xFFC7D2FE), Color(0xFF818CF8)],
             orb: _OrbStyle.dusk,
-            timeLabel: 'เมื้อเย็น  19:00 น.',
           ),
+        ),
+        // Time pills — matching Figma positions (pill bottom at y=124 for
+        // top row, y=274 for bottom row; centered within 150-wide half)
+        Positioned(
+          left: 0,
+          width: 150,
+          top: 90,
+          child: Center(child: _TimePill(text: 'เมื้อเช้า  06:20 น.')),
+        ),
+        Positioned(
+          right: 0,
+          width: 150,
+          top: 90,
+          child: Center(child: _TimePill(text: 'เมื้อกลางวัน  12:00 น.')),
+        ),
+        Positioned(
+          left: 0,
+          width: 150,
+          bottom: 26,
+          child: Center(child: _TimePill(text: 'เวลานอน  22:00 น.')),
+        ),
+        Positioned(
+          right: 0,
+          width: 150,
+          bottom: 26,
+          child: Center(child: _TimePill(text: 'เมื้อเย็น  19:00 น.')),
         ),
       ],
     );
@@ -307,8 +329,6 @@ class _Quadrant extends StatelessWidget {
     required this.gradientEnd,
     required this.colors,
     required this.orb,
-    required this.timeLabel,
-    this.isDark = false,
   });
 
   final _QuadrantCorner corner;
@@ -316,8 +336,6 @@ class _Quadrant extends StatelessWidget {
   final Alignment gradientEnd;
   final List<Color> colors;
   final _OrbStyle orb;
-  final String timeLabel;
-  final bool isDark;
 
   BorderRadius get _radius => switch (corner) {
         _QuadrantCorner.topLeft => const BorderRadius.only(
@@ -349,34 +367,9 @@ class _Quadrant extends StatelessWidget {
         ),
         border: Border.all(color: CupertinoColors.white, width: 1),
       ),
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Positioned.fill(child: _OrbDecoration(orb: orb)),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            top: 0,
-            child: Align(
-              alignment: _pillAlignment,
-              child: Padding(
-                padding: const EdgeInsets.all(10),
-                child: _TimePill(text: timeLabel),
-              ),
-            ),
-          ),
-        ],
-      ),
+      child: _OrbDecoration(orb: orb),
     );
   }
-
-  Alignment get _pillAlignment => switch (corner) {
-        _QuadrantCorner.topLeft => Alignment.bottomRight,
-        _QuadrantCorner.topRight => Alignment.bottomLeft,
-        _QuadrantCorner.bottomLeft => Alignment.topRight,
-        _QuadrantCorner.bottomRight => Alignment.topLeft,
-      };
 }
 
 class _OrbDecoration extends StatelessWidget {
