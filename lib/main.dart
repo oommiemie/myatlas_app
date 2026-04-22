@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'core/theme/app_theme.dart';
 import 'features/shell/main_shell.dart';
@@ -24,6 +26,17 @@ class MyAtlasApp extends StatelessWidget {
         Locale('th', 'TH'),
         Locale('en', 'US'),
       ],
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      builder: (context, child) => ScaffoldMessenger(
+        child: Material(
+          type: MaterialType.transparency,
+          child: child ?? const SizedBox.shrink(),
+        ),
+      ),
       home: const MainShell(),
     );
   }

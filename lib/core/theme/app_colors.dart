@@ -36,6 +36,26 @@ class AppColors {
   static const Color nutrition = Color(0xFF34C759);
   static const Color sleep = Color(0xFFAF52DE);
 
+  // Medicine feature palette
+  static const Color bgPrimary = Color(0xFFF4F8F5);
+  static const Color bgSurface = Color(0xFFFFFFFF);
+
+  static const Color textPrimary = Color(0xFF1A1A1A);
+  static const Color textSecondary = Color(0xFF3E453F);
+  static const Color textInverse = Color(0xFFFFFFFF);
+
+  static const Color primary400 = Color(0xFF4AB99C);
+  static const Color primary600 = Color(0xFF1D8B6B);
+  static const Color info300 = Color(0xFF7CD4FD);
+  static const Color success600 = Color(0xFF4CA30D);
+  static const Color secondary50 = Color(0xFFFAF7F1);
+  static const Color secondary600 = Color(0xFFA88B5B);
+
+  static const Color borderDefault = Color(0xFFE5E5E5);
+  static const Color border = Color(0xFFDEDEE0);
+  static const Color dateChip = Color(0xFF2C2C2C);
+  static const Color inactiveTab = Color(0x993C3C43);
+
   static Color adaptive(BuildContext context, Color light, Color dark) {
     final brightness = CupertinoTheme.brightnessOf(context);
     return brightness == Brightness.dark ? dark : light;
