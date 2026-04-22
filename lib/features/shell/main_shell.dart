@@ -4,6 +4,7 @@ import '../family/care_giver_screen.dart';
 import '../health/health_screen.dart';
 import '../health/widgets/custom_tab_bar.dart';
 import '../me/me_screen.dart';
+import '../medicine/medicine_screen.dart';
 
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
@@ -19,6 +20,9 @@ class _MainShellState extends State<MainShell> {
   Widget build(BuildContext context) {
     Widget body;
     switch (_tabIndex) {
+      case 2:
+        body = const MedicineScreen();
+        break;
       case 3:
         body = const CareGiverScreen();
         break;
