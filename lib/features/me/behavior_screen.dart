@@ -53,7 +53,7 @@ class _BehaviorScreenState extends State<BehaviorScreen>
             filter: ImageFilter.blur(sigmaX: 28, sigmaY: 28),
             child: Container(
               decoration: BoxDecoration(
-                color: const Color(0xFFF2F2F7).withValues(alpha: 0.85),
+                color: const Color(0xFFF8F8FA).withValues(alpha: 0.92),
                 borderRadius: BorderRadius.circular(38),
                 border: Border.all(
                   color: CupertinoColors.white.withValues(alpha: 0.35),
@@ -219,7 +219,7 @@ class _BehaviorScreenState extends State<BehaviorScreen>
             filter: ImageFilter.blur(sigmaX: 28, sigmaY: 28),
             child: Container(
               decoration: BoxDecoration(
-                color: const Color(0xFFF2F2F7).withValues(alpha: 0.85),
+                color: const Color(0xFFF8F8FA).withValues(alpha: 0.92),
                 borderRadius: BorderRadius.circular(38),
                 border: Border.all(
                   color: CupertinoColors.white.withValues(alpha: 0.35),

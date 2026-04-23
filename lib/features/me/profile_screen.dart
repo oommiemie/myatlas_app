@@ -6,6 +6,7 @@ import 'package:flutter/material.dart' show Icons;
 import 'package:image_picker/image_picker.dart';
 
 import '../../core/theme/app_typography.dart';
+import '../../core/widgets/app_toast.dart';
 import '../../core/widgets/liquid_glass_button.dart';
 import '../../core/widgets/popover_menu.dart';
 import '../../core/widgets/press_effect.dart';
@@ -72,7 +73,10 @@ class _ProfileScreenState extends State<ProfileScreen>
       icon: CupertinoIcons.person_crop_rectangle_fill,
       initialValue: _name,
     );
-    if (v != null && v.isNotEmpty) setState(() => _name = v);
+    if (v != null && v.isNotEmpty) {
+      setState(() => _name = v);
+      if (mounted) AppToast.success(context, 'อัปเดตข้อมูลแล้ว');
+    }
   }
 
   Future<void> _editBirthDate() async {
@@ -84,7 +88,10 @@ class _ProfileScreenState extends State<ProfileScreen>
       icon: CupertinoIcons.calendar,
       initialValue: _birthDate,
     );
-    if (v != null) setState(() => _birthDate = v);
+    if (v != null) {
+      setState(() => _birthDate = v);
+      if (mounted) AppToast.success(context, 'อัปเดตข้อมูลแล้ว');
+    }
   }
 
   Future<void> _editBloodType() async {
@@ -107,7 +114,10 @@ class _ProfileScreenState extends State<ProfileScreen>
         ),
       ],
     );
-    if (v != null) setState(() => _bloodType = v);
+    if (v != null) {
+      setState(() => _bloodType = v);
+      if (mounted) AppToast.success(context, 'อัปเดตข้อมูลแล้ว');
+    }
   }
 
   Future<void> _editGender() async {
@@ -139,7 +149,10 @@ class _ProfileScreenState extends State<ProfileScreen>
         ),
       ],
     );
-    if (v != null) setState(() => _gender = v);
+    if (v != null) {
+      setState(() => _gender = v);
+      if (mounted) AppToast.success(context, 'อัปเดตข้อมูลแล้ว');
+    }
   }
 
   Future<void> _editStatus() async {
@@ -183,7 +196,10 @@ class _ProfileScreenState extends State<ProfileScreen>
         ),
       ],
     );
-    if (v != null) setState(() => _status = v);
+    if (v != null) {
+      setState(() => _status = v);
+      if (mounted) AppToast.success(context, 'อัปเดตข้อมูลแล้ว');
+    }
   }
 
   Future<void> _editPhone() async {
@@ -197,7 +213,10 @@ class _ProfileScreenState extends State<ProfileScreen>
       keyboardType: TextInputType.phone,
       maxLength: 15,
     );
-    if (v != null && v.isNotEmpty) setState(() => _phone = v);
+    if (v != null && v.isNotEmpty) {
+      setState(() => _phone = v);
+      if (mounted) AppToast.success(context, 'อัปเดตข้อมูลแล้ว');
+    }
   }
 
   Future<void> _editEmail() async {
@@ -210,7 +229,10 @@ class _ProfileScreenState extends State<ProfileScreen>
       initialValue: _email,
       keyboardType: TextInputType.emailAddress,
     );
-    if (v != null && v.isNotEmpty) setState(() => _email = v);
+    if (v != null && v.isNotEmpty) {
+      setState(() => _email = v);
+      if (mounted) AppToast.success(context, 'อัปเดตข้อมูลแล้ว');
+    }
   }
 
   @override

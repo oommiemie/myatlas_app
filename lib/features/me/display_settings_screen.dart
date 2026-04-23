@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 
 import '../../core/services/app_settings_service.dart';
 import '../../core/services/app_strings.dart';
+import '../../core/widgets/app_option_sheet.dart';
 import '../../core/widgets/liquid_glass_button.dart';
 import '../../core/widgets/press_effect.dart';
 
@@ -73,10 +74,11 @@ class _DisplaySettingsScreenState extends State<DisplaySettingsScreen>
       _settings.locale.value.languageCode == 'en' ? 'English' : 'ไทย';
 
   Future<void> _pickLanguage() async {
-    final choice = await showCupertinoModalPopup<String>(
+    final choice = await showAppOptionSheet(
       context: context,
-      barrierColor: CupertinoColors.black.withValues(alpha: 0.35),
-      builder: (ctx) => _LanguageSheet(current: _languageLabel),
+      title: tr(context, 'ภาษา', 'Language'),
+      selected: _languageLabel,
+      options: const ['ไทย', 'English'],
     );
     if (choice != null && choice != _languageLabel) {
       _settings.setLocale(
@@ -638,119 +640,3 @@ class _FontSizeSlider extends StatelessWidget {
   }
 }
 
-class _LanguageSheet extends StatelessWidget {
-  const _LanguageSheet({required this.current});
-  final String current;
-
-  static const _options = ['ไทย', 'English'];
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(38),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 28, sigmaY: 28),
-          child: Container(
-            decoration: BoxDecoration(
-              color: const Color(0xFFF2F2F7).withValues(alpha: 0.85),
-              borderRadius: BorderRadius.circular(38),
-              border: Border.all(
-                color: CupertinoColors.white.withValues(alpha: 0.35),
-                width: 0.5,
-              ),
-            ),
-            child: SafeArea(
-              top: false,
-              bottom: false,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Container(
-                      width: 36,
-                      height: 5,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF1A1A1A).withValues(alpha: 0.25),
-                        borderRadius: BorderRadius.circular(100),
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
-                    child: Text(
-                      tr(context, 'เลือกภาษา', 'Select Language'),
-                      style: const TextStyle(
-                        color: Color(0xFF1A1A1A),
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: CupertinoColors.white,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      clipBehavior: Clip.antiAlias,
-                      child: Column(
-                        children: [
-                          for (int i = 0; i < _options.length; i++) ...[
-                            PressEffect(
-                              onTap: () {
-                                HapticFeedback.selectionClick();
-                                Navigator.of(context).pop(_options[i]);
-                              },
-                              haptic: HapticKind.none,
-                              scale: 0.99,
-                              dim: 0.96,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 16, vertical: 14),
-                                color: CupertinoColors.white,
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        _options[i],
-                                        style: const TextStyle(
-                                          color: Color(0xFF1A1A1A),
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w500,
-                                          letterSpacing: 0.275,
-                                        ),
-                                      ),
-                                    ),
-                                    if (current == _options[i])
-                                      const Icon(
-                                        CupertinoIcons.check_mark,
-                                        size: 20,
-                                        color: Color(0xFF1D8B6B),
-                                      ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            if (i != _options.length - 1)
-                              Container(
-                                height: 1,
-                                color: const Color(0xFFE5E5E5),
-                              ),
-                          ],
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}

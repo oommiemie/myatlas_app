@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 
+import '../../../core/widgets/app_text_field.dart';
 import '../../../core/widgets/press_effect.dart';
 import 'edit_sheet_scaffold.dart';
 
@@ -52,25 +53,16 @@ class _EditTextSheet extends StatefulWidget {
 
 class _EditTextSheetState extends State<_EditTextSheet> {
   late final TextEditingController _ctrl;
-  late final FocusNode _focus;
-  bool _focused = false;
 
   @override
   void initState() {
     super.initState();
     _ctrl = TextEditingController(text: widget.initialValue);
     _ctrl.addListener(() => setState(() {}));
-    _focus = FocusNode();
-    _focus.addListener(() {
-      if (_focus.hasFocus != _focused) {
-        setState(() => _focused = _focus.hasFocus);
-      }
-    });
   }
 
   @override
   void dispose() {
-    _focus.dispose();
     _ctrl.dispose();
     super.dispose();
   }
@@ -102,44 +94,11 @@ class _EditTextSheetState extends State<_EditTextSheet> {
             ),
           ),
           const SizedBox(height: 6),
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 180),
-            curve: Curves.easeOut,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(100),
-              boxShadow: _focused
-                  ? [
-                      BoxShadow(
-                        color: const Color(0xFF1D8B6B).withValues(alpha: 0.15),
-                        blurRadius: 8,
-                        spreadRadius: 1,
-                      ),
-                    ]
-                  : const [],
-            ),
-            child: CupertinoTextField(
-              controller: _ctrl,
-              focusNode: _focus,
-              autofocus: true,
-              keyboardType: widget.keyboardType,
-              maxLength: widget.maxLength,
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              decoration: BoxDecoration(
-                color: CupertinoColors.white,
-                borderRadius: BorderRadius.circular(100),
-                border: Border.all(
-                  color: _focused
-                      ? const Color(0xFF1D8B6B)
-                      : const Color(0xFFE5E5E5),
-                  width: _focused ? 1.5 : 1,
-                ),
-              ),
-              style: const TextStyle(
-                color: Color(0xFF1A1A1A),
-                fontSize: 16,
-              ),
-            ),
+          AppTextField(
+            controller: _ctrl,
+            autofocus: true,
+            keyboardType: widget.keyboardType,
+            maxLength: widget.maxLength,
           ),
         ],
       ),

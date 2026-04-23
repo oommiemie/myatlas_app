@@ -1,3 +1,6 @@
+import 'dart:ui';
+
+import 'package:flutter/cupertino.dart' show CupertinoColors;
 import 'package:flutter/material.dart';
 
 enum DatePickerRange { today, week, month }
@@ -51,27 +54,38 @@ class _DatePickerBottomSheetState extends State<DatePickerBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(24),
-          topRight: Radius.circular(24),
-        ),
-      ),
-      padding: const EdgeInsets.only(top: 8),
-      child: SafeArea(
-        top: false,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _DragHandle(),
-            const SizedBox(height: 8),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              child: _buildCalendar(),
+    return ClipRRect(
+      borderRadius:
+          const BorderRadius.vertical(top: Radius.circular(38)),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 28, sigmaY: 28),
+        child: Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFFF8F8FA).withValues(alpha: 0.92),
+            borderRadius:
+                const BorderRadius.vertical(top: Radius.circular(38)),
+            border: Border(
+              top: BorderSide(
+                color: CupertinoColors.white.withValues(alpha: 0.35),
+                width: 0.5,
+              ),
             ),
-          ],
+          ),
+          padding: const EdgeInsets.only(top: 8),
+          child: SafeArea(
+            top: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _DragHandle(),
+                const SizedBox(height: 8),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  child: _buildCalendar(),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );

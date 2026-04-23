@@ -5,6 +5,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../core/widgets/app_text_field.dart';
+import '../../core/widgets/app_toast.dart';
 import '../../core/widgets/liquid_glass_button.dart';
 import '../../core/widgets/press_effect.dart';
 
@@ -95,23 +97,9 @@ class _ReportIssueScreenState extends State<ReportIssueScreen>
 
   Future<void> _submit() async {
     HapticFeedback.mediumImpact();
-    await showCupertinoDialog<void>(
-      context: context,
-      builder: (ctx) => CupertinoAlertDialog(
-        title: const Text('ขอบคุณสำหรับรายงาน'),
-        content: const Padding(
-          padding: EdgeInsets.only(top: 8),
-          child: Text('เราได้รับรายงานปัญหาของคุณเรียบร้อยแล้ว'),
-        ),
-        actions: [
-          CupertinoDialogAction(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('ตกลง'),
-          ),
-        ],
-      ),
-    );
-    if (mounted) Navigator.of(context).pop();
+    if (!mounted) return;
+    AppToast.success(context, 'ส่งรายงานปัญหาแล้ว');
+    Navigator.of(context).pop();
   }
 
   Widget _stagger(int i, int total, Widget child) {
@@ -231,50 +219,20 @@ class _ReportIssueScreenState extends State<ReportIssueScreen>
                   4,
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: CupertinoColors.white,
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Column(
-                        children: [
-                          CupertinoTextField(
-                            controller: _subjectCtrl,
-                            placeholder: 'เรื่อง',
-                            placeholderStyle: const TextStyle(
-                              color: Color(0xFFA5ACA6),
-                              fontSize: 16,
-                            ),
-                            style: const TextStyle(
-                              color: Color(0xFF1A1A1A),
-                              fontSize: 16,
-                            ),
-                            decoration: const BoxDecoration(),
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                          ),
-                          Container(
-                            height: 1,
-                            color: const Color(0xFFE5E5E5),
-                          ),
-                          CupertinoTextField(
-                            controller: _detailCtrl,
-                            placeholder: 'รายละเอียด....',
-                            placeholderStyle: const TextStyle(
-                              color: Color(0xFFA5ACA6),
-                              fontSize: 16,
-                            ),
-                            style: const TextStyle(
-                              color: Color(0xFF1A1A1A),
-                              fontSize: 16,
-                            ),
-                            decoration: const BoxDecoration(),
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            minLines: 6,
-                            maxLines: 10,
-                          ),
-                        ],
-                      ),
+                    child: Column(
+                      children: [
+                        AppTextField(
+                          controller: _subjectCtrl,
+                          placeholder: 'เรื่อง',
+                        ),
+                        const SizedBox(height: 12),
+                        AppTextField(
+                          controller: _detailCtrl,
+                          placeholder: 'รายละเอียด....',
+                          maxLines: 10,
+                          minLines: 6,
+                        ),
+                      ],
                     ),
                   ),
                 ),

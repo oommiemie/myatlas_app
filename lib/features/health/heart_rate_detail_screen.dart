@@ -5,7 +5,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Icons;
 
 import '../../core/theme/app_typography.dart';
+import '../../core/widgets/app_toast.dart';
 import '../../core/widgets/liquid_glass_button.dart';
+import 'widgets/add_vital_sign_sheet.dart';
 
 class _HrSample {
   const _HrSample({
@@ -168,7 +170,24 @@ class _HeartRateDetailScreenState extends State<HeartRateDetailScreen> {
               children: [
                 _TopBar(
                   onBack: () => Navigator.of(context).pop(),
-                  onAdd: () {},
+                  onAdd: () async {
+                    final result = await showAddVitalSignSheet(
+                      context,
+                      title: 'เพิ่ม Heart Rate',
+                      icon: CupertinoIcons.heart_fill,
+                      color: const Color(0xFFBE123C),
+                      fields: const [
+                        VitalFieldConfig(
+                          label: 'อัตราการเต้นหัวใจ',
+                          placeholder: '72',
+                          unit: 'bpm',
+                        ),
+                      ],
+                    );
+                    if (result != null && context.mounted) {
+                      AppToast.success(context, 'บันทึกค่า Heart Rate แล้ว');
+                    }
+                  },
                 ),
                 Expanded(
                   child: Container(
@@ -1242,15 +1261,15 @@ class _HrInfoSheet extends StatelessWidget {
         padding: EdgeInsets.only(top: topInset + 10),
         child: ClipRRect(
           borderRadius:
-              const BorderRadius.vertical(top: Radius.circular(28)),
+              const BorderRadius.vertical(top: Radius.circular(38)),
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 28, sigmaY: 28),
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: const Color(0xFFF4F8F5).withValues(alpha: 0.92),
+                color: const Color(0xFFF8F8FA).withValues(alpha: 0.92),
                 border: Border(
                   top: BorderSide(
-                    color: CupertinoColors.white.withValues(alpha: 0.7),
+                    color: CupertinoColors.white.withValues(alpha: 0.35),
                     width: 0.5,
                   ),
                 ),
