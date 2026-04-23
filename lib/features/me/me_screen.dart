@@ -11,7 +11,9 @@ import 'behavior_screen.dart';
 import 'chronic_disease_screen.dart';
 import 'dental_screen.dart';
 import 'insurance_screen.dart';
+import 'opd/opd_registry_screen.dart';
 import 'profile_screen.dart' show ProfileScreen, ProfileAvatarImage;
+import 'settings_screen.dart';
 import 'treatment/treatment_screen.dart';
 import 'vaccine_screen.dart';
 
@@ -81,7 +83,11 @@ class _MeScreenState extends State<MeScreen>
             border: null,
             trailing: LiquidGlassButton(
               icon: CupertinoIcons.gear,
-              onTap: () {},
+              onTap: () => Navigator.of(context).push(
+                CupertinoPageRoute(
+                  builder: (_) => const SettingsScreen(),
+                ),
+              ),
               size: 36,
               iconSize: 18,
               iconColor: const Color(0xFF1D8B6B),
@@ -100,20 +106,25 @@ class _MeScreenState extends State<MeScreen>
                 _stagger(
                   1,
                   5,
-                  const _MenuSection(
+                  _MenuSection(
                     title: 'แบบคัดกรอง/ประเมิน',
                     items: [
-                      _MenuEntry(
+                      const _MenuEntry(
                         iconColor: Color(0xFF9333EA),
                         icon: CupertinoIcons.doc_text,
                         title: 'แบบประเมินสุขภาพ',
                         subtitle: 'แบบประเมินสุขภาพ/คัดกรอง',
                       ),
                       _MenuEntry(
-                        iconColor: Color(0xFFEA580C),
+                        iconColor: const Color(0xFFEA580C),
                         icon: CupertinoIcons.waveform_path_ecg,
                         title: 'OPD Registry',
                         subtitle: 'ลงทะเบียนคัดกรองคัดกรองด้วยตนเอง',
+                        onTap: () => Navigator.of(context).push(
+                          CupertinoPageRoute(
+                            builder: (_) => const OpdRegistryScreen(),
+                          ),
+                        ),
                       ),
                     ],
                   ),
