@@ -48,7 +48,7 @@ class _MainShellState extends State<MainShell> {
               items: const [
                 TabItem(CupertinoIcons.house, 'หน้าหลัก'),
                 TabItem(CupertinoIcons.heart, 'สุขภาพ'),
-                TabItem(CupertinoIcons.paperclip, 'ทานยา'),
+                TabItem(CupertinoIcons.capsule, 'ทานยา'),
                 TabItem(CupertinoIcons.person_2, 'ครอบครัว'),
                 TabItem(CupertinoIcons.person_crop_circle, 'ฉัน'),
               ],

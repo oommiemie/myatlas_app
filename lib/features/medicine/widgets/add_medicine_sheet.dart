@@ -1,9 +1,13 @@
+import 'dart:ui';
+
+import 'package:flutter/cupertino.dart' show CupertinoColors;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/thai_date.dart';
-
-enum _StepStatus { done, current, pending }
+import '../../../core/widgets/app_chip.dart';
+import '../../../core/widgets/app_text_field.dart';
+import '../../../core/widgets/app_toast.dart';
 
 enum _MealSlot { morning, day, evening, bedtime }
 
@@ -88,39 +92,31 @@ class _AddMedicineSheetState extends State<AddMedicineSheet> {
 
   void _finish() {
     Navigator.of(context).pop();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: const [
-            Icon(Icons.check_circle, color: Colors.white, size: 20),
-            SizedBox(width: 8),
-            Text('บันทึกรายการยาแล้ว',
-                style: TextStyle(color: Colors.white)),
-          ],
-        ),
-        backgroundColor: AppColors.success600,
-        behavior: SnackBarBehavior.floating,
-        elevation: 2,
-        margin: const EdgeInsets.fromLTRB(16, 0, 16, 75),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        duration: const Duration(milliseconds: 1500),
-      ),
-    );
+    AppToast.success(context, 'บันทึกรายการยาแล้ว');
   }
 
   @override
   Widget build(BuildContext context) {
     final h = MediaQuery.of(context).size.height;
-    return Container(
-      height: h * 0.92,
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(24),
-          topRight: Radius.circular(24),
-        ),
-      ),
-      child: Column(
+    return ClipRRect(
+      borderRadius:
+          const BorderRadius.vertical(top: Radius.circular(38)),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 28, sigmaY: 28),
+        child: Container(
+          height: h * 0.92,
+          decoration: BoxDecoration(
+            color: const Color(0xFFF8F8FA).withValues(alpha: 0.92),
+            borderRadius:
+                const BorderRadius.vertical(top: Radius.circular(38)),
+            border: Border(
+              top: BorderSide(
+                color: CupertinoColors.white.withValues(alpha: 0.35),
+                width: 0.5,
+              ),
+            ),
+          ),
+          child: Column(
         children: [
           _Header(
             showBack: _step > 0,
@@ -143,17 +139,16 @@ class _AddMedicineSheetState extends State<AddMedicineSheet> {
               ),
             ),
           ),
-          SafeArea(
-            top: false,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-              child: _PrimaryButton(
-                label: _stepButtons[_step],
-                onTap: _next,
-              ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+            child: _PrimaryButton(
+              label: _stepButtons[_step],
+              onTap: _next,
             ),
           ),
         ],
+          ),
+        ),
       ),
     );
   }
@@ -225,32 +220,33 @@ class _Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 76,
-      child: Stack(
-        children: [
-          const Center(
-            child: Text(
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+      child: SizedBox(
+        height: 44,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            const Text(
               'เพิ่มรายการยา',
               style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
                 color: AppColors.textPrimary,
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.2,
               ),
             ),
-          ),
-          if (showBack)
-            Positioned(
-              left: 16,
-              top: 16,
-              child: _CircleButton(icon: Icons.chevron_left, onTap: onBack),
+            if (showBack)
+              Align(
+                alignment: Alignment.centerLeft,
+                child: _CircleButton(icon: Icons.chevron_left, onTap: onBack),
+              ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: _CircleButton(icon: Icons.close, onTap: onClose),
             ),
-          Positioned(
-            right: 16,
-            top: 16,
-            child: _CircleButton(icon: Icons.close, onTap: onClose),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -287,102 +283,55 @@ class _CircleButton extends StatelessWidget {
   }
 }
 
-/* ---------- Stepper (single-line labels below dots) ---------- */
-
 class _Stepper extends StatelessWidget {
   final int currentStep;
 
   const _Stepper({required this.currentStep});
 
   static const _totalSteps = 3;
+  static const _accent = Color(0xFF1D8B6B);
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 64),
       child: Row(
         children: [
           for (int i = 0; i < _totalSteps; i++) ...[
-            _StepDot(
-              index: i,
-              status: i < currentStep
-                  ? _StepStatus.done
-                  : i == currentStep
-                      ? _StepStatus.current
-                      : _StepStatus.pending,
-            ),
-            if (i < _totalSteps - 1)
-              Expanded(
-                child: _Connector(done: i < currentStep),
+            Expanded(
+              flex: i == currentStep ? 3 : 2,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 320),
+                curve: Curves.easeOutCubic,
+                height: 5,
+                decoration: BoxDecoration(
+                  gradient: i <= currentStep
+                      ? const LinearGradient(
+                          colors: [
+                            Color(0xFF2CA989),
+                            Color(0xFF1D8B6B),
+                          ],
+                        )
+                      : null,
+                  color: i > currentStep
+                      ? _accent.withValues(alpha: 0.14)
+                      : null,
+                  borderRadius: BorderRadius.circular(100),
+                  boxShadow: i == currentStep
+                      ? [
+                          BoxShadow(
+                            color: _accent.withValues(alpha: 0.35),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ]
+                      : null,
+                ),
               ),
+            ),
+            if (i != _totalSteps - 1) const SizedBox(width: 6),
           ],
         ],
-      ),
-    );
-  }
-}
-
-class _StepDot extends StatelessWidget {
-  final int index;
-  final _StepStatus status;
-
-  const _StepDot({required this.index, required this.status});
-
-  @override
-  Widget build(BuildContext context) {
-    final bool isDone = status == _StepStatus.done;
-    final bool isCurrent = status == _StepStatus.current;
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 220),
-      width: 28,
-      height: 28,
-      decoration: BoxDecoration(
-        color: isDone || isCurrent ? AppColors.primary600 : Colors.white,
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: isDone || isCurrent
-              ? AppColors.primary600
-              : const Color(0xFFE0E0E0),
-          width: 1.5,
-        ),
-        boxShadow: isCurrent
-            ? [
-                BoxShadow(
-                  color: AppColors.primary600.withValues(alpha: 0.3),
-                  blurRadius: 6,
-                  spreadRadius: 2,
-                ),
-              ]
-            : null,
-      ),
-      alignment: Alignment.center,
-      child: isDone
-          ? const Icon(Icons.check, size: 16, color: Colors.white)
-          : Text(
-              '${index + 1}',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: isCurrent ? Colors.white : AppColors.textTertiary,
-              ),
-            ),
-    );
-  }
-}
-
-class _Connector extends StatelessWidget {
-  final bool done;
-
-  const _Connector({required this.done});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 2,
-      margin: const EdgeInsets.symmetric(horizontal: 6),
-      decoration: BoxDecoration(
-        color: done ? AppColors.primary600 : const Color(0xFFE0E0E0),
-        borderRadius: BorderRadius.circular(2),
       ),
     );
   }
@@ -545,35 +494,11 @@ class _TypePill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return AppChoiceChip(
+      label: label,
+      selected: selected,
       onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: selected ? const Color(0xFF2196F3) : const Color(0xFFF5F5F5),
-          borderRadius: BorderRadius.circular(24),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              selected ? Icons.radio_button_checked : Icons.radio_button_off,
-              size: 14,
-              color: selected ? Colors.white : AppColors.textTertiary,
-            ),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: selected ? Colors.white : AppColors.textPrimary,
-              ),
-            ),
-          ],
-        ),
-      ),
+      showRadio: true,
     );
   }
 }
@@ -1196,8 +1121,8 @@ class _FormSection extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFF5F5F5),
-        borderRadius: BorderRadius.circular(16),
+        color: CupertinoColors.white,
+        borderRadius: BorderRadius.circular(24),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1240,30 +1165,11 @@ class _TextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
+    return AppTextField(
       controller: controller,
+      placeholder: hint,
       maxLines: maxLines,
-      style: const TextStyle(fontSize: 14, color: AppColors.textPrimary),
-      decoration: InputDecoration(
-        hintText: hint,
-        hintStyle: const TextStyle(color: Color(0xFFB0B4B1), fontSize: 14),
-        filled: true,
-        fillColor: Colors.white,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey.shade300),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey.shade300),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.primary600, width: 1.5),
-        ),
-      ),
+      minLines: maxLines > 1 ? maxLines : null,
     );
   }
 }

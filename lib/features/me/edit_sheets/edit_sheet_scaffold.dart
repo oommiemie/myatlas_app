@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 
@@ -29,18 +31,28 @@ class EditSheetScaffold extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.only(top: MediaQuery.paddingOf(context).top + 10),
       child: ClipRRect(
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
-        ),
-        child: Container(
-          color: const Color(0xFFF2F2F7),
-          child: SafeArea(
-            top: false,
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
+        borderRadius:
+            const BorderRadius.vertical(top: Radius.circular(38)),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 28, sigmaY: 28),
+          child: Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8F8FA).withValues(alpha: 0.92),
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(38)),
+              border: Border(
+                top: BorderSide(
+                  color: CupertinoColors.white.withValues(alpha: 0.35),
+                  width: 0.5,
+                ),
+              ),
+            ),
+            child: SafeArea(
+              top: false,
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                   child: Row(
@@ -106,7 +118,8 @@ class EditSheetScaffold extends StatelessWidget {
                     child: child,
                   ),
                 ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 
 import '../../../core/widgets/liquid_glass_button.dart';
+import '../../../core/widgets/press_effect.dart';
 import 'opd_create_flow.dart';
 import 'opd_data.dart';
 
@@ -160,24 +161,34 @@ class _OpdRegistryScreenState extends State<OpdRegistryScreen>
                           if (active.isEmpty)
                             _stagger(
                               0,
-                              2,
+                              3,
                               Padding(
-                                padding: const EdgeInsets.all(16),
-                                child: _EmptyActiveCard(onTap: _addEntry),
+                                padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+                                child: _HeroCtaCard(onTap: _addEntry),
                               ),
                             )
                           else
                             _stagger(
                               0,
-                              2,
+                              3,
                               Padding(
                                 padding: const EdgeInsets.all(16),
                                 child: _ActiveCard(entry: active.first),
                               ),
                             ),
+                          if (active.isEmpty)
+                            _stagger(
+                              1,
+                              3,
+                              const Padding(
+                                padding:
+                                    EdgeInsets.fromLTRB(16, 4, 16, 16),
+                                child: _StepsStrip(),
+                              ),
+                            ),
                           _stagger(
-                            1,
                             2,
+                            3,
                             Padding(
                               padding:
                                   const EdgeInsets.fromLTRB(16, 0, 16, 8),
@@ -185,33 +196,20 @@ class _OpdRegistryScreenState extends State<OpdRegistryScreen>
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   const Padding(
-                                    padding: EdgeInsets.only(bottom: 8),
+                                    padding:
+                                        EdgeInsets.fromLTRB(4, 4, 0, 10),
                                     child: Text(
                                       'ประวัติ',
                                       style: TextStyle(
                                         color: Color(0xFF1A1A1A),
                                         fontSize: 16,
                                         fontWeight: FontWeight.w700,
+                                        letterSpacing: 0.2,
                                       ),
                                     ),
                                   ),
                                   if (history.isEmpty)
-                                    Container(
-                                      padding: const EdgeInsets.all(24),
-                                      decoration: BoxDecoration(
-                                        color: CupertinoColors.white,
-                                        borderRadius:
-                                            BorderRadius.circular(24),
-                                      ),
-                                      alignment: Alignment.center,
-                                      child: const Text(
-                                        'ยังไม่มีประวัติ',
-                                        style: TextStyle(
-                                          color: Color(0xFF6D756E),
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                    )
+                                    const _EmptyHistoryCard()
                                   else
                                     for (int i = 0;
                                         i < history.length;
@@ -238,60 +236,329 @@ class _OpdRegistryScreenState extends State<OpdRegistryScreen>
   }
 }
 
-class _EmptyActiveCard extends StatelessWidget {
-  const _EmptyActiveCard({required this.onTap});
+class _HeroCtaCard extends StatelessWidget {
+  const _HeroCtaCard({required this.onTap});
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoButton(
-      padding: EdgeInsets.zero,
-      onPressed: onTap,
+    return PressEffect(
+      onTap: onTap,
+      haptic: HapticKind.medium,
+      scale: 0.98,
+      borderRadius: BorderRadius.circular(28),
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 20),
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
         decoration: BoxDecoration(
-          color: CupertinoColors.white,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: const Color(0xFF0891B2).withValues(alpha: 0.3),
-            width: 1.5,
-            style: BorderStyle.solid,
+          borderRadius: BorderRadius.circular(28),
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF0891B2), Color(0xFF0369A1)],
           ),
-        ),
-        child: Column(
-          children: [
-            Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF0891B2), Color(0xFF0369A1)],
-                ),
-              ),
-              alignment: Alignment.center,
-              child: const Icon(
-                CupertinoIcons.plus,
-                color: CupertinoColors.white,
-                size: 28,
-              ),
-            ),
-            const SizedBox(height: 12),
-            const Text(
-              'ลงทะเบียน OPD',
-              style: TextStyle(
-                color: Color(0xFF1A1A1A),
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 4),
-            const Text(
-              'กรอกข้อมูลคัดกรองเพื่อขอ QR Code',
-              style: TextStyle(color: Color(0xFF6D756E), fontSize: 13),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF0369A1).withValues(alpha: 0.3),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
             ),
           ],
         ),
+        child: Stack(
+          children: [
+            Positioned(
+              right: -20,
+              top: -30,
+              child: Container(
+                width: 140,
+                height: 140,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: CupertinoColors.white.withValues(alpha: 0.08),
+                ),
+              ),
+            ),
+            Positioned(
+              right: -40,
+              bottom: -50,
+              child: Container(
+                width: 120,
+                height: 120,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: CupertinoColors.white.withValues(alpha: 0.06),
+                ),
+              ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: CupertinoColors.white.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(100),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            CupertinoIcons.sparkles,
+                            size: 12,
+                            color: CupertinoColors.white,
+                          ),
+                          SizedBox(width: 5),
+                          Text(
+                            'เริ่มต้นใช้งาน',
+                            style: TextStyle(
+                              color: CupertinoColors.white,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.3,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'ลงทะเบียน OPD',
+                            style: TextStyle(
+                              color: CupertinoColors.white,
+                              fontSize: 22,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: -0.2,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            'คัดกรองด้วยตัวเอง\nรับ QR Code ยื่นที่โรงพยาบาลได้เลย',
+                            style: TextStyle(
+                              color: CupertinoColors.white
+                                  .withValues(alpha: 0.85),
+                              fontSize: 13,
+                              height: 1.45,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      width: 56,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: CupertinoColors.white.withValues(alpha: 0.2),
+                        border: Border.all(
+                          color: CupertinoColors.white.withValues(alpha: 0.4),
+                          width: 1,
+                        ),
+                      ),
+                      alignment: Alignment.center,
+                      child: const Icon(
+                        CupertinoIcons.qrcode,
+                        color: CupertinoColors.white,
+                        size: 28,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 14, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: CupertinoColors.white,
+                    borderRadius: BorderRadius.circular(100),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'เริ่มลงทะเบียน',
+                        style: TextStyle(
+                          color: Color(0xFF0369A1),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.2,
+                        ),
+                      ),
+                      SizedBox(width: 6),
+                      Icon(
+                        CupertinoIcons.arrow_right,
+                        size: 14,
+                        color: Color(0xFF0369A1),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _StepsStrip extends StatelessWidget {
+  const _StepsStrip();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+      decoration: BoxDecoration(
+        color: CupertinoColors.white,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: const Row(
+        children: [
+          Expanded(
+            child: _StepItem(
+              icon: CupertinoIcons.square_list_fill,
+              color: Color(0xFF1D8B6B),
+              label: 'คัดกรอง\nด้วยตนเอง',
+            ),
+          ),
+          _StepArrow(),
+          Expanded(
+            child: _StepItem(
+              icon: CupertinoIcons.qrcode,
+              color: Color(0xFF0891B2),
+              label: 'รับ\nQR Code',
+            ),
+          ),
+          _StepArrow(),
+          Expanded(
+            child: _StepItem(
+              icon: CupertinoIcons.building_2_fill,
+              color: Color(0xFFFB923C),
+              label: 'ยื่นที่\nโรงพยาบาล',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StepItem extends StatelessWidget {
+  const _StepItem({
+    required this.icon,
+    required this.color,
+    required this.label,
+  });
+  final IconData icon;
+  final Color color;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: color.withValues(alpha: 0.12),
+          ),
+          alignment: Alignment.center,
+          child: Icon(icon, size: 18, color: color),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          label,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            color: Color(0xFF1A1A1A),
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            height: 1.3,
+            letterSpacing: 0.1,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _StepArrow extends StatelessWidget {
+  const _StepArrow();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 18),
+      child: Icon(
+        CupertinoIcons.chevron_right,
+        size: 12,
+        color: const Color(0xFF1A1A1A).withValues(alpha: 0.3),
+      ),
+    );
+  }
+}
+
+class _EmptyHistoryCard extends StatelessWidget {
+  const _EmptyHistoryCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 20),
+      decoration: BoxDecoration(
+        color: CupertinoColors.white,
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Column(
+        children: [
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: const Color(0xFF1A1A1A).withValues(alpha: 0.04),
+            ),
+            alignment: Alignment.center,
+            child: Icon(
+              CupertinoIcons.doc_text_search,
+              size: 26,
+              color: const Color(0xFF1A1A1A).withValues(alpha: 0.4),
+            ),
+          ),
+          const SizedBox(height: 12),
+          const Text(
+            'ยังไม่มีประวัติ',
+            style: TextStyle(
+              color: Color(0xFF1A1A1A),
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 4),
+          const Text(
+            'ประวัติลงทะเบียน OPD จะแสดงที่นี่',
+            style: TextStyle(
+              color: Color(0xFF6D756E),
+              fontSize: 13,
+              height: 1.4,
+            ),
+          ),
+        ],
       ),
     );
   }

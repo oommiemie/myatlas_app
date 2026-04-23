@@ -5,7 +5,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Icons;
 
 import '../../core/theme/app_typography.dart';
+import '../../core/widgets/app_toast.dart';
 import '../../core/widgets/liquid_glass_button.dart';
+import 'widgets/add_vital_sign_sheet.dart';
 
 class BloodPressureDetailScreen extends StatefulWidget {
   const BloodPressureDetailScreen({super.key});
@@ -150,7 +152,29 @@ class _BloodPressureDetailScreenState
               children: [
                 _TopBar(
                   onBack: () => Navigator.of(context).pop(),
-                  onAdd: () {},
+                  onAdd: () async {
+                    final result = await showAddVitalSignSheet(
+                      context,
+                      title: 'เพิ่มความดันโลหิต',
+                      icon: CupertinoIcons.heart_fill,
+                      color: const Color(0xFFBE123C),
+                      fields: const [
+                        VitalFieldConfig(
+                          label: 'ค่าบน (Systolic)',
+                          placeholder: '120',
+                          unit: 'mmHg',
+                        ),
+                        VitalFieldConfig(
+                          label: 'ค่าล่าง (Diastolic)',
+                          placeholder: '80',
+                          unit: 'mmHg',
+                        ),
+                      ],
+                    );
+                    if (result != null && context.mounted) {
+                      AppToast.success(context, 'บันทึกค่าความดันแล้ว');
+                    }
+                  },
                 ),
                 Expanded(
                   child: Container(
@@ -1236,15 +1260,15 @@ class _BpInfoSheet extends StatelessWidget {
         padding: EdgeInsets.only(top: topInset + 10),
         child: ClipRRect(
           borderRadius:
-              const BorderRadius.vertical(top: Radius.circular(28)),
+              const BorderRadius.vertical(top: Radius.circular(38)),
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 28, sigmaY: 28),
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: const Color(0xFFF4F8F5).withValues(alpha: 0.92),
+                color: const Color(0xFFF8F8FA).withValues(alpha: 0.92),
                 border: Border(
                   top: BorderSide(
-                    color: CupertinoColors.white.withValues(alpha: 0.7),
+                    color: CupertinoColors.white.withValues(alpha: 0.35),
                     width: 0.5,
                   ),
                 ),
