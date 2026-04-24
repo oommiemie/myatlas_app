@@ -6,6 +6,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../core/theme/app_typography.dart';
 import '../../core/widgets/liquid_glass_button.dart';
 import '../../core/widgets/press_effect.dart';
+import '../appointment/appointment_screen.dart';
 import 'allergy_screen.dart';
 import 'behavior_screen.dart';
 import 'chronic_disease_screen.dart';
@@ -132,14 +133,19 @@ class _MeScreenState extends State<MeScreen>
                 _stagger(
                   2,
                   5,
-                  const _MenuSection(
+                  _MenuSection(
                     title: 'นัดหมาย',
                     items: [
                       _MenuEntry(
-                        iconColor: Color(0xFF1D8B6B),
+                        iconColor: const Color(0xFF1D8B6B),
                         icon: CupertinoIcons.calendar,
                         title: 'ใบนัดหมาย',
                         subtitle: 'นัดหมายจากแพทย์และนัดหมายเยี่ยมบ้าน',
+                        onTap: () => Navigator.of(context).push(
+                          CupertinoPageRoute(
+                            builder: (_) => const AppointmentScreen(),
+                          ),
+                        ),
                       ),
                     ],
                   ),

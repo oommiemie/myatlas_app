@@ -4,6 +4,10 @@ class ThaiDate {
     'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม',
   ];
 
+  static const _weekdaysFull = [
+    'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์', 'อาทิตย์',
+  ];
+
   static String format(DateTime date) {
     return '${date.day} ${_monthsFull[date.month - 1]} ${date.year + 543}';
   }
@@ -14,4 +18,8 @@ class ThaiDate {
     final yy = ((date.year + 543) % 100).toString().padLeft(2, '0');
     return '$dd/$mm/$yy';
   }
+
+  static String monthName(int month) => _monthsFull[month - 1];
+
+  static String weekdayName(DateTime date) => _weekdaysFull[date.weekday - 1];
 }

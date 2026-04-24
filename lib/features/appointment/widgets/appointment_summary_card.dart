@@ -1,28 +1,24 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
-import 'add_medicine_sheet.dart';
 
-class SummaryCard extends StatelessWidget {
-  final int morningCount;
-  final int dayCount;
-  final int eveningCount;
-  final int bedtimeCount;
+class AppointmentSummaryCard extends StatelessWidget {
+  final int soonCount;
+  final int weekCount;
+  final int monthCount;
 
-  const SummaryCard({
+  const AppointmentSummaryCard({
     super.key,
-    required this.morningCount,
-    required this.dayCount,
-    required this.eveningCount,
-    required this.bedtimeCount,
+    required this.soonCount,
+    required this.weekCount,
+    required this.monthCount,
   });
 
   @override
   Widget build(BuildContext context) {
     final items = [
-      _SummaryItem(label: 'เช้า', count: morningCount),
-      _SummaryItem(label: 'กลางวัน', count: dayCount),
-      _SummaryItem(label: 'เย็น', count: eveningCount),
-      _SummaryItem(label: 'ก่อนนอน', count: bedtimeCount),
+      _SummaryItem(label: 'เร็วๆนี้', count: soonCount),
+      _SummaryItem(label: '1 สัปดาห์', count: weekCount),
+      _SummaryItem(label: '1 เดือน', count: monthCount),
     ];
     return Container(
       padding: const EdgeInsets.all(16),
@@ -47,13 +43,6 @@ class SummaryCard extends StatelessWidget {
               const SizedBox(width: 8),
             ],
           ],
-          const Spacer(),
-          Builder(
-            builder: (context) => _LiquidGlassButton(
-              onTap: () => showAddMedicineSheet(context),
-              child: const Icon(Icons.add, size: 20, color: AppColors.textPrimary),
-            ),
-          ),
         ],
       ),
     );
@@ -104,31 +93,6 @@ class _SummaryItem extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _LiquidGlassButton extends StatelessWidget {
-  final Widget child;
-  final VoidCallback onTap;
-
-  const _LiquidGlassButton({required this.child, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.65),
-          borderRadius: BorderRadius.circular(296),
-          border: Border.all(color: AppColors.borderDefault, width: 1),
-        ),
-        alignment: Alignment.center,
-        child: child,
-      ),
     );
   }
 }
