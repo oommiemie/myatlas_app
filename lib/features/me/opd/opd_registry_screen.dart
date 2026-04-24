@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 
 import '../../../core/widgets/liquid_glass_button.dart';
 import '../../../core/widgets/press_effect.dart';
+import '../../health/widgets/health_detail_app_bar.dart';
 import 'opd_create_flow.dart';
 import 'opd_data.dart';
 
@@ -89,49 +90,15 @@ class _OpdRegistryScreenState extends State<OpdRegistryScreen>
             top: 0,
             left: 0,
             right: 0,
-            height: 200,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [Color(0xFFFB923C), Color(0xFFC2410C)],
-                ),
-              ),
-            ),
+            height: 180,
+            child: DetailHeaderBackground(),
           ),
-          Column(
+          SafeArea(
+            bottom: false,
+            child: Column(
             children: [
-              SafeArea(
-                bottom: false,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-                  child: Row(
-                    children: [
-                      LiquidGlassButton(
-                        icon: CupertinoIcons.chevron_back,
-                        iconColor: const Color(0xFF1A1A1A),
-                        onTap: () => Navigator.of(context).pop(),
-                      ),
-                      const SizedBox(width: 10),
-                      const Expanded(
-                        child: Text(
-                          'OPD Registry',
-                          style: TextStyle(
-                            color: CupertinoColors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                      LiquidGlassButton(
-                        icon: CupertinoIcons.plus,
-                        iconColor: const Color(0xFF1A1A1A),
-                        onTap: _addEntry,
-                      ),
-                    ],
-                  ),
-                ),
+              const SizedBox(
+                height: HealthDetailAppBar.safeAreaContentHeight,
               ),
               Expanded(
                 child: Container(
@@ -152,7 +119,15 @@ class _OpdRegistryScreenState extends State<OpdRegistryScreen>
                       final history = entries
                           .where((e) => e.status != OpdStatus.active)
                           .toList();
-                      return ListView(
+                      return NotificationListener<ScrollNotification>(
+                        onNotification: (n) {
+                          if (n is ScrollUpdateNotification ||
+                              n is ScrollStartNotification) {
+                            _scrollOffset.value = n.metrics.pixels;
+                          }
+                          return false;
+                        },
+                        child: ListView(
                         physics: const BouncingScrollPhysics(
                           parent: AlwaysScrollableScrollPhysics(),
                         ),
@@ -223,12 +198,33 @@ class _OpdRegistryScreenState extends State<OpdRegistryScreen>
                             ),
                           ),
                         ],
+                        ),
                       );
                     },
                   ),
                 ),
               ),
             ],
+            ),
+          ),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: ValueListenableBuilder<double>(
+              valueListenable: _scrollOffset,
+              builder: (_, offset, __) => HealthDetailAppBar(
+                title: 'OPD Registry',
+                scrollOffset: offset,
+                onBack: () => Navigator.of(context).pop(),
+                action: LiquidGlassButton(
+                  icon: CupertinoIcons.plus,
+                  onTap: _addEntry,
+                  size: 40,
+                  iconSize: 18,
+                ),
+              ),
+            ),
           ),
         ],
       ),

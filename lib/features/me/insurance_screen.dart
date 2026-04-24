@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 
-import '../../core/widgets/liquid_glass_button.dart';
+import '../health/widgets/health_detail_app_bar.dart';
 
 enum _DotIcon { plus, letterN, info, briefcase, crossCase, calendar }
 
@@ -72,6 +72,7 @@ class InsuranceScreen extends StatefulWidget {
 class _InsuranceScreenState extends State<InsuranceScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController _enter;
+  final ValueNotifier<double> _scrollOffset = ValueNotifier<double>(0);
 
   @override
   void initState() {
@@ -86,6 +87,7 @@ class _InsuranceScreenState extends State<InsuranceScreen>
   @override
   void dispose() {
     _enter.dispose();
+    _scrollOffset.dispose();
     super.dispose();
   }
 
@@ -124,69 +126,66 @@ class _InsuranceScreenState extends State<InsuranceScreen>
             top: 0,
             left: 0,
             right: 0,
-            height: 200,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [Color(0xFF2BB892), Color(0xFF12624A)],
-                ),
-              ),
-            ),
+            height: 180,
+            child: DetailHeaderBackground(),
           ),
-          Column(
-            children: [
-              SafeArea(
-                bottom: false,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-                  child: Row(
-                    children: [
-                      LiquidGlassButton(
-                        icon: CupertinoIcons.chevron_back,
-                        iconColor: const Color(0xFF1A1A1A),
-                        onTap: () => Navigator.of(context).pop(),
+          SafeArea(
+            bottom: false,
+            child: Column(
+              children: [
+                const SizedBox(
+                  height: HealthDetailAppBar.safeAreaContentHeight,
+                ),
+                Expanded(
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFF4F8F5),
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(24),
+                        topRight: Radius.circular(24),
                       ),
-                      const SizedBox(width: 10),
-                      const Text(
-                        'สิทธิการรักษา/ประกัน',
-                        style: TextStyle(
-                          color: CupertinoColors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: NotificationListener<ScrollNotification>(
+                      onNotification: (n) {
+                        if (n is ScrollUpdateNotification ||
+                            n is ScrollStartNotification) {
+                          _scrollOffset.value = n.metrics.pixels;
+                        }
+                        return false;
+                      },
+                      child: ListView.separated(
+                        physics: const BouncingScrollPhysics(
+                          parent: AlwaysScrollableScrollPhysics(),
+                        ),
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 40),
+                        itemCount: items.length,
+                        separatorBuilder: (_, __) =>
+                            const SizedBox(height: 16),
+                        itemBuilder: (context, i) => _stagger(
+                          i,
+                          items.length,
+                          _PlanCard(plan: items[i]),
                         ),
                       ),
-                    ],
-                  ),
-                ),
-              ),
-              Expanded(
-                child: Container(
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFF4F8F5),
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(24),
-                      topRight: Radius.circular(24),
-                    ),
-                  ),
-                  clipBehavior: Clip.antiAlias,
-                  child: ListView.separated(
-                    physics: const BouncingScrollPhysics(
-                      parent: AlwaysScrollableScrollPhysics(),
-                    ),
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 40),
-                    itemCount: items.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 16),
-                    itemBuilder: (context, i) => _stagger(
-                      i,
-                      items.length,
-                      _PlanCard(plan: items[i]),
                     ),
                   ),
                 ),
+              ],
+            ),
+          ),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: ValueListenableBuilder<double>(
+              valueListenable: _scrollOffset,
+              builder: (_, offset, __) => HealthDetailAppBar(
+                title: 'สิทธิการรักษา/ประกัน',
+                scrollOffset: offset,
+                onBack: () => Navigator.of(context).pop(),
               ),
-            ],
+            ),
           ),
         ],
       ),
