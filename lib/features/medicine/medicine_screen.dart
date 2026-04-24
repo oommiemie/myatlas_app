@@ -23,14 +23,18 @@ class MedicineScreen extends StatefulWidget {
 }
 
 class _MedicineScreenState extends State<MedicineScreen> {
-  // Hysteresis: collapse only after significant scroll, expand only at top
+  // Collapse after significant downward scroll; expand as soon as user reverses
+  // direction (iOS-Safari-style reverse-scroll reveal).
   static const double _collapseThreshold = 40.0;
-  static const double _expandThreshold = 0.0;
+  static const double _reverseScrollDelta = 6.0;
 
   int _selectedTab = 0;
   TimePeriod _selectedPeriod = TimePeriod.morning;
   final ScrollController _scrollController = ScrollController();
   bool _headerCollapsed = false;
+  double _lastOffset = 0.0;
+  DateTime _lastToggleTime = DateTime.fromMillisecondsSinceEpoch(0);
+  static const Duration _toggleCooldown = Duration(milliseconds: 320);
   DateTime _selectedDate = DateTime(2026, 4, 21);
 
   @override
@@ -55,15 +59,29 @@ class _MedicineScreenState extends State<MedicineScreen> {
   void _handleScroll() {
     if (!_scrollController.hasClients) return;
     final offset = _scrollController.offset;
-    if (!_headerCollapsed) {
-      if (offset > _collapseThreshold) {
-        setState(() => _headerCollapsed = true);
-      }
-    } else {
-      if (offset <= _expandThreshold) {
+    final delta = offset - _lastOffset;
+    final sinceLastToggle = DateTime.now().difference(_lastToggleTime);
+    final cooledDown = sinceLastToggle >= _toggleCooldown;
+
+    if (offset <= 0) {
+      if (_headerCollapsed) {
+        _lastToggleTime = DateTime.now();
         setState(() => _headerCollapsed = false);
       }
+    } else if (cooledDown &&
+        !_headerCollapsed &&
+        delta > 0 &&
+        offset > _collapseThreshold) {
+      _lastToggleTime = DateTime.now();
+      setState(() => _headerCollapsed = true);
+    } else if (cooledDown &&
+        _headerCollapsed &&
+        delta < -_reverseScrollDelta) {
+      _lastToggleTime = DateTime.now();
+      setState(() => _headerCollapsed = false);
     }
+
+    _lastOffset = offset;
   }
 
   void _onTabChanged(int i) {
@@ -96,11 +114,7 @@ class _MedicineScreenState extends State<MedicineScreen> {
   void _onPeriodSelected(TimePeriod p) {
     setState(() {
       _selectedPeriod = p;
-      _headerCollapsed = false;
     });
-    if (_scrollController.hasClients) {
-      _scrollController.jumpTo(0);
-    }
   }
 
   @override
@@ -110,81 +124,86 @@ class _MedicineScreenState extends State<MedicineScreen> {
         ? AppColors.primary400
         : TimePeriodTheme.of(_selectedPeriod).backgroundColor;
     final statusBarHeight = MediaQuery.of(context).padding.top;
+    const duration = Duration(milliseconds: 260);
+    const curve = Curves.easeOutCubic;
+
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 220),
-      curve: Curves.easeOut,
+      duration: duration,
+      curve: curve,
       color: _headerCollapsed ? currentColor : AppColors.bgPrimary,
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        body: Stack(
+        body: Column(
           children: [
-            Column(
-              children: [
-                AnimatedSize(
-                  duration: const Duration(milliseconds: 220),
-                  curve: Curves.easeOut,
-                  alignment: Alignment.bottomCenter,
-                  child: _headerCollapsed
-                      ? const SizedBox(width: double.infinity, height: 0)
-                      : Padding(
-                          padding: EdgeInsets.only(top: statusBarHeight),
-                          child: MedicineHeader(
-                            selectedTab: _selectedTab,
-                            onTabChanged: _onTabChanged,
-                          ),
-                        ),
-                ),
-                Expanded(
-                  child: ClipRRect(
-                    borderRadius: _headerCollapsed
-                        ? BorderRadius.zero
-                        : const BorderRadius.only(
-                            topLeft: Radius.circular(24),
-                            topRight: Radius.circular(24),
-                          ),
-                    child: Stack(
-                      clipBehavior: Clip.hardEdge,
-                      children: [
-                        Positioned.fill(
-                          child: isPrescription
-                              ? const ColoredBox(color: AppColors.primary400)
-                              : TimePeriodBackground(period: _selectedPeriod),
-                        ),
-                        AnimatedPositioned(
-                          duration: const Duration(milliseconds: 220),
-                          curve: Curves.easeOut,
-                          top: _headerCollapsed ? statusBarHeight + 16 : 16,
-                          left: 0,
-                          right: 0,
-                          child: DateBanner(
-                            date: _selectedDate,
-                            onTapChip: () => _showDatePicker(context),
-                          ),
-                        ),
-                        AnimatedPositioned(
-                          duration: const Duration(milliseconds: 220),
-                          curve: Curves.easeOut,
-                          top: _headerCollapsed ? statusBarHeight + 81 : 81,
-                          left: 0,
-                          right: 0,
-                          bottom: 0,
-                          child: isPrescription
-                              ? _PrescriptionContent(
-                                  scrollController: _scrollController,
-                                  date: _selectedDate,
-                                )
-                              : _MedicineListContent(
-                                  selectedPeriod: _selectedPeriod,
-                                  onSelectPeriod: _onPeriodSelected,
-                                  scrollController: _scrollController,
-                                  date: _selectedDate,
-                                ),
-                        ),
-                      ],
+            AnimatedSize(
+              duration: duration,
+              curve: curve,
+              alignment: Alignment.topCenter,
+              child: _headerCollapsed
+                  ? const SizedBox(width: double.infinity, height: 0)
+                  : Padding(
+                      padding: EdgeInsets.only(top: statusBarHeight),
+                      child: MedicineHeader(
+                        selectedTab: _selectedTab,
+                        onTabChanged: _onTabChanged,
+                      ),
                     ),
-                  ),
+            ),
+            Expanded(
+              child: TweenAnimationBuilder<double>(
+                duration: duration,
+                curve: curve,
+                tween: Tween(end: _headerCollapsed ? 0.0 : 24.0),
+                builder: (context, radius, child) {
+                  return ClipRRect(
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(radius),
+                      topRight: Radius.circular(radius),
+                    ),
+                    child: child,
+                  );
+                },
+                child: Stack(
+                  clipBehavior: Clip.hardEdge,
+                  children: [
+                    Positioned.fill(
+                      child: isPrescription
+                          ? const ColoredBox(color: AppColors.primary400)
+                          : TimePeriodBackground(period: _selectedPeriod),
+                    ),
+                    AnimatedPositioned(
+                      duration: duration,
+                      curve: curve,
+                      top: _headerCollapsed ? statusBarHeight + 16 : 16,
+                      left: 0,
+                      right: 0,
+                      child: DateBanner(
+                        date: _selectedDate,
+                        onTapChip: () => _showDatePicker(context),
+                      ),
+                    ),
+                    AnimatedPositioned(
+                      duration: duration,
+                      curve: curve,
+                      top: _headerCollapsed ? statusBarHeight + 81 : 81,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      child: isPrescription
+                          ? _PrescriptionContent(
+                              scrollController: _scrollController,
+                              date: _selectedDate,
+                            )
+                          : _MedicineListContent(
+                              selectedPeriod: _selectedPeriod,
+                              onSelectPeriod: _onPeriodSelected,
+                              scrollController: _scrollController,
+                              date: _selectedDate,
+                            ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ],
         ),

@@ -1,15 +1,17 @@
 import 'dart:ui';
 
-import 'package:flutter/cupertino.dart' show CupertinoColors;
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/thai_date.dart';
 import '../../../core/widgets/app_chip.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../../../core/widgets/app_toast.dart';
+import '../../../core/widgets/press_effect.dart';
 
 enum _MealSlot { morning, day, evening, bedtime }
+
+enum _FoodTiming { before, after }
 
 Future<void> showAddMedicineSheet(BuildContext context) {
   return showModalBottomSheet<void>(
@@ -41,6 +43,7 @@ class _AddMedicineSheetState extends State<AddMedicineSheet> {
   // Step 2 fields
   final Set<int> _days = {1};
   final Set<_MealSlot> _selectedMeals = {_MealSlot.morning};
+  _FoodTiming? _foodTiming = _FoodTiming.before;
   DateTime? _rangeStart;
   DateTime? _rangeEnd;
 
@@ -180,6 +183,8 @@ class _AddMedicineSheetState extends State<AddMedicineSheet> {
           selectedMeals: _selectedMeals,
           mealTimes: _mealDefaultTimes,
           onMealToggle: _toggleMeal,
+          foodTiming: _foodTiming,
+          onFoodTimingChange: (t) => setState(() => _foodTiming = t),
           rangeStart: _rangeStart,
           rangeEnd: _rangeEnd,
           onRangeChange: (s, e) => setState(() {
@@ -593,6 +598,8 @@ class _ScheduleForm extends StatelessWidget {
   final Set<_MealSlot> selectedMeals;
   final Map<_MealSlot, TimeOfDay> mealTimes;
   final ValueChanged<_MealSlot> onMealToggle;
+  final _FoodTiming? foodTiming;
+  final ValueChanged<_FoodTiming?> onFoodTimingChange;
   final DateTime? rangeStart;
   final DateTime? rangeEnd;
   final void Function(DateTime?, DateTime?) onRangeChange;
@@ -603,10 +610,17 @@ class _ScheduleForm extends StatelessWidget {
     required this.selectedMeals,
     required this.mealTimes,
     required this.onMealToggle,
+    required this.foodTiming,
+    required this.onFoodTimingChange,
     required this.rangeStart,
     required this.rangeEnd,
     required this.onRangeChange,
   });
+
+  bool get _showFoodTiming =>
+      selectedMeals.contains(_MealSlot.morning) ||
+      selectedMeals.contains(_MealSlot.day) ||
+      selectedMeals.contains(_MealSlot.evening);
 
   static const _dayLabels = ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'];
 
@@ -665,6 +679,29 @@ class _ScheduleForm extends StatelessWidget {
             ),
           ],
         ),
+        if (_showFoodTiming) ...[
+          const SizedBox(height: 12),
+          _FormSection(
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _FoodTimingChip(
+                    label: 'ก่อนอาหาร',
+                    selected: foodTiming == _FoodTiming.before,
+                    onTap: () => onFoodTimingChange(_FoodTiming.before),
+                  ),
+                  const SizedBox(width: 8),
+                  _FoodTimingChip(
+                    label: 'หลังอาหาร',
+                    selected: foodTiming == _FoodTiming.after,
+                    onTap: () => onFoodTimingChange(_FoodTiming.after),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
         const SizedBox(height: 12),
         _FormSection(
           children: [
@@ -1200,7 +1237,11 @@ class _MealTimeQuadrants extends StatelessWidget {
       child: LayoutBuilder(
         builder: (context, constraints) {
           final size = constraints.biggest.shortestSide;
-          final pillOffset = size * 0.05;
+          // Pills anchor their inner edge at `centerAnchor` from the opposite
+          // outer edge so morning/bedtime right-edges align, noon/evening
+          // left-edges align, and the spacing is symmetric around the center
+          // divider. Matches behavior_screen's 160/300 scheme.
+          final centerAnchor = size * 0.533;
           return Stack(
             clipBehavior: Clip.none,
             children: [
@@ -1253,9 +1294,8 @@ class _MealTimeQuadrants extends StatelessWidget {
                   ],
                 ),
               ),
-              // Pills — positioned at each quadrant's center, tap to toggle
               Positioned(
-                left: pillOffset,
+                right: centerAnchor,
                 top: size * 0.2,
                 child: _MealPill(
                   label: 'มื้อเช้า',
@@ -1265,7 +1305,7 @@ class _MealTimeQuadrants extends StatelessWidget {
                 ),
               ),
               Positioned(
-                right: pillOffset,
+                left: centerAnchor,
                 top: size * 0.2,
                 child: _MealPill(
                   label: 'มื้อกลางวัน',
@@ -1275,7 +1315,7 @@ class _MealTimeQuadrants extends StatelessWidget {
                 ),
               ),
               Positioned(
-                left: pillOffset,
+                right: centerAnchor,
                 bottom: size * 0.2,
                 child: _MealPill(
                   label: 'เวลานอน',
@@ -1285,7 +1325,7 @@ class _MealTimeQuadrants extends StatelessWidget {
                 ),
               ),
               Positioned(
-                right: pillOffset,
+                left: centerAnchor,
                 bottom: size * 0.2,
                 child: _MealPill(
                   label: 'มื้อเย็น',
@@ -1365,21 +1405,8 @@ class _QuadrantBg extends StatelessWidget {
             return Stack(
               clipBehavior: Clip.hardEdge,
               children: [
-                // Stars band at top of bedtime/evening
-                // Per Figma: (11, 10) 128x40 in 150 quadrant
-                if (type == _MealSlot.bedtime || type == _MealSlot.evening)
-                  Positioned(
-                    top: size.height * 0.067,
-                    left: size.width * 0.073,
-                    width: size.width * 0.855,
-                    height: size.height * 0.264,
-                    child: SvgPicture.asset(
-                      type == _MealSlot.bedtime
-                          ? 'assets/svg/meal_stars_bedtime.svg'
-                          : 'assets/svg/meal_stars_evening.svg',
-                      fit: BoxFit.contain,
-                    ),
-                  ),
+                if (type == _MealSlot.bedtime)
+                  const Positioned.fill(child: _NightStars()),
                 Positioned(
                   left: glowLeft,
                   top: glowTop,
@@ -1396,62 +1423,216 @@ class _QuadrantBg extends StatelessWidget {
   }
 }
 
-class _SunMoonGlow extends StatelessWidget {
+class _SunMoonGlow extends StatefulWidget {
   final _MealSlot type;
 
   const _SunMoonGlow({required this.type});
 
   @override
+  State<_SunMoonGlow> createState() => _SunMoonGlowState();
+}
+
+class _SunMoonGlowState extends State<_SunMoonGlow>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) => _ctrl.forward());
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // Per Figma: outer 70, middle 54 (pad 8), inner 34 (pad 10)
-    final Color ring = switch (type) {
+    final Color ring = switch (widget.type) {
       _MealSlot.morning => Colors.white.withValues(alpha: 0.5),
       _MealSlot.day => const Color(0xFFFFFCDB).withValues(alpha: 0.5),
       _MealSlot.evening => const Color(0xFFE3D8F8).withValues(alpha: 0.5),
       _MealSlot.bedtime => Colors.white.withValues(alpha: 0.2),
     };
-    final Color core = switch (type) {
+    final Color ringMid = switch (widget.type) {
+      _MealSlot.morning => Colors.white.withValues(alpha: 0.55),
+      _MealSlot.day => const Color(0xFFFFFCDB).withValues(alpha: 0.55),
+      _MealSlot.evening => const Color(0xFFE3D8F8).withValues(alpha: 0.55),
+      _MealSlot.bedtime => Colors.white.withValues(alpha: 0.28),
+    };
+    final Color core = switch (widget.type) {
       _MealSlot.morning => const Color(0xFFFFFDF0),
       _MealSlot.day => Colors.white,
       _MealSlot.evening => Colors.white,
-      _MealSlot.bedtime => Colors.transparent,
+      _MealSlot.bedtime => Colors.white.withValues(alpha: 0.95),
     };
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Outer frame size is this widget's width (≈ 70 in Figma)
         final outer = constraints.biggest.shortestSide;
-        // Padding 8 in 70 = 11.43%
         final padOuter = outer * 0.1143;
-        // Padding 10 in 54 = 18.52%
-        final middle = outer - padOuter * 2; // ≈ 54
+        final middle = outer - padOuter * 2;
         final padMiddle = middle * 0.1852;
-        // Inner circle size ≈ 34
         final inner = middle - padMiddle * 2;
 
-        return Container(
-          padding: EdgeInsets.all(padOuter),
-          decoration: BoxDecoration(color: ring, shape: BoxShape.circle),
-          child: Container(
-            padding: EdgeInsets.all(padMiddle),
-            decoration: BoxDecoration(color: ring, shape: BoxShape.circle),
-            child: Container(
-              decoration: BoxDecoration(color: core, shape: BoxShape.circle),
-              alignment: Alignment.center,
-              child: type == _MealSlot.bedtime
-                  ? SizedBox(
-                      // Moon SVG 28x30 inside inner 34x34
-                      width: inner * 0.824, // 28/34
-                      height: inner * 0.882, // 30/34
-                      child: SvgPicture.asset(
-                        'assets/svg/meal_moon_crescent.svg',
-                        fit: BoxFit.contain,
-                      ),
-                    )
-                  : null,
-            ),
-          ),
+        return AnimatedBuilder(
+          animation: _ctrl,
+          builder: (_, __) {
+            final t = Curves.easeOutCubic.transform(_ctrl.value);
+            double translateY = 0;
+            double scale = 1;
+            switch (widget.type) {
+              case _MealSlot.morning:
+                translateY = (1 - t) * 40;
+                break;
+              case _MealSlot.day:
+                scale = 0.4 + 0.6 * t;
+                break;
+              case _MealSlot.evening:
+                translateY = -(1 - t) * 40;
+                break;
+              case _MealSlot.bedtime:
+                translateY = (1 - t) * 40;
+                break;
+            }
+            return Opacity(
+              opacity: t,
+              child: Transform.translate(
+                offset: Offset(0, translateY),
+                child: Transform.scale(
+                  scale: scale,
+                  child: Container(
+                    padding: EdgeInsets.all(padOuter),
+                    decoration: BoxDecoration(color: ring, shape: BoxShape.circle),
+                    child: Container(
+                      padding: EdgeInsets.all(padMiddle),
+                      decoration:
+                          BoxDecoration(color: ringMid, shape: BoxShape.circle),
+                      child: widget.type == _MealSlot.bedtime
+                          ? ClipOval(
+                              child: Stack(
+                                children: [
+                                  Positioned.fill(
+                                    child: DecoratedBox(
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: core,
+                                      ),
+                                    ),
+                                  ),
+                                  Positioned(
+                                    left: -inner * 0.18,
+                                    top: -inner * 0.12,
+                                    child: Container(
+                                      width: inner * 0.88,
+                                      height: inner * 0.88,
+                                      decoration: const BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: Color(0xFF0B4A6F),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : DecoratedBox(
+                              decoration: BoxDecoration(
+                                color: core,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
         );
       },
+    );
+  }
+}
+
+class _NightStars extends StatefulWidget {
+  const _NightStars();
+
+  @override
+  State<_NightStars> createState() => _NightStarsState();
+}
+
+class _NightStarsState extends State<_NightStars>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+
+  static const _stars = <({double x, double y, double size, double begin})>[
+    (x: 22, y: 28, size: 2.5, begin: 0.10),
+    (x: 48, y: 12, size: 1.8, begin: 0.20),
+    (x: 82, y: 22, size: 2.2, begin: 0.30),
+    (x: 110, y: 36, size: 1.6, begin: 0.45),
+    (x: 128, y: 60, size: 2.0, begin: 0.55),
+    (x: 14, y: 58, size: 1.6, begin: 0.40),
+    (x: 30, y: 92, size: 1.8, begin: 0.65),
+    (x: 102, y: 88, size: 2.4, begin: 0.70),
+    (x: 132, y: 112, size: 1.6, begin: 0.80),
+    (x: 64, y: 44, size: 1.4, begin: 0.25),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1800),
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) => _ctrl.forward());
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: AnimatedBuilder(
+        animation: _ctrl,
+        builder: (_, __) {
+          final t = _ctrl.value;
+          return Stack(
+            children: [
+              for (final s in _stars)
+                Positioned(
+                  left: s.x,
+                  top: s.y,
+                  child: Opacity(
+                    opacity: ((t - s.begin) / (1 - s.begin)).clamp(0.0, 1.0),
+                    child: Container(
+                      width: s.size,
+                      height: s.size,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.white.withValues(alpha: 0.6),
+                            blurRadius: s.size * 2,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          );
+        },
+      ),
     );
   }
 }
@@ -1471,21 +1652,19 @@ class _MealPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const bg = Color(0x4D000000); // black 30% (matches CSS rgba(0,0,0,0.3))
     const fg = Colors.white;
-    return GestureDetector(
+    return PressEffect(
       onTap: onTap,
+      haptic: HapticKind.selection,
+      scale: 0.94,
+      dim: 0.92,
+      borderRadius: BorderRadius.circular(100),
       child: AnimatedOpacity(
         duration: const Duration(milliseconds: 220),
         opacity: selected ? 1.0 : 0.5,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: DecoratedBox(
           decoration: BoxDecoration(
-            color: bg,
             borderRadius: BorderRadius.circular(100),
-            border: selected
-                ? Border.all(color: AppColors.primary600, width: 2)
-                : null,
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.1),
@@ -1494,30 +1673,110 @@ class _MealPill extends StatelessWidget {
               ),
             ],
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.access_time, size: 12, color: fg),
-              const SizedBox(width: 6),
-              Text(
-                label,
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: fg,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(100),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 22, sigmaY: 22),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 220),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(100),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Colors.black.withValues(alpha: 0.30),
+                      Colors.black.withValues(alpha: 0.38),
+                    ],
+                  ),
+                  border: Border.all(
+                    color: selected
+                        ? AppColors.primary600
+                        : Colors.white.withValues(alpha: 0.18),
+                    width: selected ? 2 : 0.6,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(CupertinoIcons.clock, size: 14, color: fg),
+                    const SizedBox(width: 6),
+                    Text(
+                      label,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: fg,
+                        height: 1,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      time,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: fg,
+                        height: 1,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(width: 6),
-              Text(
-                time,
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: fg,
-                ),
-              ),
-            ],
+            ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _FoodTimingChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _FoodTimingChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.fromLTRB(10, 6, 16, 6),
+        decoration: BoxDecoration(
+          color: selected
+              ? const Color(0xE62CA989)
+              : const Color(0x80FFFFFF).withValues(alpha: 0.5),
+          borderRadius: BorderRadius.circular(100),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              selected ? CupertinoIcons.check_mark_circled_solid : CupertinoIcons.circle,
+              size: 12,
+              color: selected ? Colors.white : AppColors.textSecondary,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: selected ? FontWeight.w500 : FontWeight.w400,
+                color: selected ? Colors.white : AppColors.textSecondary,
+                height: 20 / 14,
+              ),
+            ),
+          ],
         ),
       ),
     );

@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import '../family/care_giver_screen.dart';
 import '../health/health_screen.dart';
 import '../health/widgets/custom_tab_bar.dart';
+import '../home/home_screen.dart';
 import '../me/me_screen.dart';
 import '../medicine/medicine_screen.dart';
 
@@ -14,12 +15,15 @@ class MainShell extends StatefulWidget {
 }
 
 class _MainShellState extends State<MainShell> {
-  int _tabIndex = 1; // Health tab by default
+  int _tabIndex = 0;
 
   @override
   Widget build(BuildContext context) {
     Widget body;
     switch (_tabIndex) {
+      case 1:
+        body = const HealthScreen();
+        break;
       case 2:
         body = const MedicineScreen();
         break;
@@ -30,7 +34,7 @@ class _MainShellState extends State<MainShell> {
         body = const MeScreen();
         break;
       default:
-        body = const HealthScreen();
+        body = const HomeScreen();
     }
     return CupertinoPageScaffold(
       backgroundColor: const Color(0xFFF4F8F5),
