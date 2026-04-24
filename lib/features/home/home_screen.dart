@@ -81,15 +81,10 @@ class _HeroSection extends StatelessWidget {
         ),
       ),
       padding: EdgeInsets.only(top: statusBarHeight),
-      child: const Column(
-        children: [
-          HomeUserHeader(
-            date: '12 ม.ค. 69',
-            name: 'คุณณัฐพงษ์',
-            hasUnread: true,
-          ),
-          SizedBox(height: 185),
-        ],
+      child: const HomeUserHeader(
+        date: '12 ม.ค. 69',
+        name: 'คุณณัฐพงษ์',
+        hasUnread: true,
       ),
     );
   }
