@@ -2,8 +2,9 @@ import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 
-import '../../../core/widgets/app_option_sheet.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../../../core/widgets/liquid_glass_button.dart';
 import '../../../core/widgets/press_effect.dart';
@@ -35,14 +36,6 @@ class VitalMeasurement {
   final String location;
   final String? note;
 }
-
-const _locations = [
-  'บ้าน',
-  'คลินิก',
-  'โรงพยาบาล',
-  'ที่ทำงาน',
-  'อื่นๆ',
-];
 
 Future<VitalMeasurement?> showAddVitalSignSheet(
   BuildContext context, {
@@ -96,7 +89,9 @@ class _AddVitalSignSheetState extends State<_AddVitalSignSheet> {
   late final List<TextEditingController> _valueCtrls;
   late final TextEditingController _noteCtrl;
   DateTime _measuredAt = DateTime.now();
-  String _location = _locations.first;
+  String? _location;
+  bool _locationLoading = true;
+  String? _locationError;
 
   @override
   void initState() {
@@ -108,6 +103,69 @@ class _AddVitalSignSheetState extends State<_AddVitalSignSheet> {
     for (final c in _valueCtrls) {
       c.addListener(() => setState(() {}));
     }
+    _fetchLocation();
+  }
+
+  Future<void> _fetchLocation() async {
+    if (!mounted) return;
+    setState(() {
+      _locationLoading = true;
+      _locationError = null;
+    });
+    try {
+      final serviceOn = await Geolocator.isLocationServiceEnabled();
+      if (!serviceOn) {
+        throw 'เปิด GPS ก่อนใช้งาน';
+      }
+      var perm = await Geolocator.checkPermission();
+      if (perm == LocationPermission.denied) {
+        perm = await Geolocator.requestPermission();
+      }
+      if (perm == LocationPermission.denied ||
+          perm == LocationPermission.deniedForever) {
+        throw 'ไม่ได้รับสิทธิ์เข้าถึงตำแหน่ง';
+      }
+      final pos = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 10),
+        ),
+      );
+      await setLocaleIdentifier('th_TH');
+      final placemarks = await placemarkFromCoordinates(
+        pos.latitude,
+        pos.longitude,
+      );
+      if (!mounted) return;
+      final place = placemarks.isNotEmpty ? placemarks.first : null;
+      setState(() {
+        _locationLoading = false;
+        _location = _formatPlace(place, pos);
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _locationLoading = false;
+        _locationError = e.toString();
+      });
+    }
+  }
+
+  String _formatPlace(Placemark? p, Position pos) {
+    if (p == null) {
+      return '${pos.latitude.toStringAsFixed(4)}, ${pos.longitude.toStringAsFixed(4)}';
+    }
+    final parts = <String>[
+      if ((p.name ?? '').isNotEmpty) p.name!,
+      if ((p.subLocality ?? '').isNotEmpty) p.subLocality!,
+      if ((p.locality ?? '').isNotEmpty) p.locality!,
+      if ((p.administrativeArea ?? '').isNotEmpty) p.administrativeArea!,
+    ];
+    final seen = <String>{};
+    final unique = parts.where((s) => seen.add(s)).toList();
+    return unique.isEmpty
+        ? '${pos.latitude.toStringAsFixed(4)}, ${pos.longitude.toStringAsFixed(4)}'
+        : unique.take(3).join(', ');
   }
 
   @override
@@ -226,16 +284,6 @@ class _AddVitalSignSheetState extends State<_AddVitalSignSheet> {
     );
   }
 
-  Future<void> _pickLocation() async {
-    final v = await showAppOptionSheet(
-      context: context,
-      title: 'สถานที่วัด',
-      selected: _location,
-      options: _locations,
-    );
-    if (v != null) setState(() => _location = v);
-  }
-
   void _save() {
     if (!_canSave) return;
     HapticFeedback.mediumImpact();
@@ -243,7 +291,7 @@ class _AddVitalSignSheetState extends State<_AddVitalSignSheet> {
       VitalMeasurement(
         values: _valueCtrls.map((c) => c.text.trim()).toList(),
         measuredAt: _measuredAt,
-        location: _location,
+        location: _location ?? '',
         note: _noteCtrl.text.trim().isEmpty ? null : _noteCtrl.text.trim(),
       ),
     );
@@ -404,12 +452,11 @@ class _AddVitalSignSheetState extends State<_AddVitalSignSheet> {
                                   onTap: _pickDate,
                                 ),
                                 const _RowDivider(),
-                                _MetaRow(
-                                  icon: CupertinoIcons.location_solid,
-                                  iconColor: const Color(0xFF1D8B6B),
-                                  label: 'สถานที่วัด',
+                                _LocationRow(
+                                  loading: _locationLoading,
+                                  error: _locationError,
                                   value: _location,
-                                  onTap: _pickLocation,
+                                  onRefresh: _fetchLocation,
                                 ),
                               ],
                             ),
@@ -553,6 +600,113 @@ class _RowDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
       Container(height: 0.5, color: const Color(0xFFEDEDF0));
+}
+
+class _LocationRow extends StatelessWidget {
+  const _LocationRow({
+    required this.loading,
+    required this.error,
+    required this.value,
+    required this.onRefresh,
+  });
+  final bool loading;
+  final String? error;
+  final String? value;
+  final VoidCallback onRefresh;
+
+  @override
+  Widget build(BuildContext context) {
+    final hasError = error != null;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Container(
+            width: 30,
+            height: 30,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: const Color(0xFF1D8B6B).withValues(alpha: 0.12),
+            ),
+            alignment: Alignment.center,
+            child: const Icon(
+              CupertinoIcons.location_solid,
+              size: 14,
+              color: Color(0xFF1D8B6B),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Location',
+                  style: TextStyle(
+                    color: Color(0xFF6D756E),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                if (loading)
+                  const Row(
+                    children: [
+                      SizedBox(
+                        width: 12,
+                        height: 12,
+                        child: CupertinoActivityIndicator(radius: 6),
+                      ),
+                      SizedBox(width: 6),
+                      Text(
+                        'กำลังค้นหาตำแหน่ง...',
+                        style: TextStyle(
+                          color: Color(0xFF9CA3AF),
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  )
+                else
+                  Text(
+                    hasError ? (error ?? 'ไม่ทราบ') : (value ?? '-'),
+                    style: TextStyle(
+                      color: hasError
+                          ? const Color(0xFFE62E05)
+                          : const Color(0xFF1A1A1A),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          PressEffect(
+            onTap: loading ? () {} : onRefresh,
+            haptic: loading ? HapticKind.none : HapticKind.selection,
+            borderRadius: BorderRadius.circular(100),
+            child: Container(
+              width: 30,
+              height: 30,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: const Color(0xFFF1F5F4),
+              ),
+              alignment: Alignment.center,
+              child: Icon(
+                CupertinoIcons.arrow_clockwise,
+                size: 13,
+                color: loading
+                    ? const Color(0xFF9CA3AF)
+                    : const Color(0xFF1D8B6B),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 extension on Widget {

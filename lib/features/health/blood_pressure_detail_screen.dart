@@ -7,7 +7,9 @@ import 'package:flutter/material.dart' show Icons;
 import '../../core/theme/app_typography.dart';
 import '../../core/widgets/app_toast.dart';
 import '../../core/widgets/liquid_glass_button.dart';
+import 'widgets/add_measurement.dart';
 import 'widgets/add_vital_sign_sheet.dart';
+import 'widgets/measure_animations.dart';
 
 class BloodPressureDetailScreen extends StatefulWidget {
   const BloodPressureDetailScreen({super.key});
@@ -153,11 +155,12 @@ class _BloodPressureDetailScreenState
                 _TopBar(
                   onBack: () => Navigator.of(context).pop(),
                   onAdd: () async {
-                    final result = await showAddVitalSignSheet(
+                    final result = await showAddMeasurement(
                       context,
                       title: 'เพิ่มความดันโลหิต',
                       icon: CupertinoIcons.heart_fill,
                       color: const Color(0xFFBE123C),
+                      animation: MeasureAnimationKind.pressureCuff,
                       fields: const [
                         VitalFieldConfig(
                           label: 'ค่าบน (Systolic)',

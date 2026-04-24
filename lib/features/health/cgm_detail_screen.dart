@@ -7,6 +7,8 @@ import 'package:flutter/material.dart' show Icons;
 import '../../core/theme/app_typography.dart';
 import '../../core/widgets/app_toast.dart';
 import '../../core/widgets/liquid_glass_button.dart';
+import 'widgets/add_measurement.dart';
+import 'widgets/measure_animations.dart';
 import 'widgets/add_vital_sign_sheet.dart';
 
 class _CgmSample {
@@ -182,9 +184,10 @@ class _CgmDetailScreenState extends State<CgmDetailScreen> {
                 _TopBar(
                   onBack: () => Navigator.of(context).pop(),
                   onAdd: () async {
-                    final result = await showAddVitalSignSheet(
+                    final result = await showAddMeasurement(
                       context,
                       title: 'เพิ่มค่า CGM',
+                      animation: MeasureAnimationKind.sugarDrop,
                       icon: CupertinoIcons.waveform_path_ecg,
                       color: const Color(0xFFF59E0B),
                       fields: const [

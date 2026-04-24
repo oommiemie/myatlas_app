@@ -6,6 +6,8 @@ import 'package:flutter/material.dart' show Icons;
 import '../../core/theme/app_typography.dart';
 import '../../core/widgets/app_toast.dart';
 import '../../core/widgets/liquid_glass_button.dart';
+import 'widgets/add_measurement.dart';
+import 'widgets/measure_animations.dart';
 import 'widgets/add_vital_sign_sheet.dart';
 
 class _SleepSample {
@@ -163,9 +165,10 @@ class _SleepDetailScreenState extends State<SleepDetailScreen> {
                 _TopBar(
                   onBack: () => Navigator.of(context).pop(),
                   onAdd: () async {
-                    final result = await showAddVitalSignSheet(
+                    final result = await showAddMeasurement(
                       context,
                       title: 'เพิ่มการนอน',
+                      animation: MeasureAnimationKind.sleep,
                       icon: CupertinoIcons.moon_zzz_fill,
                       color: const Color(0xFF6366F1),
                       fields: const [
