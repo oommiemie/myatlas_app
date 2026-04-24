@@ -7,8 +7,9 @@ import '../../core/theme/app_typography.dart';
 import '../../core/widgets/app_toast.dart';
 import '../../core/widgets/liquid_glass_button.dart';
 import 'widgets/add_measurement.dart';
-import 'widgets/measure_animations.dart';
 import 'widgets/add_vital_sign_sheet.dart';
+import 'widgets/health_detail_app_bar.dart';
+import 'widgets/measure_animations.dart';
 
 class _SleepSample {
   const _SleepSample({
@@ -116,6 +117,35 @@ class SleepDetailScreen extends StatefulWidget {
 class _SleepDetailScreenState extends State<SleepDetailScreen> {
   int _tab = 0;
   int? _selectedIndex;
+  final ValueNotifier<double> _scrollOffset = ValueNotifier<double>(0);
+
+  @override
+  void dispose() {
+    _scrollOffset.dispose();
+    super.dispose();
+  }
+
+  Future<void> _addMeasurement() async {
+    final result = await showAddMeasurement(
+      context,
+      title: 'เพิ่มการนอน',
+      animation: MeasureAnimationKind.sleep,
+      icon: CupertinoIcons.moon_zzz_fill,
+      color: const Color(0xFF6366F1),
+      fields: const [
+        VitalFieldConfig(
+          label: 'ชั่วโมงนอน',
+          placeholder: '8',
+          unit: 'ชม.',
+          keyboardType:
+              TextInputType.numberWithOptions(decimal: true),
+        ),
+      ],
+    );
+    if (result != null && mounted) {
+      AppToast.success(context, 'บันทึกการนอนแล้ว');
+    }
+  }
 
   void _showSleepInfoSheet() {
     Navigator.of(context, rootNavigator: true).push(
@@ -155,36 +185,15 @@ class _SleepDetailScreenState extends State<SleepDetailScreen> {
             top: 0,
             left: 0,
             right: 0,
-            height: 250,
-            child: _HeaderBackground(),
+            height: 180,
+            child: DetailHeaderBackground(),
           ),
           SafeArea(
             bottom: false,
             child: Column(
               children: [
-                _TopBar(
-                  onBack: () => Navigator.of(context).pop(),
-                  onAdd: () async {
-                    final result = await showAddMeasurement(
-                      context,
-                      title: 'เพิ่มการนอน',
-                      animation: MeasureAnimationKind.sleep,
-                      icon: CupertinoIcons.moon_zzz_fill,
-                      color: const Color(0xFF6366F1),
-                      fields: const [
-                        VitalFieldConfig(
-                          label: 'ชั่วโมงนอน',
-                          placeholder: '8',
-                          unit: 'ชม.',
-                          keyboardType:
-                              TextInputType.numberWithOptions(decimal: true),
-                        ),
-                      ],
-                    );
-                    if (result != null && context.mounted) {
-                      AppToast.success(context, 'บันทึกการนอนแล้ว');
-                    }
-                  },
+                const SizedBox(
+                  height: HealthDetailAppBar.safeAreaContentHeight,
                 ),
                 Expanded(
                   child: Container(
@@ -195,94 +204,65 @@ class _SleepDetailScreenState extends State<SleepDetailScreen> {
                           BorderRadius.vertical(top: Radius.circular(24)),
                     ),
                     clipBehavior: Clip.antiAlias,
-                    child: ListView(
-                      physics: const BouncingScrollPhysics(),
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-                      children: [
-                        _SleepChartCard(
-                          tab: _tab,
-                          onTabChange: (i) => setState(() => _tab = i),
-                          selectedIndex: _selectedIndex,
-                          onSelect: (idx) =>
-                              setState(() => _selectedIndex = idx),
-                        ),
-                        const SizedBox(height: 16),
-                        _AboutSleepCard(onTap: _showSleepInfoSheet),
-                        const SizedBox(height: 16),
-                        const _OptionLabel(),
-                        const SizedBox(height: 10),
-                        const _HighlightOption(),
-                        const SizedBox(height: 16),
-                        const _SettingsCard(),
-                      ],
+                    child: NotificationListener<ScrollNotification>(
+                      onNotification: (n) {
+                        if (n is ScrollUpdateNotification ||
+                            n is ScrollStartNotification) {
+                          _scrollOffset.value = n.metrics.pixels;
+                        }
+                        return false;
+                      },
+                      child: ListView(
+                        physics: const BouncingScrollPhysics(),
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+                        children: [
+                          _SleepChartCard(
+                            tab: _tab,
+                            onTabChange: (i) => setState(() => _tab = i),
+                            selectedIndex: _selectedIndex,
+                            onSelect: (idx) =>
+                                setState(() => _selectedIndex = idx),
+                          ),
+                          const SizedBox(height: 16),
+                          _AboutSleepCard(onTap: _showSleepInfoSheet),
+                          const SizedBox(height: 16),
+                          const _OptionLabel(),
+                          const SizedBox(height: 10),
+                          const _HighlightOption(),
+                          const SizedBox(height: 16),
+                          const _SettingsCard(),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ],
             ),
           ),
-        ],
-      ),
-    );
-  }
-}
-
-class _HeaderBackground extends StatelessWidget {
-  const _HeaderBackground();
-
-  @override
-  Widget build(BuildContext context) {
-    return const DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: RadialGradient(
-          center: Alignment(-0.2, -0.5),
-          radius: 1.2,
-          colors: [
-            Color(0xFF7C3AED),
-            Color(0xFF4C1D95),
-            Color(0xFF2E1065),
-          ],
-          stops: [0.0, 0.55, 1.0],
-        ),
-      ),
-    );
-  }
-}
-
-class _TopBar extends StatelessWidget {
-  const _TopBar({required this.onBack, required this.onAdd});
-  final VoidCallback onBack;
-  final VoidCallback onAdd;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 6, 16, 16),
-      child: Row(
-        children: [
-          LiquidGlassButton(
-            icon: CupertinoIcons.chevron_back,
-            onTap: onBack,
-          ),
-          const SizedBox(width: 10),
-          Text(
-            'การนอนหลับ',
-            style: AppTypography.title3(CupertinoColors.white).copyWith(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: ValueListenableBuilder<double>(
+              valueListenable: _scrollOffset,
+              builder: (_, offset, __) => HealthDetailAppBar(
+                title: 'การนอนหลับ',
+                scrollOffset: offset,
+                onBack: () => Navigator.of(context).pop(),
+                action: LiquidGlassButton(
+                  icon: CupertinoIcons.plus,
+                  onTap: _addMeasurement,
+                  size: 40,
+                  iconSize: 18,
+                ),
+              ),
             ),
           ),
-          const Spacer(),
-          LiquidGlassButton(
-            icon: CupertinoIcons.plus,
-            onTap: onAdd,
-          ),
         ],
       ),
     );
   }
 }
-
 
 class _SleepChartCard extends StatelessWidget {
   const _SleepChartCard({

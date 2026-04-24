@@ -60,11 +60,17 @@ class MyAtlasApp extends StatelessWidget {
                   data: mq.copyWith(
                     textScaler: TextScaler.linear(textScale),
                   ),
-                  child: ScaffoldMessenger(
-                    child: Material(
-                      type: MaterialType.transparency,
-                      child: MiniCallOverlay(
-                        child: child ?? const SizedBox.shrink(),
+                  child: Theme(
+                    data: ThemeData(
+                      fontFamily: 'Google Sans',
+                      brightness: brightness,
+                    ),
+                    child: ScaffoldMessenger(
+                      child: Material(
+                        type: MaterialType.transparency,
+                        child: MiniCallOverlay(
+                          child: child ?? const SizedBox.shrink(),
+                        ),
                       ),
                     ),
                   ),

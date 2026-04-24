@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import 'app_colors.dart';
 
@@ -30,7 +29,8 @@ class AppTheme {
 
   static CupertinoTextThemeData _textTheme(Color primaryLabel) {
     TextStyle style(double size, FontWeight weight, {Color? color}) =>
-        GoogleFonts.dmSans(
+        TextStyle(
+          fontFamily: 'Google Sans',
           fontSize: size,
           fontWeight: weight,
           color: color ?? primaryLabel,

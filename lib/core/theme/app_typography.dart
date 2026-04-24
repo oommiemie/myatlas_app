@@ -1,10 +1,9 @@
 import 'package:flutter/cupertino.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class AppTypography {
   AppTypography._();
 
-  static const String _fallbackFamily = 'DM Sans';
+  static const String _fontFamily = 'Google Sans';
 
   static TextStyle _base({
     required double size,
@@ -13,7 +12,8 @@ class AppTypography {
     double letterSpacing = 0,
     Color color = const Color(0xFF000000),
   }) {
-    return GoogleFonts.dmSans(
+    return TextStyle(
+      fontFamily: _fontFamily,
       fontSize: size,
       fontWeight: weight,
       height: height,
@@ -55,5 +55,5 @@ class AppTypography {
   static TextStyle caption2(Color color) =>
       _base(size: 11, weight: FontWeight.w400, height: 1.36, color: color);
 
-  static String get fallbackFamily => _fallbackFamily;
+  static String get fallbackFamily => _fontFamily;
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 
-import '../../core/widgets/liquid_glass_button.dart';
+import '../health/widgets/health_detail_app_bar.dart';
 
 enum DentalType { cleaning, filling, extraction, checkup, rootcanal, orthodontic }
 
@@ -98,6 +98,7 @@ class DentalScreen extends StatefulWidget {
 class _DentalScreenState extends State<DentalScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController _enter;
+  final ValueNotifier<double> _scrollOffset = ValueNotifier<double>(0);
 
   @override
   void initState() {
@@ -112,6 +113,7 @@ class _DentalScreenState extends State<DentalScreen>
   @override
   void dispose() {
     _enter.dispose();
+    _scrollOffset.dispose();
     super.dispose();
   }
 
@@ -159,88 +161,85 @@ class _DentalScreenState extends State<DentalScreen>
             top: 0,
             left: 0,
             right: 0,
-            height: 200,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [Color(0xFF38BDF8), Color(0xFF0369A1)],
+            height: 180,
+            child: DetailHeaderBackground(),
+          ),
+          SafeArea(
+            bottom: false,
+            child: Column(
+              children: [
+                const SizedBox(
+                  height: HealthDetailAppBar.safeAreaContentHeight,
                 ),
-              ),
+                Expanded(
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFF4F8F5),
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(24),
+                        topRight: Radius.circular(24),
+                      ),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: NotificationListener<ScrollNotification>(
+                      onNotification: (n) {
+                        if (n is ScrollUpdateNotification ||
+                            n is ScrollStartNotification) {
+                          _scrollOffset.value = n.metrics.pixels;
+                        }
+                        return false;
+                      },
+                      child: ListView(
+                        physics: const BouncingScrollPhysics(
+                          parent: AlwaysScrollableScrollPhysics(),
+                        ),
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 40),
+                        children: [
+                          for (final group in groups.entries) ...[
+                            Padding(
+                              padding:
+                                  const EdgeInsets.fromLTRB(4, 4, 0, 8),
+                              child: Text(
+                                group.key,
+                                style: const TextStyle(
+                                  color: Color(0xFF1A1A1A),
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                            for (int i = 0; i < group.value.length; i++) ...[
+                              _stagger(
+                                flatIndex++,
+                                total,
+                                _DentalRow(
+                                  record: group.value[i],
+                                  isLast: i == group.value.length - 1,
+                                ),
+                              ),
+                            ],
+                            const SizedBox(height: 8),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-          Column(
-            children: [
-              SafeArea(
-                bottom: false,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-                  child: Row(
-                    children: [
-                      LiquidGlassButton(
-                        icon: CupertinoIcons.chevron_back,
-                        iconColor: const Color(0xFF1A1A1A),
-                        onTap: () => Navigator.of(context).pop(),
-                      ),
-                      const SizedBox(width: 10),
-                      const Text(
-                        'ประวัติทันตกรรม',
-                        style: TextStyle(
-                          color: CupertinoColors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: ValueListenableBuilder<double>(
+              valueListenable: _scrollOffset,
+              builder: (_, offset, __) => HealthDetailAppBar(
+                title: 'ประวัติทันตกรรม',
+                scrollOffset: offset,
+                onBack: () => Navigator.of(context).pop(),
               ),
-              Expanded(
-                child: Container(
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFF4F8F5),
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(24),
-                      topRight: Radius.circular(24),
-                    ),
-                  ),
-                  clipBehavior: Clip.antiAlias,
-                  child: ListView(
-                    physics: const BouncingScrollPhysics(
-                      parent: AlwaysScrollableScrollPhysics(),
-                    ),
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 40),
-                    children: [
-                      for (final group in groups.entries) ...[
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(4, 4, 0, 8),
-                          child: Text(
-                            group.key,
-                            style: const TextStyle(
-                              color: Color(0xFF1A1A1A),
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                        for (int i = 0; i < group.value.length; i++) ...[
-                          _stagger(
-                            flatIndex++,
-                            total,
-                            _DentalRow(
-                              record: group.value[i],
-                              isLast: i == group.value.length - 1,
-                            ),
-                          ),
-                        ],
-                        const SizedBox(height: 8),
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
         ],
       ),

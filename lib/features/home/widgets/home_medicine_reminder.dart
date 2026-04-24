@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/app_toast.dart';
 
 class MedicineReminder {
   final String mealLabel;
@@ -79,39 +80,11 @@ class _HomeMedicineReminderState extends State<HomeMedicineReminder> {
   void _toggle(int i) {
     setState(() => _taken[i] = !_taken[i]);
     final taken = _taken[i];
-    final messenger = ScaffoldMessenger.of(context);
-    messenger.hideCurrentSnackBar();
-    messenger.showSnackBar(
-      SnackBar(
-        duration: const Duration(milliseconds: 1500),
-        behavior: SnackBarBehavior.floating,
-        elevation: 2,
-        margin: const EdgeInsets.fromLTRB(16, 0, 16, 100),
-        backgroundColor:
-            taken ? AppColors.success600 : AppColors.textPrimary,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        content: Row(
-          children: [
-            Icon(
-              taken ? Icons.check_circle : Icons.undo_rounded,
-              color: Colors.white,
-              size: 20,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              taken ? 'บันทึกการทานยาแล้ว' : 'ยกเลิกการบันทึก',
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: Colors.white,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+    if (taken) {
+      AppToast.success(context, 'บันทึกการทานยาแล้ว');
+    } else {
+      AppToast.info(context, 'ยกเลิกการบันทึก');
+    }
   }
 
   @override
