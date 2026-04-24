@@ -6,6 +6,8 @@ import 'package:flutter/material.dart' show Icons;
 import '../../core/theme/app_typography.dart';
 import '../../core/widgets/app_toast.dart';
 import '../../core/widgets/liquid_glass_button.dart';
+import 'widgets/add_measurement.dart';
+import 'widgets/measure_animations.dart';
 import 'widgets/add_vital_sign_sheet.dart';
 
 class _SpSample {
@@ -163,9 +165,10 @@ class _Spo2DetailScreenState extends State<Spo2DetailScreen> {
                 _TopBar(
                   onBack: () => Navigator.of(context).pop(),
                   onAdd: () async {
-                    final result = await showAddVitalSignSheet(
+                    final result = await showAddMeasurement(
                       context,
                       title: 'เพิ่มค่า SpO₂',
+                      animation: MeasureAnimationKind.pulseOx,
                       icon: CupertinoIcons.heart_circle_fill,
                       color: const Color(0xFF0891B2),
                       fields: const [

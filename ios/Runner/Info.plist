@@ -49,5 +49,7 @@
 	<string>แอปต้องการใช้กล้องเพื่อถ่ายภาพอาหารสำหรับวิเคราะห์โภชนาการ</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>แอปต้องการเข้าถึงคลังภาพเพื่อเลือกภาพอาหารสำหรับวิเคราะห์โภชนาการ</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>แอปใช้ตำแหน่งเพื่อบันทึกสถานที่ที่วัดข้อมูลสุขภาพ</string>
 </dict>
 </plist>
