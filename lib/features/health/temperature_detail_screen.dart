@@ -10,6 +10,7 @@ import '../../core/widgets/app_toast.dart';
 import '../../core/widgets/liquid_glass_button.dart';
 import 'widgets/add_measurement.dart';
 import 'widgets/add_vital_sign_sheet.dart';
+import 'widgets/health_detail_app_bar.dart';
 import 'widgets/measure_animations.dart';
 
 class _TempSample {
@@ -121,6 +122,35 @@ class TemperatureDetailScreen extends StatefulWidget {
 class _TemperatureDetailScreenState extends State<TemperatureDetailScreen> {
   int _tab = 0;
   int? _selectedIndex;
+  final ValueNotifier<double> _scrollOffset = ValueNotifier<double>(0);
+
+  @override
+  void dispose() {
+    _scrollOffset.dispose();
+    super.dispose();
+  }
+
+  Future<void> _addMeasurement() async {
+    final result = await showAddMeasurement(
+      context,
+      title: 'เพิ่มอุณหภูมิ',
+      animation: MeasureAnimationKind.thermometer,
+      icon: CupertinoIcons.thermometer,
+      color: const Color(0xFF2563EB),
+      fields: const [
+        VitalFieldConfig(
+          label: 'อุณหภูมิ',
+          placeholder: '36.5',
+          unit: '°C',
+          keyboardType:
+              TextInputType.numberWithOptions(decimal: true),
+        ),
+      ],
+    );
+    if (result != null && mounted) {
+      AppToast.success(context, 'บันทึกอุณหภูมิแล้ว');
+    }
+  }
 
   void _showTempInfoSheet() {
     Navigator.of(context, rootNavigator: true).push(
@@ -160,36 +190,15 @@ class _TemperatureDetailScreenState extends State<TemperatureDetailScreen> {
             top: 0,
             left: 0,
             right: 0,
-            height: 250,
-            child: _HeaderBackground(),
+            height: 180,
+            child: DetailHeaderBackground(),
           ),
           SafeArea(
             bottom: false,
             child: Column(
               children: [
-                _TopBar(
-                  onBack: () => Navigator.of(context).pop(),
-                  onAdd: () async {
-                    final result = await showAddMeasurement(
-                      context,
-                      title: 'เพิ่มอุณหภูมิ',
-                      animation: MeasureAnimationKind.thermometer,
-                      icon: CupertinoIcons.thermometer,
-                      color: const Color(0xFF2563EB),
-                      fields: const [
-                        VitalFieldConfig(
-                          label: 'อุณหภูมิ',
-                          placeholder: '36.5',
-                          unit: '°C',
-                          keyboardType:
-                              TextInputType.numberWithOptions(decimal: true),
-                        ),
-                      ],
-                    );
-                    if (result != null && context.mounted) {
-                      AppToast.success(context, 'บันทึกอุณหภูมิแล้ว');
-                    }
-                  },
+                const SizedBox(
+                  height: HealthDetailAppBar.safeAreaContentHeight,
                 ),
                 Expanded(
                   child: Container(
@@ -200,94 +209,65 @@ class _TemperatureDetailScreenState extends State<TemperatureDetailScreen> {
                           BorderRadius.vertical(top: Radius.circular(24)),
                     ),
                     clipBehavior: Clip.antiAlias,
-                    child: ListView(
-                      physics: const BouncingScrollPhysics(),
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-                      children: [
-                        _TempChartCard(
-                          tab: _tab,
-                          onTabChange: (i) => setState(() => _tab = i),
-                          selectedIndex: _selectedIndex,
-                          onSelect: (idx) =>
-                              setState(() => _selectedIndex = idx),
-                        ),
-                        const SizedBox(height: 16),
-                        _AboutTempCard(onTap: _showTempInfoSheet),
-                        const SizedBox(height: 16),
-                        const _OptionLabel(),
-                        const SizedBox(height: 10),
-                        const _HighlightOption(),
-                        const SizedBox(height: 16),
-                        const _SettingsCard(),
-                      ],
+                    child: NotificationListener<ScrollNotification>(
+                      onNotification: (n) {
+                        if (n is ScrollUpdateNotification ||
+                            n is ScrollStartNotification) {
+                          _scrollOffset.value = n.metrics.pixels;
+                        }
+                        return false;
+                      },
+                      child: ListView(
+                        physics: const BouncingScrollPhysics(),
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+                        children: [
+                          _TempChartCard(
+                            tab: _tab,
+                            onTabChange: (i) => setState(() => _tab = i),
+                            selectedIndex: _selectedIndex,
+                            onSelect: (idx) =>
+                                setState(() => _selectedIndex = idx),
+                          ),
+                          const SizedBox(height: 16),
+                          _AboutTempCard(onTap: _showTempInfoSheet),
+                          const SizedBox(height: 16),
+                          const _OptionLabel(),
+                          const SizedBox(height: 10),
+                          const _HighlightOption(),
+                          const SizedBox(height: 16),
+                          const _SettingsCard(),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ],
             ),
           ),
-        ],
-      ),
-    );
-  }
-}
-
-class _HeaderBackground extends StatelessWidget {
-  const _HeaderBackground();
-
-  @override
-  Widget build(BuildContext context) {
-    return const DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: RadialGradient(
-          center: Alignment(-0.2, -0.5),
-          radius: 1.2,
-          colors: [
-            Color(0xFF7AA8E8),
-            Color(0xFF4A78D6),
-            Color(0xFF2A4FB3),
-          ],
-          stops: [0.0, 0.55, 1.0],
-        ),
-      ),
-    );
-  }
-}
-
-class _TopBar extends StatelessWidget {
-  const _TopBar({required this.onBack, required this.onAdd});
-  final VoidCallback onBack;
-  final VoidCallback onAdd;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 6, 16, 16),
-      child: Row(
-        children: [
-          LiquidGlassButton(
-            icon: CupertinoIcons.chevron_back,
-            onTap: onBack,
-          ),
-          const SizedBox(width: 10),
-          Text(
-            'อุณหภูมิ',
-            style: AppTypography.title3(CupertinoColors.white).copyWith(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: ValueListenableBuilder<double>(
+              valueListenable: _scrollOffset,
+              builder: (_, offset, __) => HealthDetailAppBar(
+                title: 'อุณหภูมิ',
+                scrollOffset: offset,
+                onBack: () => Navigator.of(context).pop(),
+                action: LiquidGlassButton(
+                  icon: CupertinoIcons.plus,
+                  onTap: _addMeasurement,
+                  size: 40,
+                  iconSize: 18,
+                ),
+              ),
             ),
           ),
-          const Spacer(),
-          LiquidGlassButton(
-            icon: CupertinoIcons.plus,
-            onTap: onAdd,
-          ),
         ],
       ),
     );
   }
 }
-
 
 class _TempChartCard extends StatelessWidget {
   const _TempChartCard({

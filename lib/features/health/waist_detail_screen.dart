@@ -8,8 +8,9 @@ import '../../core/theme/app_typography.dart';
 import '../../core/widgets/app_toast.dart';
 import '../../core/widgets/liquid_glass_button.dart';
 import 'widgets/add_measurement.dart';
-import 'widgets/measure_animations.dart';
 import 'widgets/add_vital_sign_sheet.dart';
+import 'widgets/health_detail_app_bar.dart';
+import 'widgets/measure_animations.dart';
 
 class _WaistSample {
   const _WaistSample({
@@ -105,6 +106,35 @@ class WaistDetailScreen extends StatefulWidget {
 class _WaistDetailScreenState extends State<WaistDetailScreen> {
   int _tab = 0;
   int? _selectedIndex;
+  final ValueNotifier<double> _scrollOffset = ValueNotifier<double>(0);
+
+  @override
+  void dispose() {
+    _scrollOffset.dispose();
+    super.dispose();
+  }
+
+  Future<void> _addMeasurement() async {
+    final result = await showAddMeasurement(
+      context,
+      title: 'เพิ่มรอบเอว',
+      animation: MeasureAnimationKind.tape,
+      icon: CupertinoIcons.rectangle_compress_vertical,
+      color: const Color(0xFF9333EA),
+      fields: const [
+        VitalFieldConfig(
+          label: 'รอบเอว',
+          placeholder: '82',
+          unit: 'cm',
+          keyboardType:
+              TextInputType.numberWithOptions(decimal: true),
+        ),
+      ],
+    );
+    if (result != null && mounted) {
+      AppToast.success(context, 'บันทึกรอบเอวแล้ว');
+    }
+  }
 
   void _showWaistInfoSheet() {
     Navigator.of(context, rootNavigator: true).push(
@@ -144,36 +174,15 @@ class _WaistDetailScreenState extends State<WaistDetailScreen> {
             top: 0,
             left: 0,
             right: 0,
-            height: 250,
-            child: _HeaderBackground(),
+            height: 180,
+            child: DetailHeaderBackground(),
           ),
           SafeArea(
             bottom: false,
             child: Column(
               children: [
-                _TopBar(
-                  onBack: () => Navigator.of(context).pop(),
-                  onAdd: () async {
-                    final result = await showAddMeasurement(
-                      context,
-                      title: 'เพิ่มรอบเอว',
-                      animation: MeasureAnimationKind.tape,
-                      icon: CupertinoIcons.rectangle_compress_vertical,
-                      color: const Color(0xFF9333EA),
-                      fields: const [
-                        VitalFieldConfig(
-                          label: 'รอบเอว',
-                          placeholder: '82',
-                          unit: 'cm',
-                          keyboardType:
-                              TextInputType.numberWithOptions(decimal: true),
-                        ),
-                      ],
-                    );
-                    if (result != null && context.mounted) {
-                      AppToast.success(context, 'บันทึกรอบเอวแล้ว');
-                    }
-                  },
+                const SizedBox(
+                  height: HealthDetailAppBar.safeAreaContentHeight,
                 ),
                 Expanded(
                   child: Container(
@@ -184,94 +193,65 @@ class _WaistDetailScreenState extends State<WaistDetailScreen> {
                           BorderRadius.vertical(top: Radius.circular(24)),
                     ),
                     clipBehavior: Clip.antiAlias,
-                    child: ListView(
-                      physics: const BouncingScrollPhysics(),
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-                      children: [
-                        _WaistChartCard(
-                          tab: _tab,
-                          onTabChange: (i) => setState(() => _tab = i),
-                          selectedIndex: _selectedIndex,
-                          onSelect: (idx) =>
-                              setState(() => _selectedIndex = idx),
-                        ),
-                        const SizedBox(height: 16),
-                        _AboutWaistCard(onTap: _showWaistInfoSheet),
-                        const SizedBox(height: 16),
-                        const _OptionLabel(),
-                        const SizedBox(height: 10),
-                        const _HighlightOption(),
-                        const SizedBox(height: 16),
-                        const _SettingsCard(),
-                      ],
+                    child: NotificationListener<ScrollNotification>(
+                      onNotification: (n) {
+                        if (n is ScrollUpdateNotification ||
+                            n is ScrollStartNotification) {
+                          _scrollOffset.value = n.metrics.pixels;
+                        }
+                        return false;
+                      },
+                      child: ListView(
+                        physics: const BouncingScrollPhysics(),
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+                        children: [
+                          _WaistChartCard(
+                            tab: _tab,
+                            onTabChange: (i) => setState(() => _tab = i),
+                            selectedIndex: _selectedIndex,
+                            onSelect: (idx) =>
+                                setState(() => _selectedIndex = idx),
+                          ),
+                          const SizedBox(height: 16),
+                          _AboutWaistCard(onTap: _showWaistInfoSheet),
+                          const SizedBox(height: 16),
+                          const _OptionLabel(),
+                          const SizedBox(height: 10),
+                          const _HighlightOption(),
+                          const SizedBox(height: 16),
+                          const _SettingsCard(),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ],
             ),
           ),
-        ],
-      ),
-    );
-  }
-}
-
-class _HeaderBackground extends StatelessWidget {
-  const _HeaderBackground();
-
-  @override
-  Widget build(BuildContext context) {
-    return const DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: RadialGradient(
-          center: Alignment(-0.2, -0.5),
-          radius: 1.2,
-          colors: [
-            Color(0xFF7DD3B0),
-            Color(0xFF3CA97A),
-            Color(0xFF1C7A54),
-          ],
-          stops: [0.0, 0.55, 1.0],
-        ),
-      ),
-    );
-  }
-}
-
-class _TopBar extends StatelessWidget {
-  const _TopBar({required this.onBack, required this.onAdd});
-  final VoidCallback onBack;
-  final VoidCallback onAdd;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 6, 16, 16),
-      child: Row(
-        children: [
-          LiquidGlassButton(
-            icon: CupertinoIcons.chevron_back,
-            onTap: onBack,
-          ),
-          const SizedBox(width: 10),
-          Text(
-            'รอบเอว',
-            style: AppTypography.title3(CupertinoColors.white).copyWith(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: ValueListenableBuilder<double>(
+              valueListenable: _scrollOffset,
+              builder: (_, offset, __) => HealthDetailAppBar(
+                title: 'รอบเอว',
+                scrollOffset: offset,
+                onBack: () => Navigator.of(context).pop(),
+                action: LiquidGlassButton(
+                  icon: CupertinoIcons.plus,
+                  onTap: _addMeasurement,
+                  size: 40,
+                  iconSize: 18,
+                ),
+              ),
             ),
           ),
-          const Spacer(),
-          LiquidGlassButton(
-            icon: CupertinoIcons.plus,
-            onTap: onAdd,
-          ),
         ],
       ),
     );
   }
 }
-
 
 class _WaistChartCard extends StatelessWidget {
   const _WaistChartCard({

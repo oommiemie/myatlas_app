@@ -6,6 +6,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../core/theme/app_typography.dart';
 import '../../core/widgets/liquid_glass_button.dart';
 import '../../core/widgets/press_effect.dart';
+import '../health/health_assessment_screen.dart';
 import 'allergy_screen.dart';
 import 'behavior_screen.dart';
 import 'chronic_disease_screen.dart';
@@ -109,11 +110,16 @@ class _MeScreenState extends State<MeScreen>
                   _MenuSection(
                     title: 'แบบคัดกรอง/ประเมิน',
                     items: [
-                      const _MenuEntry(
-                        iconColor: Color(0xFF9333EA),
+                      _MenuEntry(
+                        iconColor: const Color(0xFF9333EA),
                         icon: CupertinoIcons.doc_text,
                         title: 'แบบประเมินสุขภาพ',
                         subtitle: 'แบบประเมินสุขภาพ/คัดกรอง',
+                        onTap: () => Navigator.of(context).push(
+                          CupertinoPageRoute(
+                            builder: (_) => const HealthAssessmentScreen(),
+                          ),
+                        ),
                       ),
                       _MenuEntry(
                         iconColor: const Color(0xFFEA580C),

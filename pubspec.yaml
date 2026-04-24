@@ -75,6 +75,7 @@ flutter:
     - assets/images/family/
     - assets/images/me/
     - assets/images/allergy/
+    - assets/images/assessment/
     - assets/svg/
     - assets/3d/
 

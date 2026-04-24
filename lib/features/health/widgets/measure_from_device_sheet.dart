@@ -362,7 +362,9 @@ class _MeasureFromDeviceSheetState extends State<_MeasureFromDeviceSheet>
                             ),
                           ),
                           Align(
-                            alignment: Alignment.centerLeft,
+                            alignment: _stage == _DeviceStage.done
+                                ? Alignment.centerLeft
+                                : Alignment.centerRight,
                             child: LiquidGlassButton(
                               icon: CupertinoIcons.xmark,
                               iconColor: const Color(0xFF1A1A1A),

@@ -8,8 +8,9 @@ import '../../core/theme/app_typography.dart';
 import '../../core/widgets/app_toast.dart';
 import '../../core/widgets/liquid_glass_button.dart';
 import 'widgets/add_measurement.dart';
-import 'widgets/measure_animations.dart';
 import 'widgets/add_vital_sign_sheet.dart';
+import 'widgets/health_detail_app_bar.dart';
+import 'widgets/measure_animations.dart';
 
 class _CgmSample {
   const _CgmSample({
@@ -28,94 +29,86 @@ class _CgmSample {
   final int markerIndex;
 }
 
-final _cgmSamples = <_CgmSample>[
-  // Day — 48 half-hourly CGM readings (00:00..23:30) with realistic meal
-  // spikes, dawn phenomenon, and sensor micro-fluctuations.
-  _CgmSample(
-    values: [
-      // 00:00 post-dinner slow decline
-      108, 104, 100, 96, 92, 89, 86, 84,
-      // 04:00 overnight low then dawn rise
-      82, 80, 80, 82, 86, 90, 94, 100,
-      // 08:00 breakfast spike, peak ~09:00
-      110, 132, 162, 170, 158, 140, 124, 112,
-      // 12:00 lunch (12:30) peak ~13:30 then recovery
-      118, 148, 182, 176, 154, 132, 116, 108,
-      // 16:00 afternoon snack + stable
-      106, 110, 118, 124, 120, 116, 122, 138,
-      // 20:00 dinner peak then wind-down
-      168, 188, 176, 154, 134, 122, 114, 110,
-    ].map((e) => e.toDouble()).toList(),
-    xLabels: const ['12 AM', '6', '12 PM', '6'],
-    xLabelIndices: const [0, 12, 24, 36],
-    pointLabels: const [
-      '00:00', '00:30', '01:00', '01:30', '02:00', '02:30',
-      '03:00', '03:30', '04:00', '04:30', '05:00', '05:30',
-      '06:00', '06:30', '07:00', '07:30', '08:00', '08:30',
-      '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
-      '12:00', '12:30', '13:00', '13:30', '14:00', '14:30',
-      '15:00', '15:30', '16:00', '16:30', '17:00', '17:30',
-      '18:00', '18:30', '19:00', '19:30', '20:00', '20:30',
-      '21:00', '21:30', '22:00', '22:30', '23:00', '23:30',
-    ],
-    dateLabel: '11 เม.ย. 69',
-    markerIndex: 39,
-  ),
-  // Week — 7 daily averages
-  _CgmSample(
-    values: [124, 132, 118, 128, 136, 142, 126]
-        .map((e) => e.toDouble())
-        .toList(),
-    xLabels: const ['จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.', 'อา.'],
-    xLabelIndices: const [0, 1, 2, 3, 4, 5, 6],
-    pointLabels: const [
-      'จ. 7 เม.ย.',
-      'อ. 8 เม.ย.',
-      'พ. 9 เม.ย.',
-      'พฤ. 10 เม.ย.',
-      'ศ. 11 เม.ย.',
-      'ส. 12 เม.ย.',
-      'อา. 13 เม.ย.',
-    ],
-    dateLabel: 'สัปดาห์ที่ 15',
-    markerIndex: 4,
-  ),
-  // Month — 30 daily averages with natural drift and a post-holiday spike
-  _CgmSample(
-    values: [
-      118, 122, 120, 116, 124, 132, 126, 120, 118, 122,
-      128, 124, 118, 116, 120, 126, 130, 138, 144, 132,
-      124, 118, 120, 124, 128, 136, 148, 140, 128, 122,
-    ].map((e) => e.toDouble()).toList(),
-    xLabels: const ['1', '8', '15', '22', '29'],
-    xLabelIndices: const [0, 7, 14, 21, 28],
-    pointLabels: const [
-      '1 เม.ย. 69', '2 เม.ย. 69', '3 เม.ย. 69', '4 เม.ย. 69', '5 เม.ย. 69',
-      '6 เม.ย. 69', '7 เม.ย. 69', '8 เม.ย. 69', '9 เม.ย. 69', '10 เม.ย. 69',
-      '11 เม.ย. 69', '12 เม.ย. 69', '13 เม.ย. 69', '14 เม.ย. 69', '15 เม.ย. 69',
-      '16 เม.ย. 69', '17 เม.ย. 69', '18 เม.ย. 69', '19 เม.ย. 69', '20 เม.ย. 69',
-      '21 เม.ย. 69', '22 เม.ย. 69', '23 เม.ย. 69', '24 เม.ย. 69', '25 เม.ย. 69',
-      '26 เม.ย. 69', '27 เม.ย. 69', '28 เม.ย. 69', '29 เม.ย. 69', '30 เม.ย. 69',
-    ],
-    dateLabel: 'เม.ย. 69',
-    markerIndex: 10,
-  ),
-  // Year — 12 monthly averages with festive-season rise (Apr / Dec)
-  _CgmSample(
-    values: [120, 124, 128, 138, 130, 124, 126, 132, 128, 122, 126, 138]
-        .map((e) => e.toDouble())
-        .toList(),
-    xLabels: const ['ม.ค.', 'เม.ย.', 'ก.ค.', 'ต.ค.'],
-    xLabelIndices: const [0, 3, 6, 9],
-    pointLabels: const [
-      'ม.ค. 69', 'ก.พ. 69', 'มี.ค. 69', 'เม.ย. 69',
-      'พ.ค. 69', 'มิ.ย. 69', 'ก.ค. 69', 'ส.ค. 69',
-      'ก.ย. 69', 'ต.ค. 69', 'พ.ย. 69', 'ธ.ค. 69',
-    ],
-    dateLabel: '2569',
-    markerIndex: 3,
-  ),
+// Real-time CGM data: 48 readings at 30-min intervals over the last ~24 hours.
+// Index 0 = 10:30 (yesterday), index 47 = 10:00 today (= "NOW").
+// Hand-tuned to look realistic: lunch + dinner peaks, overnight low, dawn rise,
+// breakfast spike then recovery. Last value (90) shows on the hero gauge.
+const _cgm24hValues = <double>[
+  142, 130, 122, 118,            // 10:30-12:00 (post-breakfast settling)
+  122, 134, 152, 172,            // 12:30-14:00 (lunch climb)
+  178, 162, 148, 138,            // 14:30-16:00 (recovery)
+  132, 130, 132, 138,            // 16:30-18:00 (afternoon)
+  148, 165, 180, 188,            // 18:30-20:00 (dinner climb)
+  176, 158, 140, 128,            // 20:30-22:00 (recovery)
+  118, 110, 102, 95,             // 22:30-00:00 (pre-sleep)
+  90, 86, 82, 80,                // 00:30-02:00 (sleeping)
+  78, 78, 80, 82,                // 02:30-04:00 (overnight low)
+  84, 88, 92, 96,                // 04:30-06:00 (dawn rise)
+  100, 108, 118, 130,            // 06:30-08:00 (waking)
+  145, 165, 110, 90,             // 08:30-10:00 (breakfast peak then NOW=90)
 ];
+
+/// Builds 4 time windows ending at "now". Each slices the 24h dataset above.
+List<_CgmSample> _buildCgmSamples() {
+  // Window definitions: (hours, label-stride-hours).
+  // 3h → labels every 1h; 6h → every 2h; 12h → every 4h; 24h → every 6h.
+  // 30-min readings → 1h = 2 indices.
+  String timeAt(int totalMinFromMidnightYesterday) {
+    final total = totalMinFromMidnightYesterday;
+    final hr = (total ~/ 60) % 24;
+    final mn = total % 60;
+    return '${hr.toString().padLeft(2, '0')}:${mn.toString().padLeft(2, '0')}';
+  }
+
+  // First reading is at 10:30 yesterday = 10*60+30 = 630 min from y-day midnight.
+  String pointLabelFor(int idx) => timeAt(630 + idx * 30);
+
+  _CgmSample sample({
+    required int hours,
+    required int strideHours,
+  }) {
+    final total = _cgm24hValues.length;
+    // Number of readings spanning the window: hours * 2 (every 30min) + 1 to include both endpoints.
+    final count = hours * 2 + 1;
+    final start = (total - count).clamp(0, total - 1);
+    final values = _cgm24hValues.sublist(start);
+    // Build labels every `strideHours` from start, plus "NOW" at the end.
+    // Window length in indices = values.length - 1.
+    final lastIdx = values.length - 1;
+    final stridePts = strideHours * 2;
+    final indices = <int>[];
+    for (int i = 0; i <= lastIdx; i += stridePts) {
+      if (lastIdx - i >= stridePts) {
+        // Skip second-to-last if too close to NOW.
+        indices.add(i);
+      }
+    }
+    indices.add(lastIdx);
+    final labels = indices
+        .map((i) => i == lastIdx ? 'NOW' : pointLabelFor(start + i))
+        .toList();
+    return _CgmSample(
+      values: values,
+      xLabels: labels,
+      xLabelIndices: indices,
+      pointLabels: List.generate(
+        values.length,
+        (i) => pointLabelFor(start + i),
+      ),
+      dateLabel: '$hours ชั่วโมงล่าสุด',
+      markerIndex: lastIdx,
+    );
+  }
+
+  return [
+    sample(hours: 3, strideHours: 1),
+    sample(hours: 6, strideHours: 2),
+    sample(hours: 12, strideHours: 4),
+    sample(hours: 24, strideHours: 6),
+  ];
+}
+
+final _cgmSamples = _buildCgmSamples();
 
 const _yLabels = [250, 200, 150, 100, 50];
 const _yMax = 250.0;
@@ -135,6 +128,33 @@ class CgmDetailScreen extends StatefulWidget {
 class _CgmDetailScreenState extends State<CgmDetailScreen> {
   int _tab = 0;
   int? _selectedIndex;
+  final ValueNotifier<double> _scrollOffset = ValueNotifier<double>(0);
+
+  @override
+  void dispose() {
+    _scrollOffset.dispose();
+    super.dispose();
+  }
+
+  Future<void> _addMeasurement() async {
+    final result = await showAddMeasurement(
+      context,
+      title: 'เพิ่มค่า CGM',
+      animation: MeasureAnimationKind.sugarDrop,
+      icon: CupertinoIcons.waveform_path_ecg,
+      color: const Color(0xFFF59E0B),
+      fields: const [
+        VitalFieldConfig(
+          label: 'น้ำตาลต่อเนื่อง (CGM)',
+          placeholder: '100',
+          unit: 'mg/dL',
+        ),
+      ],
+    );
+    if (result != null && mounted) {
+      AppToast.success(context, 'บันทึกค่า CGM แล้ว');
+    }
+  }
 
   void _showCgmInfoSheet() {
     Navigator.of(context, rootNavigator: true).push(
@@ -174,34 +194,15 @@ class _CgmDetailScreenState extends State<CgmDetailScreen> {
             top: 0,
             left: 0,
             right: 0,
-            height: 250,
-            child: _HeaderBackground(),
+            height: 180,
+            child: DetailHeaderBackground(),
           ),
           SafeArea(
             bottom: false,
             child: Column(
               children: [
-                _TopBar(
-                  onBack: () => Navigator.of(context).pop(),
-                  onAdd: () async {
-                    final result = await showAddMeasurement(
-                      context,
-                      title: 'เพิ่มค่า CGM',
-                      animation: MeasureAnimationKind.sugarDrop,
-                      icon: CupertinoIcons.waveform_path_ecg,
-                      color: const Color(0xFFF59E0B),
-                      fields: const [
-                        VitalFieldConfig(
-                          label: 'น้ำตาลต่อเนื่อง (CGM)',
-                          placeholder: '100',
-                          unit: 'mg/dL',
-                        ),
-                      ],
-                    );
-                    if (result != null && context.mounted) {
-                      AppToast.success(context, 'บันทึกค่า CGM แล้ว');
-                    }
-                  },
+                const SizedBox(
+                  height: HealthDetailAppBar.safeAreaContentHeight,
                 ),
                 Expanded(
                   child: Container(
@@ -212,94 +213,65 @@ class _CgmDetailScreenState extends State<CgmDetailScreen> {
                           BorderRadius.vertical(top: Radius.circular(24)),
                     ),
                     clipBehavior: Clip.antiAlias,
-                    child: ListView(
-                      physics: const BouncingScrollPhysics(),
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-                      children: [
-                        _CgmChartCard(
-                          tab: _tab,
-                          onTabChange: (i) => setState(() => _tab = i),
-                          selectedIndex: _selectedIndex,
-                          onSelect: (idx) =>
-                              setState(() => _selectedIndex = idx),
-                        ),
-                        const SizedBox(height: 16),
-                        _AboutCgmCard(onTap: _showCgmInfoSheet),
-                        const SizedBox(height: 16),
-                        const _OptionLabel(),
-                        const SizedBox(height: 10),
-                        const _HighlightOption(),
-                        const SizedBox(height: 16),
-                        const _SettingsCard(),
-                      ],
+                    child: NotificationListener<ScrollNotification>(
+                      onNotification: (n) {
+                        if (n is ScrollUpdateNotification ||
+                            n is ScrollStartNotification) {
+                          _scrollOffset.value = n.metrics.pixels;
+                        }
+                        return false;
+                      },
+                      child: ListView(
+                        physics: const BouncingScrollPhysics(),
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+                        children: [
+                          _CgmChartCard(
+                            tab: _tab,
+                            onTabChange: (i) => setState(() => _tab = i),
+                            selectedIndex: _selectedIndex,
+                            onSelect: (idx) =>
+                                setState(() => _selectedIndex = idx),
+                          ),
+                          const SizedBox(height: 16),
+                          _AboutCgmCard(onTap: _showCgmInfoSheet),
+                          const SizedBox(height: 16),
+                          const _OptionLabel(),
+                          const SizedBox(height: 10),
+                          const _HighlightOption(),
+                          const SizedBox(height: 16),
+                          const _SettingsCard(),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ],
             ),
           ),
-        ],
-      ),
-    );
-  }
-}
-
-class _HeaderBackground extends StatelessWidget {
-  const _HeaderBackground();
-
-  @override
-  Widget build(BuildContext context) {
-    return const DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: RadialGradient(
-          center: Alignment(-0.2, -0.5),
-          radius: 1.2,
-          colors: [
-            Color(0xFFCB9AEE),
-            Color(0xFF9333EA),
-            Color(0xFF6B21A8),
-          ],
-          stops: [0.0, 0.55, 1.0],
-        ),
-      ),
-    );
-  }
-}
-
-class _TopBar extends StatelessWidget {
-  const _TopBar({required this.onBack, required this.onAdd});
-  final VoidCallback onBack;
-  final VoidCallback onAdd;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 6, 16, 16),
-      child: Row(
-        children: [
-          LiquidGlassButton(
-            icon: CupertinoIcons.chevron_back,
-            onTap: onBack,
-          ),
-          const SizedBox(width: 10),
-          Text(
-            'CGM',
-            style: AppTypography.title3(CupertinoColors.white).copyWith(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: ValueListenableBuilder<double>(
+              valueListenable: _scrollOffset,
+              builder: (_, offset, __) => HealthDetailAppBar(
+                title: 'CGM',
+                scrollOffset: offset,
+                onBack: () => Navigator.of(context).pop(),
+                action: LiquidGlassButton(
+                  icon: CupertinoIcons.plus,
+                  onTap: _addMeasurement,
+                  size: 40,
+                  iconSize: 18,
+                ),
+              ),
             ),
           ),
-          const Spacer(),
-          LiquidGlassButton(
-            icon: CupertinoIcons.plus,
-            onTap: onAdd,
-          ),
         ],
       ),
     );
   }
 }
-
 
 class _CgmChartCard extends StatelessWidget {
   const _CgmChartCard({
@@ -320,9 +292,9 @@ class _CgmChartCard extends StatelessWidget {
     final activeIdx =
         (selectedIndex ?? fallback).clamp(0, sample.values.length - 1);
     final value = sample.values[activeIdx];
-    final activeLabel = selectedIndex != null
-        ? sample.pointLabels[activeIdx]
-        : sample.dateLabel;
+    final timeLabel = activeIdx == sample.values.length - 1
+        ? 'ตอนนี้'
+        : sample.pointLabels[activeIdx];
     return Container(
       decoration: BoxDecoration(
         color: CupertinoColors.white,
@@ -331,27 +303,18 @@ class _CgmChartCard extends StatelessWidget {
       child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(16),
-            child: _SegmentedTabs(
-              tabs: const ['วัน', 'สัปดาห์', 'เดือน', 'ปี'],
-              selected: tab,
-              onChange: onTabChange,
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            child: _CgmHeroGauge(
+              value: value,
+              timeLabel: timeLabel,
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: _ValueDisplay(
-                    value: value,
-                    dateLabel: activeLabel,
-                    isSelected: selectedIndex != null,
-                  ),
-                ),
-                const _StatusBadge(label: 'ปกติ'),
-              ],
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+            child: _SegmentedTabs(
+              tabs: const ['3 ชม.', '6 ชม.', '12 ชม.', '24 ชม.'],
+              selected: tab,
+              onChange: onTabChange,
             ),
           ),
           SizedBox(
@@ -367,6 +330,155 @@ class _CgmChartCard extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Circle gauge that mirrors the Figma hero — soft mint ring around current
+/// reading, last-known timestamp, and a status pill.
+class _CgmHeroGauge extends StatelessWidget {
+  const _CgmHeroGauge({required this.value, required this.timeLabel});
+  final double value;
+  final String timeLabel;
+
+  ({String label, Color color}) _statusFor(double v) {
+    if (v < 70) return (label: 'น้ำตาลต่ำ', color: const Color(0xFFD97706));
+    if (v >= 200) {
+      return (label: 'สูงมาก', color: const Color(0xFFDC2626));
+    }
+    if (v >= 140) return (label: 'สูง', color: const Color(0xFFD97706));
+    return (label: 'ปกติ', color: const Color(0xFF4CA30D));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final status = _statusFor(value);
+    return SizedBox(
+      width: 150,
+      height: 150,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 400),
+            transitionBuilder: (child, anim) =>
+                FadeTransition(opacity: anim, child: child),
+            child: CustomPaint(
+              key: ValueKey(status.color.toARGB32()),
+              size: const Size(150, 150),
+              painter: _GaugeRingPainter(color: status.color),
+            ),
+          ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    CupertinoIcons.arrow_up_left_circle,
+                    size: 10,
+                    color: Color(0xFF6D756E),
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    '$timeLabel น.',
+                    style: const TextStyle(
+                      color: Color(0xFF6D756E),
+                      fontSize: 10,
+                      letterSpacing: -0.6,
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                value.round().toString(),
+                style: const TextStyle(
+                  color: CupertinoColors.black,
+                  fontSize: 28,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: -0.6,
+                  height: 1,
+                ),
+              ),
+              const SizedBox(height: 2),
+              const Text(
+                'mg/dL',
+                style: TextStyle(
+                  color: CupertinoColors.black,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: -0.4,
+                  height: 1.2,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: status.color.withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(100),
+                  border: Border.all(
+                    color: CupertinoColors.white.withValues(alpha: 0.5),
+                  ),
+                ),
+                child: Text(
+                  status.label,
+                  style: TextStyle(
+                    color: status.color,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: 0.275,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GaugeRingPainter extends CustomPainter {
+  _GaugeRingPainter({required this.color});
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = size.center(Offset.zero);
+    final radius = size.width / 2 - 4;
+    // Soft outer glow
+    canvas.drawCircle(
+      center,
+      radius + 1,
+      Paint()
+        ..color = color.withValues(alpha: 0.18)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6),
+    );
+    // Outer thin track
+    canvas.drawCircle(
+      center,
+      radius,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1
+        ..color = color.withValues(alpha: 0.35),
+    );
+    // Inner thick band
+    canvas.drawCircle(
+      center,
+      radius - 4,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 6
+        ..color = color.withValues(alpha: 0.55),
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _GaugeRingPainter old) => old.color != color;
 }
 
 class _SegmentedTabs extends StatelessWidget {
@@ -451,122 +563,6 @@ class _SegmentedTabs extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-}
-
-class _ValueDisplay extends StatelessWidget {
-  const _ValueDisplay({
-    required this.value,
-    required this.dateLabel,
-    required this.isSelected,
-  });
-  final double value;
-  final String dateLabel;
-  final bool isSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 220),
-      switchInCurve: Curves.easeOutCubic,
-      transitionBuilder: (child, anim) => FadeTransition(
-        opacity: anim,
-        child: SlideTransition(
-          position: Tween<Offset>(
-            begin: const Offset(0, 0.15),
-            end: Offset.zero,
-          ).animate(anim),
-          child: child,
-        ),
-      ),
-      child: Column(
-        key: ValueKey('$value-$dateLabel-$isSelected'),
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            isSelected ? 'ค่าที่เลือก' : 'Value',
-            style: AppTypography.caption1(const Color(0xFF6D756E)).copyWith(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              letterSpacing: 0.275,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                value.round().toString(),
-                style: AppTypography.title2(CupertinoColors.black).copyWith(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w500,
-                  letterSpacing: -0.6,
-                  height: 1,
-                ),
-              ),
-              const SizedBox(width: 6),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 2),
-                child: Text(
-                  'mg/dl',
-                  style: AppTypography.caption2(const Color(0xFF737373))
-                      .copyWith(fontSize: 10),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Text(
-            dateLabel,
-            style: AppTypography.caption2(const Color(0xFF737373))
-                .copyWith(fontSize: 10),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _StatusBadge extends StatelessWidget {
-  const _StatusBadge({required this.label});
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(100),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(
-            color: const Color(0xFF4CA30D).withValues(alpha: 0.20),
-            borderRadius: BorderRadius.circular(100),
-            border: Border.all(
-              color: CupertinoColors.white.withValues(alpha: 0.1),
-              width: 1,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFFA6EF67).withValues(alpha: 0.1),
-                blurRadius: 4,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Text(
-            label,
-            style: AppTypography.caption1(
-              const Color(0xFF4CA30D),
-            ).copyWith(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              letterSpacing: 0.275,
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

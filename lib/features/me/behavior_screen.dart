@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 
 import '../../core/widgets/liquid_glass_button.dart';
 import '../../core/widgets/press_effect.dart';
+import '../health/widgets/health_detail_app_bar.dart';
 
 class BehaviorScreen extends StatefulWidget {
   const BehaviorScreen({super.key});
@@ -16,6 +17,7 @@ class BehaviorScreen extends StatefulWidget {
 class _BehaviorScreenState extends State<BehaviorScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController _enter;
+  final ValueNotifier<double> _scrollOffset = ValueNotifier<double>(0);
   bool _trackNutrition = true;
 
   DateTime _morning = DateTime(2026, 1, 1, 6, 20);
@@ -316,6 +318,7 @@ class _BehaviorScreenState extends State<BehaviorScreen>
   @override
   void dispose() {
     _enter.dispose();
+    _scrollOffset.dispose();
     super.dispose();
   }
 
@@ -352,43 +355,14 @@ class _BehaviorScreenState extends State<BehaviorScreen>
             top: 0,
             left: 0,
             right: 0,
-            height: 200,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [Color(0xFFC084FC), Color(0xFF7C3AED)],
-                ),
-              ),
-            ),
+            height: 180,
+            child: DetailHeaderBackground(),
           ),
-          Column(
+          SafeArea(
+            bottom: false,
+            child: Column(
             children: [
-              SafeArea(
-                bottom: false,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-                  child: Row(
-                    children: [
-                      LiquidGlassButton(
-                        icon: CupertinoIcons.chevron_back,
-                        iconColor: const Color(0xFF1A1A1A),
-                        onTap: () => Navigator.of(context).pop(),
-                      ),
-                      const SizedBox(width: 10),
-                      const Text(
-                        'พฤติกรรมผู้ใช้งาน',
-                        style: TextStyle(
-                          color: CupertinoColors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              const SizedBox(height: HealthDetailAppBar.safeAreaContentHeight),
               Expanded(
                 child: Container(
                   decoration: const BoxDecoration(
@@ -399,12 +373,20 @@ class _BehaviorScreenState extends State<BehaviorScreen>
                     ),
                   ),
                   clipBehavior: Clip.antiAlias,
-                  child: ListView(
+                  child: NotificationListener<ScrollNotification>(
+                    onNotification: (n) {
+                      if (n is ScrollUpdateNotification ||
+                          n is ScrollStartNotification) {
+                        _scrollOffset.value = n.metrics.pixels;
+                      }
+                      return false;
+                    },
+                    child: ListView(
                     physics: const BouncingScrollPhysics(
                       parent: AlwaysScrollableScrollPhysics(),
                     ),
                     padding: const EdgeInsets.fromLTRB(16, 16, 16, 40),
-                  children: [
+                    children: [
                     _stagger(
                       0,
                       3,
@@ -486,11 +468,26 @@ class _BehaviorScreenState extends State<BehaviorScreen>
                         ),
                       ),
                     ),
-                  ],
+                    ],
+                    ),
                   ),
                 ),
               ),
             ],
+            ),
+          ),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: ValueListenableBuilder<double>(
+              valueListenable: _scrollOffset,
+              builder: (_, offset, __) => HealthDetailAppBar(
+                title: 'พฤติกรรมผู้ใช้งาน',
+                scrollOffset: offset,
+                onBack: () => Navigator.of(context).pop(),
+              ),
+            ),
           ),
         ],
       ),
