@@ -79,6 +79,13 @@ flutter:
     - assets/svg/
     - assets/3d/
 
+  fonts:
+    - family: Google Sans
+      fonts:
+        - asset: assets/fonts/GoogleSans-Variable.ttf
+        - asset: assets/fonts/GoogleSans-Italic-Variable.ttf
+          style: italic
+
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
 
