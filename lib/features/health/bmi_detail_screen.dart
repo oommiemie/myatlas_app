@@ -84,7 +84,7 @@ class _BmiDetailScreenState extends State<BmiDetailScreen> {
   Future<void> _addMeasurement() async {
     final result = await showAddMeasurement(
       context,
-      title: 'เพิ่มข้อมูล BMI',
+      title: 'เพิ่มดัชนีมวลกาย',
       animation: MeasureAnimationKind.scale,
       icon: CupertinoIcons.chart_bar_alt_fill,
       color: const Color(0xFF1D8B6B),
@@ -104,7 +104,7 @@ class _BmiDetailScreenState extends State<BmiDetailScreen> {
       ],
     );
     if (result != null && mounted) {
-      AppToast.success(context, 'บันทึกข้อมูล BMI แล้ว');
+      AppToast.success(context, 'บันทึกดัชนีมวลกายแล้ว');
     }
   }
 
@@ -210,7 +210,7 @@ class _BmiDetailScreenState extends State<BmiDetailScreen> {
             child: ValueListenableBuilder<double>(
               valueListenable: _scrollOffset,
               builder: (_, offset, __) => HealthDetailAppBar(
-                title: 'Body Mass Index',
+                title: 'ดัชนีมวลกาย',
                 scrollOffset: offset,
                 onBack: () => Navigator.of(context).pop(),
                 action: LiquidGlassButton(
@@ -437,7 +437,7 @@ class _StatItem extends StatelessWidget {
         Text(
           label,
           style: AppTypography.caption2(const Color(0xFF737373))
-              .copyWith(fontSize: 8),
+              .copyWith(fontSize: 10),
         ),
       ],
     );
@@ -645,7 +645,7 @@ class _MetricValueDisplay extends StatelessWidget {
                 child: Text(
                   isWeight ? 'kg' : 'cm',
                   style: AppTypography.caption2(const Color(0xFF737373))
-                      .copyWith(fontSize: 10),
+                      .copyWith(fontSize: 11),
                 ),
               ),
             ],
@@ -654,7 +654,7 @@ class _MetricValueDisplay extends StatelessWidget {
           Text(
             point.dateLabel,
             style: AppTypography.caption2(const Color(0xFF737373))
-                .copyWith(fontSize: 10),
+                .copyWith(fontSize: 11),
           ),
         ],
       ),
@@ -843,7 +843,7 @@ class _AxisLabelsPainter extends CustomPainter {
     final chartHeight = size.height - topPad - bottomPad;
     final labelStyle = TextStyle(
       color: const Color(0xFF6D756E),
-      fontSize: 10,
+      fontSize: 11,
       letterSpacing: 0.6,
     );
     for (int i = 0; i < yLabels.length; i++) {
@@ -890,7 +890,7 @@ class _AreaChartPainter extends CustomPainter {
 
     final labelStyle = TextStyle(
       color: const Color(0xFF6D756E),
-      fontSize: 10,
+      fontSize: 11,
       letterSpacing: 0.6,
     );
 
@@ -1143,7 +1143,7 @@ class _AboutBmiCard extends StatelessWidget {
                         style: AppTypography.caption2(
                           const Color(0xFF6D756E),
                         ).copyWith(
-                          fontSize: 10,
+                          fontSize: 11,
                           fontWeight: FontWeight.w700,
                           height: 1,
                         ),
@@ -1200,7 +1200,7 @@ class _OptionLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Text(
-      'Option',
+      'ตัวเลือก',
       style: AppTypography.headline(const Color(0xFF1A1A1A)).copyWith(
         fontSize: 16,
         fontWeight: FontWeight.w700,

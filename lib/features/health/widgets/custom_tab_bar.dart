@@ -280,7 +280,7 @@ class _TabButton extends StatelessWidget {
                 duration: const Duration(milliseconds: 220),
                 curve: Curves.easeOut,
                 style: AppTypography.caption2(color).copyWith(
-                  fontSize: 10,
+                  fontSize: 11,
                   fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
                   letterSpacing: selected ? -0.1 : 0,
                   height: 1.2,

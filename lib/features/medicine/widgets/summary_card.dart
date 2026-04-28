@@ -75,7 +75,7 @@ class _SummaryItem extends StatelessWidget {
         Text(
           label,
           style: const TextStyle(
-            fontSize: 10,
+            fontSize: 11,
             color: AppColors.textSecondary,
           ),
         ),
@@ -92,11 +92,11 @@ class _SummaryItem extends StatelessWidget {
                   color: AppColors.textPrimary,
                 ),
               ),
-              const TextSpan(text: ' ', style: TextStyle(fontSize: 10)),
+              const TextSpan(text: ' ', style: TextStyle(fontSize: 11)),
               const TextSpan(
                 text: 'รายการ',
                 style: TextStyle(
-                  fontSize: 10,
+                  fontSize: 11,
                   color: AppColors.textTertiary,
                 ),
               ),

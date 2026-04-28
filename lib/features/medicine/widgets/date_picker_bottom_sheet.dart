@@ -180,11 +180,11 @@ class _RangeSegmented extends StatelessWidget {
       ),
       child: Row(
         children: [
-          _segment('Today', DatePickerRange.today),
+          _segment('วันนี้', DatePickerRange.today),
           const _SegmentDivider(),
-          _segment('Week', DatePickerRange.week),
+          _segment('สัปดาห์', DatePickerRange.week),
           const _SegmentDivider(),
-          _segment('Month', DatePickerRange.month),
+          _segment('เดือน', DatePickerRange.month),
         ],
       ),
     );

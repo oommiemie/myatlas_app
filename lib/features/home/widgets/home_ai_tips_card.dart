@@ -272,10 +272,10 @@ class _AiTipsHeaderChipState extends State<_AiTipsHeaderChip>
                     borderRadius: BorderRadius.circular(radius),
                   ),
                   child: _ChipContent(
-                  angle: angle,
-                  typing: widget.typing,
-                  labelChild: widget.labelChild,
-                ),
+                    angle: angle,
+                    typing: widget.typing,
+                    labelChild: widget.labelChild,
+                  ),
                 ),
               ),
             ],
@@ -328,8 +328,7 @@ class _ChipContent extends StatelessWidget {
             valueListenable: typing,
             builder: (_, isTyping, __) => AnimatedSwitcher(
               duration: const Duration(milliseconds: 200),
-              transitionBuilder: (c, a) =>
-                  FadeTransition(opacity: a, child: c),
+              transitionBuilder: (c, a) => FadeTransition(opacity: a, child: c),
               child: isTyping
                   ? const Padding(
                       key: ValueKey('dots'),
@@ -472,10 +471,7 @@ class _RiskBarBlock extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 8,
-            color: AppColors.textSecondary,
-          ),
+          style: const TextStyle(fontSize: 10, color: AppColors.textSecondary),
         ),
         const SizedBox(height: 2),
         Container(
@@ -576,11 +572,11 @@ class _HealthMetricChip extends StatelessWidget {
                     color: Color(0xFFE62E05),
                   ),
                 ),
-                const TextSpan(text: ' ', style: TextStyle(fontSize: 10)),
+                const TextSpan(text: ' ', style: TextStyle(fontSize: 11)),
                 TextSpan(
                   text: unit,
                   style: const TextStyle(
-                    fontSize: 10,
+                    fontSize: 11,
                     color: AppColors.textTertiary,
                   ),
                 ),

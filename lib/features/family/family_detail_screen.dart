@@ -5,10 +5,13 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_typography.dart';
+import '../../core/widgets/liquid_glass_button.dart';
+import '../../core/widgets/press_effect.dart';
 import '../health/widgets/mini_charts.dart';
 import 'call_screen.dart';
 import 'care_giver_screen.dart';
-import '../../core/widgets/liquid_glass_button.dart';
+import 'fall_alert.dart';
+import 'family_devices.dart';
 
 // Bangkok example coordinate for the family home.
 const double _homeLat = 13.7563;
@@ -35,6 +38,8 @@ class _FamilyDetailScreenState extends State<FamilyDetailScreen>
     with SingleTickerProviderStateMixin {
   final ValueNotifier<double> _scrollOffset = ValueNotifier<double>(0);
   late final AnimationController _enter;
+  // Mock state — in a real app this would come from a repository.
+  late final Set<DeviceKind> _connectedDevices;
 
   @override
   void initState() {
@@ -44,6 +49,30 @@ class _FamilyDetailScreenState extends State<FamilyDetailScreen>
       duration: const Duration(milliseconds: 900),
     );
     WidgetsBinding.instance.addPostFrameCallback((_) => _enter.forward());
+    _connectedDevices = _seedDevicesFor(widget.member);
+  }
+
+  Set<DeviceKind> _seedDevicesFor(FamilyMember m) {
+    // Pre-fill plausible devices based on which vitals the member already has.
+    final s = <DeviceKind>{DeviceKind.watch};
+    if (m.cgm > 0) s.add(DeviceKind.cgm);
+    if (m.spo2 > 0) s.add(DeviceKind.spo2);
+    return s;
+  }
+
+  Future<void> _manageDevices() async {
+    await showManageDevicesSheet(
+      context,
+      selected: _connectedDevices,
+      memberName: widget.member.name.split(' ').first,
+      onChanged: (next) {
+        setState(() {
+          _connectedDevices
+            ..clear()
+            ..addAll(next);
+        });
+      },
+    );
   }
 
   @override
@@ -123,15 +152,27 @@ class _FamilyDetailScreenState extends State<FamilyDetailScreen>
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 110),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate.fixed([
-                    _stagger(0, 5, _ProfileCard(member: member)),
+                    _stagger(0, 7, _ProfileCard(member: member)),
                     const SizedBox(height: 16),
-                    _stagger(1, 5, _MetricsGrid(member: member)),
+                    _stagger(1, 7, _MetricsGrid(member: member)),
                     const SizedBox(height: 16),
-                    _stagger(2, 5, const _LocationCard()),
+                    _stagger(2, 7, _StepsCard(member: member)),
                     const SizedBox(height: 16),
-                    _stagger(3, 5, const _RecentEventsSection()),
+                    _stagger(
+                      3,
+                      7,
+                      _DevicesCard(
+                        member: member,
+                        connected: _connectedDevices,
+                        onManage: _manageDevices,
+                      ),
+                    ),
                     const SizedBox(height: 16),
-                    _stagger(4, 5, const _EmergencyContactsSection()),
+                    _stagger(4, 7, const _LocationCard()),
+                    const SizedBox(height: 16),
+                    _stagger(5, 7, const _RecentEventsSection()),
+                    const SizedBox(height: 16),
+                    _stagger(6, 7, const _EmergencyContactsSection()),
                   ]),
                 ),
               ),
@@ -258,87 +299,23 @@ class _ProfileCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isAttention = member.status == FamilyMemberStatus.attentionNeeded;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         FamilyMemberCard(member: member),
-        if (isAttention)
-          Padding(
-            padding: const EdgeInsets.only(top: 10),
-            child: _FallAlertBanner(),
-          ),
+        ValueListenableBuilder<Map<String, FallAlert>>(
+          valueListenable: fallAlertsStore,
+          builder: (_, store, __) {
+            if (!store.containsKey(member.name)) {
+              return const SizedBox.shrink();
+            }
+            return Padding(
+              padding: const EdgeInsets.only(top: 10),
+              child: FallAlertBanner(member: member),
+            );
+          },
+        ),
       ],
-    );
-  }
-}
-
-class _FallAlertBanner extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: CupertinoColors.white,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      width: 8,
-                      height: 8,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Color(0xFFBC1B06),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'FALL DETECTED',
-                      style:
-                          AppTypography.caption1(const Color(0xFFBC1B06))
-                              .copyWith(
-                        fontSize: 12,
-                        letterSpacing: 0.6,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  'On the Way • สมพงษ์ (รปภ.)',
-                  style: AppTypography.caption2(const Color(0xFF6D756E))
-                      .copyWith(fontSize: 10),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-            decoration: BoxDecoration(
-              color: const Color(0xFFFF6900).withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Text(
-              'HIGH',
-              style: AppTypography.caption2(const Color(0xFFFF8904))
-                  .copyWith(
-                fontSize: 10,
-                letterSpacing: 0.5,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
@@ -372,7 +349,7 @@ class _MetricsGrid extends StatelessWidget {
               child: _MetricTile(
                 icon: CupertinoIcons.heart_fill,
                 iconColor: AppColors.health,
-                label: 'Heart Rate',
+                label: 'อัตราการเต้นหัวใจ',
                 value: member.heartRate.toString(),
                 unit: 'bpm',
                 chart: MiniLineChart(
@@ -388,7 +365,7 @@ class _MetricsGrid extends StatelessWidget {
               child: _MetricTile(
                 icon: CupertinoIcons.sun_max,
                 iconColor: AppColors.mindfulness,
-                label: 'SpO₂',
+                label: 'ออกซิเจนในเลือด',
                 value: member.spo2.toString(),
                 unit: '%',
                 chart: MiniBarChart(
@@ -409,7 +386,7 @@ class _MetricsGrid extends StatelessWidget {
               child: _MetricTile(
                 icon: CupertinoIcons.drop_fill,
                 iconColor: AppColors.sleep,
-                label: 'CGM',
+                label: 'น้ำตาลต่อเนื่อง',
                 value: member.cgm.toString(),
                 unit: 'mg/dl',
                 chart: MiniLineChart(
@@ -440,6 +417,581 @@ class _MetricsGrid extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ],
+    );
+  }
+}
+
+class _StepsCard extends StatelessWidget {
+  const _StepsCard({required this.member});
+  final FamilyMember member;
+
+  static const _stepColor = Color(0xFFE32616);
+  static const _weekDayLabels = ['จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.', 'อา.'];
+
+  String _formatInt(int v) {
+    final s = v.toString();
+    final buf = StringBuffer();
+    for (int k = 0; k < s.length; k++) {
+      if (k > 0 && (s.length - k) % 3 == 0) buf.write(',');
+      buf.write(s[k]);
+    }
+    return buf.toString();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final progress = (member.steps / member.stepsGoal).clamp(0.0, 1.0);
+    final percent = (progress * 100).round();
+    final remaining = (member.stepsGoal - member.steps).clamp(0, 1 << 31);
+    final reached = member.steps >= member.stepsGoal;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: CupertinoColors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: const Color(0xFF747480).withValues(alpha: 0.08),
+        ),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 28,
+                height: 28,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: _stepColor,
+                ),
+                alignment: Alignment.center,
+                child: const Icon(
+                  CupertinoIcons.flame_fill,
+                  color: CupertinoColors.white,
+                  size: 14,
+                ),
+              ),
+              const SizedBox(width: 10),
+              const Expanded(
+                child: Text(
+                  'ก้าวเดินวันนี้',
+                  style: TextStyle(
+                    color: Color(0xFF1A1A1A),
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.2,
+                  ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: reached
+                      ? const Color(0xFF1D8B6B).withValues(alpha: 0.14)
+                      : _stepColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(100),
+                ),
+                child: Text(
+                  reached ? 'ถึงเป้าแล้ว' : '$percent%',
+                  style: TextStyle(
+                    color: reached
+                        ? const Color(0xFF1D8B6B)
+                        : _stepColor,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.2,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                _formatInt(member.steps),
+                style: const TextStyle(
+                  color: Color(0xFF1A1A1A),
+                  fontSize: 36,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.8,
+                  height: 1,
+                  fontFeatures: [FontFeature.tabularFigures()],
+                ),
+              ),
+              const SizedBox(width: 6),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Text(
+                  '/ ${_formatInt(member.stepsGoal)} ก้าว',
+                  style: const TextStyle(
+                    color: Color(0xFF6D756E),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            reached
+                ? 'เดินครบเป้าหมายแล้ว วันนี้สุดยอดเลย'
+                : 'อีก ${_formatInt(remaining)} ก้าวจะถึงเป้าหมาย',
+            style: const TextStyle(
+              color: Color(0xFF6D756E),
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
+              letterSpacing: 0.2,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 14),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(100),
+            child: SizedBox(
+              height: 8,
+              child: Stack(
+                children: [
+                  Container(
+                    color: const Color(0xFF1A1A1A).withValues(alpha: 0.06),
+                  ),
+                  FractionallySizedBox(
+                    alignment: Alignment.centerLeft,
+                    widthFactor: progress,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: reached
+                              ? const [
+                                  Color(0xFF26A37E),
+                                  Color(0xFF1D8B6B),
+                                ]
+                              : const [
+                                  Color(0xFFFF6B5A),
+                                  Color(0xFFE32616),
+                                ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 18),
+          const Text(
+            '7 วันที่ผ่านมา',
+            style: TextStyle(
+              color: Color(0xFF6D756E),
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.3,
+            ),
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            height: 72,
+            child: _StepsWeekChart(
+              values: member.stepsWeek,
+              goal: member.stepsGoal,
+              dayLabels: _weekDayLabels,
+              color: _stepColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StepsWeekChart extends StatelessWidget {
+  const _StepsWeekChart({
+    required this.values,
+    required this.goal,
+    required this.dayLabels,
+    required this.color,
+  });
+  final List<int> values;
+  final int goal;
+  final List<String> dayLabels;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final maxVal = values.reduce((a, b) => a > b ? a : b);
+    final scaleMax = maxVal > goal ? maxVal : goal;
+    final lastIdx = values.length - 1;
+    return LayoutBuilder(
+      builder: (ctx, constraints) {
+        return Column(
+          children: [
+            Expanded(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  for (int i = 0; i < values.length; i++) ...[
+                    if (i > 0) const SizedBox(width: 6),
+                    Expanded(
+                      child: _StepsBar(
+                        progress: values[i] / scaleMax,
+                        color: i == lastIdx
+                            ? color
+                            : color.withValues(alpha: 0.35),
+                        reachedGoal: values[i] >= goal,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                for (int i = 0; i < values.length; i++) ...[
+                  if (i > 0) const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      dayLabels[i],
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: i == lastIdx
+                            ? const Color(0xFF1A1A1A)
+                            : const Color(0xFF6D756E),
+                        fontSize: 11,
+                        fontWeight: i == lastIdx
+                            ? FontWeight.w700
+                            : FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _StepsBar extends StatelessWidget {
+  const _StepsBar({
+    required this.progress,
+    required this.color,
+    required this.reachedGoal,
+  });
+  final double progress;
+  final Color color;
+  final bool reachedGoal;
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(6),
+      child: Stack(
+        alignment: Alignment.bottomCenter,
+        children: [
+          Positioned.fill(
+            child: ColoredBox(
+              color: const Color(0xFF1A1A1A).withValues(alpha: 0.04),
+            ),
+          ),
+          FractionallySizedBox(
+            heightFactor: progress.clamp(0.05, 1.0),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: reachedGoal
+                      ? [
+                          const Color(0xFF26A37E),
+                          color.withValues(alpha: 0.6),
+                        ]
+                      : [color, color.withValues(alpha: 0.55)],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DevicesCard extends StatelessWidget {
+  const _DevicesCard({
+    required this.member,
+    required this.connected,
+    required this.onManage,
+  });
+  final FamilyMember member;
+  final Set<DeviceKind> connected;
+  final VoidCallback onManage;
+
+  /// Plausible per-device battery derived from the member's primary battery
+  /// plus a deterministic offset per device kind.
+  int _batteryFor(DeviceKind kind) {
+    final base = member.batteryPercent;
+    switch (kind) {
+      case DeviceKind.watch:
+        return base;
+      case DeviceKind.cgm:
+        return (base - 5).clamp(8, 100);
+      case DeviceKind.bp:
+        return (base + 25).clamp(8, 100);
+      case DeviceKind.spo2:
+        return (base - 12).clamp(8, 100);
+      case DeviceKind.scale:
+        return 88;
+      case DeviceKind.thermometer:
+        return 72;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final list = connected.toList();
+    final isEmpty = list.isEmpty;
+    return Container(
+      decoration: BoxDecoration(
+        color: CupertinoColors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: const Color(0xFF747480).withValues(alpha: 0.08),
+        ),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 28,
+                height: 28,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Color(0xFF1D8B6B),
+                ),
+                alignment: Alignment.center,
+                child: const Icon(
+                  CupertinoIcons.dot_radiowaves_left_right,
+                  color: CupertinoColors.white,
+                  size: 14,
+                ),
+              ),
+              const SizedBox(width: 10),
+              const Expanded(
+                child: Text(
+                  'อุปกรณ์ที่เชื่อมต่อ',
+                  style: TextStyle(
+                    color: Color(0xFF1A1A1A),
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.2,
+                  ),
+                ),
+              ),
+              if (!isEmpty)
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1D8B6B).withValues(alpha: 0.14),
+                    borderRadius: BorderRadius.circular(100),
+                  ),
+                  child: Text(
+                    '${list.length} อุปกรณ์',
+                    style: const TextStyle(
+                      color: Color(0xFF1D8B6B),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.2,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          if (isEmpty)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 18),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1A1A1A).withValues(alpha: 0.03),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: const Color(0xFF1A1A1A).withValues(alpha: 0.06),
+                ),
+              ),
+              alignment: Alignment.center,
+              child: const Text(
+                'ยังไม่ได้เชื่อมต่ออุปกรณ์ใด ๆ',
+                style: TextStyle(
+                  color: Color(0xFF6D756E),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            )
+          else
+            Column(
+              children: [
+                for (int i = 0; i < list.length; i++) ...[
+                  _ConnectedDeviceRow(
+                    kind: list[i],
+                    battery: _batteryFor(list[i]),
+                  ),
+                  if (i < list.length - 1)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      child: Container(
+                        height: 0.5,
+                        color: const Color(0xFFEDEDF0),
+                      ),
+                    ),
+                ],
+              ],
+            ),
+          const SizedBox(height: 14),
+          PressEffect(
+            onTap: onManage,
+            haptic: HapticKind.selection,
+            scale: 0.98,
+            borderRadius: BorderRadius.circular(100),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              decoration: BoxDecoration(
+                color: CupertinoColors.white,
+                borderRadius: BorderRadius.circular(100),
+                border: Border.all(
+                  color: const Color(0xFF1D8B6B).withValues(alpha: 0.4),
+                ),
+              ),
+              alignment: Alignment.center,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    CupertinoIcons.add,
+                    size: 14,
+                    color: Color(0xFF1D8B6B),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    isEmpty ? 'เชื่อมต่ออุปกรณ์' : 'จัดการอุปกรณ์',
+                    style: const TextStyle(
+                      color: Color(0xFF1D8B6B),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.2,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ConnectedDeviceRow extends StatelessWidget {
+  const _ConnectedDeviceRow({required this.kind, required this.battery});
+  final DeviceKind kind;
+  final int battery;
+
+  Color get _batteryColor {
+    if (battery < 20) return const Color(0xFFDC2626);
+    if (battery < 40) return const Color(0xFFD97706);
+    return const Color(0xFF1D8B6B);
+  }
+
+  IconData get _batteryIcon {
+    if (battery >= 75) return CupertinoIcons.battery_75_percent;
+    if (battery >= 25) return CupertinoIcons.battery_25_percent;
+    return CupertinoIcons.battery_empty;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final c = _batteryColor;
+    return Row(
+      children: [
+        Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: kind.tone.withValues(alpha: 0.14),
+          ),
+          alignment: Alignment.center,
+          child: Icon(kind.icon, color: kind.tone, size: 17),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                kind.label,
+                style: const TextStyle(
+                  color: Color(0xFF1A1A1A),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  height: 1.3,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                kind.brands,
+                style: const TextStyle(
+                  color: Color(0xFF6D756E),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w400,
+                  height: 1.4,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 10),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: c.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(100),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(_batteryIcon, size: 14, color: c),
+              const SizedBox(width: 4),
+              Text(
+                '$battery%',
+                style: TextStyle(
+                  color: c,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.2,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -529,7 +1081,7 @@ class _MetricTile extends StatelessWidget {
                         unit,
                         style: AppTypography.caption2(
                           const Color(0xFF737373),
-                        ).copyWith(fontSize: 8),
+                        ).copyWith(fontSize: 10),
                       ),
                     ),
                   ],
@@ -602,7 +1154,7 @@ class _LocationCard extends StatelessWidget {
                                     ),
                                     const SizedBox(width: 8),
                                     Text(
-                                      'Last Location',
+                                      'ตำแหน่งล่าสุด',
                                       style: AppTypography.caption1(
                                         CupertinoColors.white,
                                       ).copyWith(
@@ -638,7 +1190,7 @@ class _LocationCard extends StatelessWidget {
                                     'โซน A',
                                     style: AppTypography.caption2(
                                       CupertinoColors.white,
-                                    ).copyWith(fontSize: 10),
+                                    ).copyWith(fontSize: 11),
                                   ),
                                 ),
                               ],
@@ -804,7 +1356,7 @@ class _RecentEventsSection extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                'Recent Events',
+                'เหตุการณ์ล่าสุด',
                 style:
                     AppTypography.headline(const Color(0xFF1A1A1A)).copyWith(
                   fontSize: 16,
@@ -813,25 +1365,25 @@ class _RecentEventsSection extends StatelessWidget {
               ),
             ),
             Text(
-              'View All',
+              'ดูทั้งหมด',
               style: AppTypography.caption1(const Color(0xFF0088FF))
-                  .copyWith(fontSize: 11, fontWeight: FontWeight.w500),
+                  .copyWith(fontSize: 12, fontWeight: FontWeight.w500),
             ),
           ],
         ),
         const SizedBox(height: 8),
         const _EventRow(
-          title: 'Fall',
-          date: 'Apr 6',
-          statusLabel: 'En Route',
+          title: 'การล้ม',
+          date: '6 เม.ย.',
+          statusLabel: 'กำลังช่วยเหลือ',
           statusColor: Color(0xFF51A2FF),
           closed: false,
         ),
         const SizedBox(height: 8),
         const _EventRow(
-          title: 'Fall',
-          date: 'Apr 6',
-          statusLabel: 'Closed',
+          title: 'การล้ม',
+          date: '6 เม.ย.',
+          statusLabel: 'ปิดเคสแล้ว',
           statusColor: Color(0xFF71717B),
           closed: true,
         ),
@@ -895,7 +1447,7 @@ class _EventRow extends StatelessWidget {
                 Text(
                   date,
                   style: AppTypography.caption2(const Color(0xFF6D756E))
-                      .copyWith(fontSize: 10, height: 1.5),
+                      .copyWith(fontSize: 11, height: 1.5),
                 ),
               ],
             ),
@@ -922,7 +1474,7 @@ class _EventRow extends StatelessWidget {
                 Text(
                   statusLabel,
                   style: AppTypography.caption1(statusColor).copyWith(
-                    fontSize: 11,
+                    fontSize: 12,
                     letterSpacing: 0.275,
                   ),
                 ),
@@ -944,7 +1496,7 @@ class _EmergencyContactsSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Emergency Contacts',
+          'ผู้ติดต่อฉุกเฉิน',
           style: AppTypography.headline(const Color(0xFF1A1A1A)).copyWith(
             fontSize: 16,
             fontWeight: FontWeight.w700,
@@ -1026,7 +1578,7 @@ class _ContactRow extends StatelessWidget {
                 Text(
                   '$relation • $phone',
                   style: AppTypography.caption2(const Color(0xFF1A1A1A))
-                      .copyWith(fontSize: 10),
+                      .copyWith(fontSize: 11),
                 ),
               ],
             ),

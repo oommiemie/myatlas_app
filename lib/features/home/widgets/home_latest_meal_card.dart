@@ -156,7 +156,7 @@ class _MealRow extends StatelessWidget {
                 Text(
                   'อาหารที่ทาน',
                   style: TextStyle(
-                    fontSize: 10,
+                    fontSize: 11,
                     color: Color(0xCCFFFFFF),
                   ),
                 ),
@@ -219,7 +219,7 @@ class _CalorieRing extends StatelessWidget {
               Text(
                 'kcal',
                 style: TextStyle(
-                  fontSize: 8,
+                  fontSize: 10,
                   color: Colors.white,
                   height: 1.2,
                 ),
@@ -333,7 +333,7 @@ class _MacroItem extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
-                  fontSize: 10,
+                  fontSize: 11,
                   color: AppColors.textSecondary,
                 ),
               ),
@@ -349,7 +349,7 @@ class _MacroItem extends StatelessWidget {
               child: Text(
                 pct,
                 style: const TextStyle(
-                  fontSize: 8,
+                  fontSize: 10,
                   color: Colors.white,
                 ),
               ),
@@ -368,11 +368,11 @@ class _MacroItem extends StatelessWidget {
                   color: AppColors.textPrimary,
                 ),
               ),
-              const TextSpan(text: ' ', style: TextStyle(fontSize: 10)),
+              const TextSpan(text: ' ', style: TextStyle(fontSize: 11)),
               TextSpan(
                 text: unit,
                 style: const TextStyle(
-                  fontSize: 10,
+                  fontSize: 11,
                   color: AppColors.textTertiary,
                 ),
               ),

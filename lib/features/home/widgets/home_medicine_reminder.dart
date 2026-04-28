@@ -320,7 +320,7 @@ class _SummaryCard extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                    fontSize: 10,
+                    fontSize: 11,
                     color: AppColors.textTertiary,
                     height: 1.4,
                   ),

@@ -477,7 +477,7 @@ class _ValueDisplay extends StatelessWidget {
                 child: Text(
                   'mg/dl',
                   style: AppTypography.caption2(const Color(0xFF737373))
-                      .copyWith(fontSize: 10),
+                      .copyWith(fontSize: 11),
                 ),
               ),
             ],
@@ -486,7 +486,7 @@ class _ValueDisplay extends StatelessWidget {
           Text(
             dateLabel,
             style: AppTypography.caption2(const Color(0xFF737373))
-                .copyWith(fontSize: 10),
+                .copyWith(fontSize: 11),
           ),
         ],
       ),
@@ -742,7 +742,7 @@ class _AxisLabelsPainter extends CustomPainter {
     final chartHeight = size.height - topPad - bottomPad;
     final labelStyle = TextStyle(
       color: const Color(0xFF6D756E),
-      fontSize: 10,
+      fontSize: 11,
       letterSpacing: 0.6,
     );
     for (int i = 0; i < _yLabels.length; i++) {
@@ -792,7 +792,7 @@ class _BgChartPainter extends CustomPainter {
 
     final labelStyle = TextStyle(
       color: const Color(0xFF6D756E),
-      fontSize: 10,
+      fontSize: 11,
       letterSpacing: 0.6,
     );
 
@@ -1044,7 +1044,7 @@ class _AboutBgCard extends StatelessWidget {
                           style: AppTypography.caption2(
                             const Color(0xFF6D756E),
                           ).copyWith(
-                            fontSize: 10,
+                            fontSize: 11,
                             fontWeight: FontWeight.w700,
                             height: 1,
                           ),
@@ -1101,7 +1101,7 @@ class _OptionLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Text(
-      'Option',
+      'ตัวเลือก',
       style: AppTypography.headline(const Color(0xFF1A1A1A)).copyWith(
         fontSize: 16,
         fontWeight: FontWeight.w700,

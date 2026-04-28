@@ -46,10 +46,7 @@ class _StatusInfo {
 /// Evaluate whether measured values fall within normal reference ranges.
 /// Returns `null` when values can't be parsed — in which case the UI
 /// simply omits the status badge rather than guessing.
-_StatusInfo? _evaluateStatus(
-  MeasureAnimationKind kind,
-  List<String> values,
-) {
+_StatusInfo? _evaluateStatus(MeasureAnimationKind kind, List<String> values) {
   double? parse(int i) {
     if (i >= values.length) return null;
     return double.tryParse(values[i]);
@@ -59,8 +56,10 @@ _StatusInfo? _evaluateStatus(
     case MeasureAnimationKind.ecg:
       final bpm = parse(0);
       if (bpm == null) return null;
-      if (bpm < 60) return const _StatusInfo(level: _StatusLevel.warn, label: 'ชีพจรต่ำ');
-      if (bpm > 100) return const _StatusInfo(level: _StatusLevel.warn, label: 'ชีพจรเร็ว');
+      if (bpm < 60)
+        return const _StatusInfo(level: _StatusLevel.warn, label: 'ชีพจรต่ำ');
+      if (bpm > 100)
+        return const _StatusInfo(level: _StatusLevel.warn, label: 'ชีพจรเร็ว');
       return const _StatusInfo(level: _StatusLevel.normal, label: 'ปกติ');
 
     case MeasureAnimationKind.pressureCuff:
@@ -68,10 +67,16 @@ _StatusInfo? _evaluateStatus(
       final dia = parse(1);
       if (sys == null || dia == null) return null;
       if (sys >= 140 || dia >= 90) {
-        return const _StatusInfo(level: _StatusLevel.alert, label: 'ความดันสูง');
+        return const _StatusInfo(
+          level: _StatusLevel.alert,
+          label: 'ความดันสูง',
+        );
       }
       if (sys >= 130 || dia >= 80) {
-        return const _StatusInfo(level: _StatusLevel.warn, label: 'ค่อนข้างสูง');
+        return const _StatusInfo(
+          level: _StatusLevel.warn,
+          label: 'ค่อนข้างสูง',
+        );
       }
       if (sys < 90 || dia < 60) {
         return const _StatusInfo(level: _StatusLevel.warn, label: 'ความดันต่ำ');
@@ -81,24 +86,47 @@ _StatusInfo? _evaluateStatus(
     case MeasureAnimationKind.thermometer:
       final t = parse(0);
       if (t == null) return null;
-      if (t >= 38.0) return const _StatusInfo(level: _StatusLevel.alert, label: 'ไข้สูง');
-      if (t >= 37.3) return const _StatusInfo(level: _StatusLevel.warn, label: 'อุณหภูมิสูงเล็กน้อย');
-      if (t < 36.1) return const _StatusInfo(level: _StatusLevel.warn, label: 'อุณหภูมิต่ำ');
+      if (t >= 38.0)
+        return const _StatusInfo(level: _StatusLevel.alert, label: 'ไข้สูง');
+      if (t >= 37.3)
+        return const _StatusInfo(
+          level: _StatusLevel.warn,
+          label: 'อุณหภูมิสูงเล็กน้อย',
+        );
+      if (t < 36.1)
+        return const _StatusInfo(
+          level: _StatusLevel.warn,
+          label: 'อุณหภูมิต่ำ',
+        );
       return const _StatusInfo(level: _StatusLevel.normal, label: 'ปกติ');
 
     case MeasureAnimationKind.sugarDrop:
       final s = parse(0);
       if (s == null) return null;
-      if (s < 70) return const _StatusInfo(level: _StatusLevel.warn, label: 'น้ำตาลต่ำ');
-      if (s >= 200) return const _StatusInfo(level: _StatusLevel.alert, label: 'น้ำตาลสูงมาก');
-      if (s >= 140) return const _StatusInfo(level: _StatusLevel.warn, label: 'น้ำตาลสูง');
+      if (s < 70)
+        return const _StatusInfo(level: _StatusLevel.warn, label: 'น้ำตาลต่ำ');
+      if (s >= 200)
+        return const _StatusInfo(
+          level: _StatusLevel.alert,
+          label: 'น้ำตาลสูงมาก',
+        );
+      if (s >= 140)
+        return const _StatusInfo(level: _StatusLevel.warn, label: 'น้ำตาลสูง');
       return const _StatusInfo(level: _StatusLevel.normal, label: 'ปกติ');
 
     case MeasureAnimationKind.pulseOx:
       final s = parse(0);
       if (s == null) return null;
-      if (s < 90) return const _StatusInfo(level: _StatusLevel.alert, label: 'ออกซิเจนต่ำ');
-      if (s < 95) return const _StatusInfo(level: _StatusLevel.warn, label: 'ต่ำกว่าปกติ');
+      if (s < 90)
+        return const _StatusInfo(
+          level: _StatusLevel.alert,
+          label: 'ออกซิเจนต่ำ',
+        );
+      if (s < 95)
+        return const _StatusInfo(
+          level: _StatusLevel.warn,
+          label: 'ต่ำกว่าปกติ',
+        );
       return const _StatusInfo(level: _StatusLevel.normal, label: 'ปกติ');
 
     case MeasureAnimationKind.scale:
@@ -110,27 +138,48 @@ _StatusInfo? _evaluateStatus(
       final bmi = w / (h * h);
       final bmiStr = bmi.toStringAsFixed(1);
       if (bmi < 18.5) {
-        return _StatusInfo(level: _StatusLevel.warn, label: 'น้ำหนักน้อย · BMI $bmiStr');
+        return _StatusInfo(
+          level: _StatusLevel.warn,
+          label: 'น้ำหนักน้อย · BMI $bmiStr',
+        );
       }
       if (bmi >= 30) {
-        return _StatusInfo(level: _StatusLevel.alert, label: 'อ้วน · BMI $bmiStr');
+        return _StatusInfo(
+          level: _StatusLevel.alert,
+          label: 'อ้วน · BMI $bmiStr',
+        );
       }
       if (bmi >= 25) {
-        return _StatusInfo(level: _StatusLevel.warn, label: 'น้ำหนักเกิน · BMI $bmiStr');
+        return _StatusInfo(
+          level: _StatusLevel.warn,
+          label: 'น้ำหนักเกิน · BMI $bmiStr',
+        );
       }
-      return _StatusInfo(level: _StatusLevel.normal, label: 'ปกติ · BMI $bmiStr');
+      return _StatusInfo(
+        level: _StatusLevel.normal,
+        label: 'ปกติ · BMI $bmiStr',
+      );
 
     case MeasureAnimationKind.tape:
       final w = parse(0);
       if (w == null) return null;
-      if (w >= 90) return const _StatusInfo(level: _StatusLevel.warn, label: 'รอบเอวเกินเกณฑ์');
+      if (w >= 90)
+        return const _StatusInfo(
+          level: _StatusLevel.warn,
+          label: 'รอบเอวเกินเกณฑ์',
+        );
       return const _StatusInfo(level: _StatusLevel.normal, label: 'ปกติ');
 
     case MeasureAnimationKind.sleep:
       final h = parse(0);
       if (h == null) return null;
-      if (h < 6) return const _StatusInfo(level: _StatusLevel.warn, label: 'นอนน้อย');
-      if (h > 9) return const _StatusInfo(level: _StatusLevel.warn, label: 'นอนมากเกินไป');
+      if (h < 6)
+        return const _StatusInfo(level: _StatusLevel.warn, label: 'นอนน้อย');
+      if (h > 9)
+        return const _StatusInfo(
+          level: _StatusLevel.warn,
+          label: 'นอนมากเกินไป',
+        );
       return const _StatusInfo(level: _StatusLevel.normal, label: 'ปกติ');
   }
 }
@@ -166,7 +215,8 @@ Future<VitalMeasurement?> showMeasureFromDeviceSheet(
         color: color,
         fields: fields,
         animation: animation,
-        devices: devices ??
+        devices:
+            devices ??
             const [
               MockDevice(name: 'Omron HEM-7280T', model: 'BLE · 92%'),
               MockDevice(name: 'iHealth Track', model: 'BLE · 78%'),
@@ -323,8 +373,9 @@ class _MeasureFromDeviceSheetState extends State<_MeasureFromDeviceSheet>
             child: Container(
               decoration: BoxDecoration(
                 color: const Color(0xFFF8F8FA).withValues(alpha: 0.92),
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(38)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(38),
+                ),
                 border: Border(
                   top: BorderSide(
                     color: CupertinoColors.white.withValues(alpha: 0.35),
@@ -544,8 +595,9 @@ class _SearchingView extends StatelessWidget {
                           Icon(
                             CupertinoIcons.chevron_right,
                             size: 14,
-                            color:
-                                const Color(0xFF1A1A1A).withValues(alpha: 0.4),
+                            color: const Color(
+                              0xFF1A1A1A,
+                            ).withValues(alpha: 0.4),
                           ),
                         ],
                       ),
@@ -761,8 +813,18 @@ class _ResultViewState extends State<_ResultView>
     if (diff == 0) return 'วันนี้';
     if (diff == 1) return 'เมื่อวาน';
     const months = [
-      'ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.',
-      'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.',
+      'ม.ค.',
+      'ก.พ.',
+      'มี.ค.',
+      'เม.ย.',
+      'พ.ค.',
+      'มิ.ย.',
+      'ก.ค.',
+      'ส.ค.',
+      'ก.ย.',
+      'ต.ค.',
+      'พ.ย.',
+      'ธ.ค.',
     ];
     return '${t.day} ${months[t.month - 1]}';
   }
@@ -805,14 +867,11 @@ class _ResultViewState extends State<_ResultView>
         scale: scale,
         child: Center(
           child: Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
             decoration: BoxDecoration(
               color: status.color.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(100),
-              border: Border.all(
-                color: status.color.withValues(alpha: 0.28),
-              ),
+              border: Border.all(color: status.color.withValues(alpha: 0.28)),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -856,8 +915,9 @@ class _ResultViewState extends State<_ResultView>
                     height: 120,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: const Color(0xFF1D8B6B)
-                          .withValues(alpha: 0.08 + pulse.abs() * 0.04),
+                      color: const Color(
+                        0xFF1D8B6B,
+                      ).withValues(alpha: 0.08 + pulse.abs() * 0.04),
                     ),
                   ),
                   Container(
@@ -880,8 +940,7 @@ class _ResultViewState extends State<_ResultView>
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF1D8B6B)
-                              .withValues(alpha: 0.4),
+                          color: const Color(0xFF1D8B6B).withValues(alpha: 0.4),
                           blurRadius: 22,
                           offset: const Offset(0, 10),
                         ),
@@ -973,9 +1032,7 @@ class _ResultViewState extends State<_ResultView>
               color: CupertinoColors.white,
               borderRadius: BorderRadius.circular(25),
             ),
-            child: multiField
-                ? _buildMultiFieldRow()
-                : _buildSingleField(),
+            child: multiField ? _buildMultiFieldRow() : _buildSingleField(),
           ),
         ),
       ),
@@ -1034,11 +1091,7 @@ class _ResultViewState extends State<_ResultView>
       return Row(
         children: [
           Expanded(child: _buildFieldTile(0)),
-          Container(
-            width: 0.5,
-            height: 72,
-            color: const Color(0xFFEDEDF0),
-          ),
+          Container(width: 0.5, height: 72, color: const Color(0xFFEDEDF0)),
           Expanded(child: _buildFieldTile(1)),
         ],
       );
@@ -1185,8 +1238,7 @@ class _ResultViewState extends State<_ResultView>
           haptic: HapticKind.selection,
           borderRadius: BorderRadius.circular(100),
           child: Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 18, vertical: 11),
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 11),
             decoration: BoxDecoration(
               color: CupertinoColors.white,
               borderRadius: BorderRadius.circular(100),

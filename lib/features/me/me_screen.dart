@@ -125,7 +125,7 @@ class _MeScreenState extends State<MeScreen>
                       _MenuEntry(
                         iconColor: const Color(0xFFEA580C),
                         icon: CupertinoIcons.waveform_path_ecg,
-                        title: 'OPD Registry',
+                        title: 'ลงทะเบียนผู้ป่วยนอก',
                         subtitle: 'ลงทะเบียนคัดกรองคัดกรองด้วยตนเอง',
                         onTap: () => Navigator.of(context).push(
                           CupertinoPageRoute(
@@ -357,7 +357,7 @@ class _ProfileBannerState extends State<_ProfileBanner>
                                 style: TextStyle(
                                   color: CupertinoColors.white
                                       .withValues(alpha: 0.7),
-                                  fontSize: 10,
+                                  fontSize: 11,
                                   letterSpacing: 1.4,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -413,7 +413,7 @@ class _ProfileBannerState extends State<_ProfileBanner>
                                           'กรุงเทพฯ',
                                           style: TextStyle(
                                             color: CupertinoColors.white,
-                                            fontSize: 10,
+                                            fontSize: 11,
                                             fontWeight: FontWeight.w500,
                                           ),
                                         ),
@@ -628,7 +628,7 @@ class _WellnessAvatar extends StatelessWidget {
                 '78',
                 style: TextStyle(
                   color: CupertinoColors.white,
-                  fontSize: 10,
+                  fontSize: 11,
                   fontWeight: FontWeight.w700,
                   height: 1.0,
                 ),
@@ -718,7 +718,7 @@ class _ProfileStat extends StatelessWidget {
           label,
           style: TextStyle(
             color: CupertinoColors.white.withValues(alpha: 0.75),
-            fontSize: 10,
+            fontSize: 11,
             height: 1.2,
           ),
         ),
@@ -842,28 +842,31 @@ class _MenuCard extends StatelessWidget {
                     entry.title,
                     style: const TextStyle(
                       color: Color(0xFF1A1A1A),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      letterSpacing: 0.275,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.2,
+                      height: 1.3,
                     ),
                   ),
                 ),
                 const Icon(
                   CupertinoIcons.chevron_forward,
-                  size: 12,
+                  size: 13,
                   color: Color(0xFF6D756E),
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 6),
             Padding(
               padding: const EdgeInsets.only(left: 32, right: 16),
               child: Text(
                 entry.subtitle,
                 style: const TextStyle(
                   color: Color(0xFF6D756E),
-                  fontSize: 12,
-                  letterSpacing: 0.275,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w400,
+                  letterSpacing: 0.2,
+                  height: 1.4,
                 ),
               ),
             ),

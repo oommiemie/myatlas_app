@@ -305,7 +305,7 @@ class _Nutrient extends StatelessWidget {
               child: Text(
                 unit,
                 style: AppTypography.caption2(MealCard._neutral500)
-                    .copyWith(fontSize: 8),
+                    .copyWith(fontSize: 10),
               ),
             ),
           ],

@@ -276,7 +276,7 @@ class _InfoCol extends StatelessWidget {
           Text(
             label,
             style: const TextStyle(
-              fontSize: 10,
+              fontSize: 11,
               color: AppColors.textSecondary,
             ),
           ),
@@ -372,7 +372,7 @@ class _MedicineDetailCard extends StatelessWidget {
                 Text(
                   'วันที่เริ่มทาน : ${item.startDate}',
                   style: const TextStyle(
-                    fontSize: 10,
+                    fontSize: 11,
                     color: Color(0xFFA5ACA6),
                     height: 1.34,
                   ),

@@ -112,7 +112,7 @@ class _TimeSlotCard extends StatelessWidget {
             Text(
               data.label,
               style: const TextStyle(
-                fontSize: 10,
+                fontSize: 11,
                 color: AppColors.textTertiary,
               ),
             ),

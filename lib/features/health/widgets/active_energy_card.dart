@@ -102,7 +102,7 @@ class ActiveEnergyCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    'Active Energy',
+                    'พลังงานที่ใช้',
                     style: AppTypography.caption1(_textTertiary)
                         .copyWith(fontSize: 12, letterSpacing: 0.275),
                   ),
@@ -123,7 +123,7 @@ class ActiveEnergyCard extends StatelessWidget {
               child: Text(
                 'Active Kilocalories',
                 style: AppTypography.caption2(_neutral500)
-                    .copyWith(fontSize: 10),
+                    .copyWith(fontSize: 11),
               ),
             ),
             Positioned(
@@ -147,7 +147,7 @@ class ActiveEnergyCard extends StatelessWidget {
                     child: Text(
                       'kcl',
                       style: AppTypography.caption2(_neutral500)
-                          .copyWith(fontSize: 8),
+                          .copyWith(fontSize: 10),
                     ),
                   ),
                 ],

@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
@@ -49,8 +48,7 @@ class HomeScreen extends StatelessWidget {
                 mealLabel: 'ก่อนนอน',
                 time: '21:00 น.',
                 name: 'Aspirin 81 mg',
-                description:
-                    'รับประทาน ครั้งละ 1 เม็ด วันละ 1 ครั้ง (ก่อนนอน)',
+                description: 'รับประทาน ครั้งละ 1 เม็ด วันละ 1 ครั้ง (ก่อนนอน)',
               ),
             ],
           ),
@@ -73,10 +71,7 @@ class _HeroSection extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [
-            Color(0xFFE4F5F0),
-            AppColors.bgPrimary,
-          ],
+          colors: [Color(0xFFE4F5F0), AppColors.bgPrimary],
           stops: [0.0, 0.5],
         ),
       ),

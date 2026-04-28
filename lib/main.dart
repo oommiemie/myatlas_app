@@ -5,6 +5,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'core/services/app_settings_service.dart';
 import 'core/theme/app_theme.dart';
+import 'core/widgets/responsive_frame.dart';
+import 'features/family/fall_push_overlay.dart';
 import 'features/family/mini_call_overlay.dart';
 import 'features/shell/main_shell.dart';
 
@@ -68,8 +70,12 @@ class MyAtlasApp extends StatelessWidget {
                     child: ScaffoldMessenger(
                       child: Material(
                         type: MaterialType.transparency,
-                        child: MiniCallOverlay(
-                          child: child ?? const SizedBox.shrink(),
+                        child: ResponsiveFrame(
+                          child: FallPushOverlay(
+                            child: MiniCallOverlay(
+                              child: child ?? const SizedBox.shrink(),
+                            ),
+                          ),
                         ),
                       ),
                     ),

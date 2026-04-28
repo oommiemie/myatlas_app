@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/liquid_glass_button.dart';
 
@@ -43,10 +42,7 @@ class AppointmentHeader extends StatelessWidget {
               ),
             ],
           ),
-          _PillTabBar(
-            selectedTab: selectedTab,
-            onTabChanged: onTabChanged,
-          ),
+          _PillTabBar(selectedTab: selectedTab, onTabChanged: onTabChanged),
         ],
       ),
     );
@@ -57,10 +53,7 @@ class _PillTabBar extends StatelessWidget {
   final int selectedTab;
   final ValueChanged<int> onTabChanged;
 
-  const _PillTabBar({
-    required this.selectedTab,
-    required this.onTabChanged,
-  });
+  const _PillTabBar({required this.selectedTab, required this.onTabChanged});
 
   static const _labels = ['โรงพยาบาล', 'เยี่ยมบ้าน'];
   static const _duration = Duration(milliseconds: 260);

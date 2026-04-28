@@ -214,7 +214,7 @@ class _OpdRegistryScreenState extends State<OpdRegistryScreen>
             child: ValueListenableBuilder<double>(
               valueListenable: _scrollOffset,
               builder: (_, offset, __) => HealthDetailAppBar(
-                title: 'OPD Registry',
+                title: 'ลงทะเบียนผู้ป่วยนอก',
                 scrollOffset: offset,
                 onBack: () => Navigator.of(context).pop(),
                 action: LiquidGlassButton(
@@ -311,7 +311,7 @@ class _HeroCtaCard extends StatelessWidget {
                             'เริ่มต้นใช้งาน',
                             style: TextStyle(
                               color: CupertinoColors.white,
-                              fontSize: 11,
+                              fontSize: 12,
                               fontWeight: FontWeight.w600,
                               letterSpacing: 0.3,
                             ),
@@ -482,7 +482,7 @@ class _StepItem extends StatelessWidget {
           textAlign: TextAlign.center,
           style: const TextStyle(
             color: Color(0xFF1A1A1A),
-            fontSize: 11,
+            fontSize: 12,
             fontWeight: FontWeight.w600,
             height: 1.3,
             letterSpacing: 0.1,

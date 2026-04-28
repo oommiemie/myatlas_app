@@ -38,14 +38,14 @@ Future<void> showCallScreen(
       ),
       transitionsBuilder: (_, anim, __, child) {
         return SlideTransition(
-          position: Tween<Offset>(
-            begin: const Offset(0, 1),
-            end: Offset.zero,
-          ).animate(CurvedAnimation(
-            parent: anim,
-            curve: Curves.fastEaseInToSlowEaseOut,
-            reverseCurve: Curves.easeInCubic,
-          )),
+          position: Tween<Offset>(begin: const Offset(0, 1), end: Offset.zero)
+              .animate(
+                CurvedAnimation(
+                  parent: anim,
+                  curve: Curves.fastEaseInToSlowEaseOut,
+                  reverseCurve: Curves.easeInCubic,
+                ),
+              ),
           child: child,
         );
       },
@@ -63,39 +63,41 @@ Future<void> showCallMenu(
       title: Text('โทรหา ${member.name}'),
       actions: [
         CupertinoActionSheetAction(
-          onPressed: () =>
-              Navigator.of(ctx).pop(_CallChoice.outgoingVoice),
+          onPressed: () => Navigator.of(ctx).pop(_CallChoice.outgoingVoice),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: const [
-              Icon(CupertinoIcons.phone_fill,
-                  color: Color(0xFF2CA989), size: 20),
+              Icon(
+                CupertinoIcons.phone_fill,
+                color: Color(0xFF2CA989),
+                size: 20,
+              ),
               SizedBox(width: 8),
-              Text('Voice Call'),
+              Text('สายเสียง'),
             ],
           ),
         ),
         CupertinoActionSheetAction(
-          onPressed: () =>
-              Navigator.of(ctx).pop(_CallChoice.outgoingVideo),
+          onPressed: () => Navigator.of(ctx).pop(_CallChoice.outgoingVideo),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: const [
-              Icon(CupertinoIcons.videocam_fill,
-                  color: Color(0xFF2CA989), size: 22),
+              Icon(
+                CupertinoIcons.videocam_fill,
+                color: Color(0xFF2CA989),
+                size: 22,
+              ),
               SizedBox(width: 8),
-              Text('Video Call'),
+              Text('สายวิดีโอ'),
             ],
           ),
         ),
         CupertinoActionSheetAction(
-          onPressed: () =>
-              Navigator.of(ctx).pop(_CallChoice.incomingVoice),
+          onPressed: () => Navigator.of(ctx).pop(_CallChoice.incomingVoice),
           child: const Text('จำลองสายเรียกเข้า (Voice)'),
         ),
         CupertinoActionSheetAction(
-          onPressed: () =>
-              Navigator.of(ctx).pop(_CallChoice.incomingVideo),
+          onPressed: () => Navigator.of(ctx).pop(_CallChoice.incomingVideo),
           child: const Text('จำลองสายเรียกเข้า (Video)'),
         ),
       ],
@@ -244,8 +246,8 @@ class _CallScreenState extends State<_CallScreen> {
             child: _stage == _CallStage.connected
                 ? _buildConnected(isVideo)
                 : widget.direction == CallDirection.outgoing
-                    ? _buildVoiceOutgoing(isVideo)
-                    : _buildIncoming(isVideo),
+                ? _buildVoiceOutgoing(isVideo)
+                : _buildIncoming(isVideo),
           ),
         ],
       ),
@@ -299,7 +301,7 @@ class _CallScreenState extends State<_CallScreen> {
         _CallAvatar(imagePath: widget.member.imagePath, size: 140),
         const SizedBox(height: 16),
         Text(
-          isVideo ? 'Video Call' : 'Calling...',
+          isVideo ? 'สายวิดีโอ' : 'กำลังโทร...',
           style: const TextStyle(
             color: CupertinoColors.white,
             fontSize: 14,
@@ -356,10 +358,7 @@ class _CallScreenState extends State<_CallScreen> {
                 height: 36,
                 decoration: const BoxDecoration(shape: BoxShape.circle),
                 clipBehavior: Clip.antiAlias,
-                child: Image.asset(
-                  widget.member.imagePath,
-                  fit: BoxFit.cover,
-                ),
+                child: Image.asset(widget.member.imagePath, fit: BoxFit.cover),
               ),
               const SizedBox(width: 8),
               Expanded(
@@ -609,8 +608,7 @@ class _CallCircleButtonState extends State<_CallCircleButton>
                     height: diameter,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color:
-                          widget.color.withValues(alpha: (1 - t) * 0.45),
+                      color: widget.color.withValues(alpha: (1 - t) * 0.45),
                     ),
                   ),
                 );
@@ -685,9 +683,7 @@ class _RoundIconButton extends StatelessWidget {
         ),
         child: Icon(
           icon,
-          color: highlighted
-              ? const Color(0xFF1A1A1A)
-              : CupertinoColors.white,
+          color: highlighted ? const Color(0xFF1A1A1A) : CupertinoColors.white,
           size: size * 0.5,
         ),
       ),

@@ -36,7 +36,7 @@ class _ProfileScreenState extends State<ProfileScreen>
   String _email = 'Nuntapong@gmail.com';
 
   // Citizen ID (shown only when verified via Health ID).
-  bool _healthIdVerified = true;
+  final bool _healthIdVerified = true;
   final String _citizenId = '1210567891908';
 
   String get _citizenIdMasked {
@@ -55,8 +55,18 @@ class _ProfileScreenState extends State<ProfileScreen>
   }
 
   static const _thaiMonths = [
-    'ม.ค', 'ก.พ', 'มี.ค', 'เม.ย', 'พ.ค', 'มิ.ย',
-    'ก.ค', 'ส.ค', 'ก.ย', 'ต.ค', 'พ.ย', 'ธ.ค',
+    'ม.ค',
+    'ก.พ',
+    'มี.ค',
+    'เม.ย',
+    'พ.ค',
+    'มิ.ย',
+    'ก.ค',
+    'ส.ค',
+    'ก.ย',
+    'ต.ค',
+    'พ.ย',
+    'ธ.ค',
   ];
 
   String get _birthDateLabel {
@@ -265,10 +275,7 @@ class _ProfileScreenState extends State<ProfileScreen>
         final t = anim.value;
         return Opacity(
           opacity: t,
-          child: Transform.translate(
-            offset: Offset(0, (1 - t) * 18),
-            child: c,
-          ),
+          child: Transform.translate(offset: Offset(0, (1 - t) * 18), child: c),
         );
       },
       child: child,
@@ -312,162 +319,159 @@ class _ProfileScreenState extends State<ProfileScreen>
               ),
               slivers: [
                 const SliverToBoxAdapter(
-                  child: SafeArea(
-                    bottom: false,
-                    child: SizedBox(height: 56),
-                  ),
+                  child: SafeArea(bottom: false, child: SizedBox(height: 56)),
                 ),
                 SliverToBoxAdapter(
                   child: _stagger(0, 4, const _AvatarSection()),
                 ),
-              SliverToBoxAdapter(
-                child: _stagger(
-                  1,
-                  4,
-                  _InfoGroup(
-                    title: 'ข้อมูลส่วนบุคคล',
-                    rows: [
-                      _InfoRow(
-                        iconColor: const Color(0xFF1D8B6B),
-                        icon: CupertinoIcons.person_crop_rectangle_fill,
-                        label: 'ชื่อ',
-                        value: _name,
-                        onTap: _editName,
-                      ),
-                      _InfoRow(
-                        iconColor: const Color(0xFF2563EB),
-                        icon: CupertinoIcons.creditcard_fill,
-                        label: 'เลขประจำตัวประชาชน',
-                        value: _healthIdVerified
-                            ? _citizenIdMasked
-                            : 'ยืนยันตัวตนเพื่อดูข้อมูล',
-                        valueColor: const Color(0xFF6D756E),
-                        showChevron: !_healthIdVerified,
-                        onTap: _healthIdVerified ? null : _verifyHealthId,
-                      ),
-                      _InfoRow(
-                        iconColor: const Color(0xFF0BA5EC),
-                        icon: CupertinoIcons.calendar,
-                        label: 'วันเกิด',
-                        value: _birthDateLabel,
-                        onTap: _editBirthDate,
-                      ),
-                      _InfoRow(
-                        iconColor: const Color(0xFFBC1B06),
-                        icon: CupertinoIcons.drop_fill,
-                        label: 'หมู่เลือด',
-                        value: _bloodType,
-                        onTap: _editBloodType,
-                      ),
-                      _InfoRow(
-                        iconColor: switch (_gender) {
-                          'หญิง' => const Color(0xFFEC4899),
-                          'อื่นๆ' => const Color(0xFF9CA3AF),
-                          _ => const Color(0xFF38BDF8),
-                        },
-                        icon: switch (_gender) {
-                          'ชาย' => Icons.male_rounded,
-                          'หญิง' => Icons.female_rounded,
-                          _ => Icons.transgender_rounded,
-                        },
-                        label: 'เพศ',
-                        value: _gender,
-                        onTap: _editGender,
-                      ),
-                      _InfoRow(
-                        iconColor: const Color(0xFFEC4899),
-                        icon: CupertinoIcons.heart_fill,
-                        label: 'สถานะ',
-                        value: _status,
-                        onTap: _editStatus,
-                      ),
-                    ],
+                SliverToBoxAdapter(
+                  child: _stagger(
+                    1,
+                    4,
+                    _InfoGroup(
+                      title: 'ข้อมูลส่วนบุคคล',
+                      rows: [
+                        _InfoRow(
+                          iconColor: const Color(0xFF1D8B6B),
+                          icon: CupertinoIcons.person_crop_rectangle_fill,
+                          label: 'ชื่อ',
+                          value: _name,
+                          onTap: _editName,
+                        ),
+                        _InfoRow(
+                          iconColor: const Color(0xFF2563EB),
+                          icon: CupertinoIcons.creditcard_fill,
+                          label: 'เลขประจำตัวประชาชน',
+                          value: _healthIdVerified
+                              ? _citizenIdMasked
+                              : 'ยืนยันตัวตนเพื่อดูข้อมูล',
+                          valueColor: const Color(0xFF6D756E),
+                          showChevron: !_healthIdVerified,
+                          onTap: _healthIdVerified ? null : _verifyHealthId,
+                        ),
+                        _InfoRow(
+                          iconColor: const Color(0xFF0BA5EC),
+                          icon: CupertinoIcons.calendar,
+                          label: 'วันเกิด',
+                          value: _birthDateLabel,
+                          onTap: _editBirthDate,
+                        ),
+                        _InfoRow(
+                          iconColor: const Color(0xFFBC1B06),
+                          icon: CupertinoIcons.drop_fill,
+                          label: 'หมู่เลือด',
+                          value: _bloodType,
+                          onTap: _editBloodType,
+                        ),
+                        _InfoRow(
+                          iconColor: switch (_gender) {
+                            'หญิง' => const Color(0xFFEC4899),
+                            'อื่นๆ' => const Color(0xFF9CA3AF),
+                            _ => const Color(0xFF38BDF8),
+                          },
+                          icon: switch (_gender) {
+                            'ชาย' => Icons.male_rounded,
+                            'หญิง' => Icons.female_rounded,
+                            _ => Icons.transgender_rounded,
+                          },
+                          label: 'เพศ',
+                          value: _gender,
+                          onTap: _editGender,
+                        ),
+                        _InfoRow(
+                          iconColor: const Color(0xFFEC4899),
+                          icon: CupertinoIcons.heart_fill,
+                          label: 'สถานะ',
+                          value: _status,
+                          onTap: _editStatus,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              SliverToBoxAdapter(
-                child: _stagger(
-                  2,
-                  4,
-                  _InfoGroup(
-                    title: 'ติดต่อ',
-                    rows: [
-                      _InfoRow(
-                        iconColor: const Color(0xFF9333EA),
-                        icon: CupertinoIcons.phone_fill,
-                        label: 'เบอร์โทรศัพท์',
-                        value: _phone,
-                        onTap: _editPhone,
-                      ),
-                      _InfoRow(
-                        iconColor: const Color(0xFFEA580C),
-                        icon: CupertinoIcons.envelope_fill,
-                        label: 'เมล',
-                        value: _email,
-                        onTap: _editEmail,
-                      ),
-                    ],
+                SliverToBoxAdapter(
+                  child: _stagger(
+                    2,
+                    4,
+                    _InfoGroup(
+                      title: 'ติดต่อ',
+                      rows: [
+                        _InfoRow(
+                          iconColor: const Color(0xFF9333EA),
+                          icon: CupertinoIcons.phone_fill,
+                          label: 'เบอร์โทรศัพท์',
+                          value: _phone,
+                          onTap: _editPhone,
+                        ),
+                        _InfoRow(
+                          iconColor: const Color(0xFFEA580C),
+                          icon: CupertinoIcons.envelope_fill,
+                          label: 'เมล',
+                          value: _email,
+                          onTap: _editEmail,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              SliverToBoxAdapter(
-                child: _stagger(
-                  3,
-                  4,
-                  _InfoGroup(
-                    title: 'บัญชี',
-                    rows: [
-                      _AccountRow(
-                        logo: _AccountLogo.healthId,
-                        label: 'Health ID',
-                        status: 'ยืนยันตัวตนแล้ว',
-                        statusColor: const Color(0xFF17C964),
-                        onTap: () => showWebViewSheet(
-                          context,
-                          title: 'Health ID',
-                          url: 'https://moph.id.th/login',
+                SliverToBoxAdapter(
+                  child: _stagger(
+                    3,
+                    4,
+                    _InfoGroup(
+                      title: 'บัญชี',
+                      rows: [
+                        _AccountRow(
+                          logo: _AccountLogo.healthId,
+                          label: 'Health ID',
+                          status: 'ยืนยันตัวตนแล้ว',
+                          statusColor: const Color(0xFF17C964),
+                          onTap: () => showWebViewSheet(
+                            context,
+                            title: 'Health ID',
+                            url: 'https://moph.id.th/login',
+                          ),
                         ),
-                      ),
-                      _AccountRow(
-                        logo: _AccountLogo.google,
-                        label: 'Google',
-                        status: 'ผูกแล้ว',
-                        statusColor: const Color(0xFF17C964),
-                        onTap: () => showWebViewSheet(
-                          context,
-                          title: 'Google',
-                          url: 'https://accounts.google.com/',
+                        _AccountRow(
+                          logo: _AccountLogo.google,
+                          label: 'Google',
+                          status: 'ผูกแล้ว',
+                          statusColor: const Color(0xFF17C964),
+                          onTap: () => showWebViewSheet(
+                            context,
+                            title: 'Google',
+                            url: 'https://accounts.google.com/',
+                          ),
                         ),
-                      ),
-                      _AccountRow(
-                        logo: _AccountLogo.facebook,
-                        label: 'Facebook',
-                        status: 'ยังไม่ผูก',
-                        statusColor: const Color(0xFF6D756E),
-                        onTap: () => showWebViewSheet(
-                          context,
-                          title: 'Facebook',
-                          url: 'https://m.facebook.com/login',
+                        _AccountRow(
+                          logo: _AccountLogo.facebook,
+                          label: 'Facebook',
+                          status: 'ยังไม่ผูก',
+                          statusColor: const Color(0xFF6D756E),
+                          onTap: () => showWebViewSheet(
+                            context,
+                            title: 'Facebook',
+                            url: 'https://m.facebook.com/login',
+                          ),
                         ),
-                      ),
-                      _AccountRow(
-                        logo: _AccountLogo.apple,
-                        label: 'Apple',
-                        status: 'ยังไม่ผูก',
-                        statusColor: const Color(0xFF6D756E),
-                        onTap: () => showWebViewSheet(
-                          context,
-                          title: 'Apple',
-                          url: 'https://appleid.apple.com/',
+                        _AccountRow(
+                          logo: _AccountLogo.apple,
+                          label: 'Apple',
+                          status: 'ยังไม่ผูก',
+                          statusColor: const Color(0xFF6D756E),
+                          onTap: () => showWebViewSheet(
+                            context,
+                            title: 'Apple',
+                            url: 'https://appleid.apple.com/',
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              const SliverToBoxAdapter(child: SizedBox(height: 40)),
-            ],
-          ),
+                const SliverToBoxAdapter(child: SizedBox(height: 40)),
+              ],
+            ),
           ),
           Positioned(
             top: 0,
@@ -513,8 +517,7 @@ class _PinnedTopBar extends StatelessWidget {
             ),
             child: Container(
               height: barHeight,
-              color:
-                  const Color(0xFFF4F8F5).withValues(alpha: 0.80 * progress),
+              color: const Color(0xFFF4F8F5).withValues(alpha: 0.80 * progress),
             ),
           ),
         ),
@@ -563,7 +566,6 @@ class _PinnedTopBar extends StatelessWidget {
     );
   }
 }
-
 
 class _AvatarSection extends StatefulWidget {
   const _AvatarSection();
@@ -686,10 +688,7 @@ class _AvatarSectionState extends State<_AvatarSection> {
 /// Avatar image that follows the currently selected profile photo,
 /// falling back to the default asset when none is set.
 class ProfileAvatarImage extends StatelessWidget {
-  const ProfileAvatarImage({
-    super.key,
-    this.fit = BoxFit.cover,
-  });
+  const ProfileAvatarImage({super.key, this.fit = BoxFit.cover});
   final BoxFit fit;
 
   @override
@@ -720,10 +719,9 @@ class _InfoGroup extends StatelessWidget {
         children: [
           Text(
             title,
-            style: AppTypography.headline(const Color(0xFF1A1A1A)).copyWith(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-            ),
+            style: AppTypography.headline(
+              const Color(0xFF1A1A1A),
+            ).copyWith(fontSize: 16, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 8),
           Container(
@@ -737,10 +735,7 @@ class _InfoGroup extends StatelessWidget {
                 for (int i = 0; i < rows.length; i++) ...[
                   rows[i],
                   if (i != rows.length - 1)
-                    Container(
-                      height: 1,
-                      color: const Color(0xFFE5E5E5),
-                    ),
+                    Container(height: 1, color: const Color(0xFFE5E5E5)),
                 ],
               ],
             ),
@@ -789,11 +784,7 @@ class _InfoRow extends StatelessWidget {
                 color: iconColor,
               ),
               alignment: Alignment.center,
-              child: Icon(
-                icon,
-                color: CupertinoColors.white,
-                size: 12,
-              ),
+              child: Icon(icon, color: CupertinoColors.white, size: 12),
             ),
             const SizedBox(width: 8),
             Expanded(
@@ -906,10 +897,6 @@ class _AccountIcon extends StatelessWidget {
       _AccountLogo.apple => 'assets/images/me/apple.png',
     };
     final fit = logo == _AccountLogo.apple ? BoxFit.contain : BoxFit.contain;
-    return SizedBox(
-      width: 24,
-      height: 24,
-      child: Image.asset(asset, fit: fit),
-    );
+    return SizedBox(width: 24, height: 24, child: Image.asset(asset, fit: fit));
   }
 }
