@@ -144,7 +144,7 @@ class _MiniCallCardState extends State<_MiniCallCard> {
                         _fmt(),
                         style: TextStyle(
                           color: CupertinoColors.white.withValues(alpha: 0.85),
-                          fontSize: 10,
+                          fontSize: 11,
                         ),
                       ),
                     ],

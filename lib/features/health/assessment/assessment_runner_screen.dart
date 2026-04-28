@@ -410,7 +410,7 @@ class _IntroStage extends StatelessWidget {
             'ข้อมูลของคุณจะถูกเก็บไว้อย่างปลอดภัย',
             style: TextStyle(
               color: Color(0xFF9CA3AF),
-              fontSize: 11,
+              fontSize: 12,
               fontWeight: FontWeight.w400,
             ),
           ),

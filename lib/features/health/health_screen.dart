@@ -184,7 +184,7 @@ class _NutritionSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _sectionTitle(context, 'Nutrition'),
+        _sectionTitle(context, 'โภชนาการ'),
         GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: () => Navigator.of(context).push(
@@ -215,7 +215,7 @@ class _VitalSignSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _sectionTitle(context, 'Vital Sign'),
+        _sectionTitle(context, 'สัญญาณชีพ'),
         _BloodPressureCard(data: data),
         const SizedBox(height: spacing),
         IntrinsicHeight(
@@ -317,7 +317,7 @@ class _BmiCard extends StatelessWidget {
       },
       icon: CupertinoIcons.chart_pie_fill,
       iconColor: AppColors.nutrition,
-      label: 'BMI',
+      label: 'ดัชนีมวลกาย',
       value: '',
       unit: '',
       chart: Stack(
@@ -384,9 +384,11 @@ class _Stat extends StatelessWidget {
       children: [
         Text(value,
             style: AppTypography.subheadline(primary)
-                .copyWith(fontWeight: FontWeight.w600)),
-        const SizedBox(height: 2),
-        Text(label, style: AppTypography.caption2(secondary)),
+                .copyWith(fontSize: 16, fontWeight: FontWeight.w700)),
+        const SizedBox(height: 3),
+        Text(label,
+            style: AppTypography.caption2(secondary)
+                .copyWith(fontSize: 12, fontWeight: FontWeight.w500)),
       ],
     );
   }
@@ -449,7 +451,7 @@ class _SleepCard extends StatelessWidget {
         },
         icon: CupertinoIcons.moon_fill,
         iconColor: AppColors.sleep,
-        label: 'Sleep',
+        label: 'การนอน',
         value: s.values[idx].toStringAsFixed(1),
         unit: 'hrs',
         chartHeight: 56,
@@ -485,7 +487,7 @@ class _HeartRateCard extends StatelessWidget {
         },
         icon: CupertinoIcons.waveform_path_ecg,
         iconColor: AppColors.health,
-        label: 'Heart Rate',
+        label: 'อัตราการเต้นหัวใจ',
         value: s.values[idx].round().toString(),
         unit: 'bpm',
         chartHeight: 56,
@@ -522,7 +524,7 @@ class _CgmCard extends StatelessWidget {
         },
         icon: CupertinoIcons.drop_fill,
         iconColor: AppColors.sleep,
-        label: 'CGM',
+        label: 'น้ำตาลต่อเนื่อง',
         value: s.values[idx].round().toString(),
         unit: 'mg/dl',
         chartHeight: 76,
@@ -596,7 +598,7 @@ class _SpO2Card extends StatelessWidget {
         },
         icon: CupertinoIcons.wind,
         iconColor: AppColors.mindfulness,
-        label: 'SpO₂',
+        label: 'ออกซิเจนในเลือด',
         value: s.values[idx].round().toString(),
         unit: '%',
         chartHeight: 56,
@@ -662,7 +664,7 @@ class _HighlightsSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _sectionTitle(context, 'Highlights'),
+        _sectionTitle(context, 'รายการเด่น'),
         TipCard(
           title: 'ขอสรุปเกี่ยวกับสุขภาพของคุณ',
           content: data.aiTip,
@@ -706,9 +708,9 @@ class _StepsCard extends StatelessWidget {
       builder: (idx, onTouch) => MetricCard(
         icon: Icons.directions_walk,
         iconColor: const Color(0xFFE32616),
-        label: 'Steps',
+        label: 'ก้าวเดิน',
         value: _formatInt(s.values[idx]),
-        unit: 'Steps',
+        unit: 'ก้าว',
         chartHeight: 56,
         showChevron: false,
         chart: MiniBarChart(

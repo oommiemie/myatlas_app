@@ -204,7 +204,7 @@ class _Header extends StatelessWidget {
           ),
           const SizedBox(width: 10),
           Text(
-            'Nutrition',
+            'โภชนาการ',
             style: AppTypography.title3(CupertinoColors.white).copyWith(
               fontSize: 20,
               fontWeight: FontWeight.w700,
@@ -409,7 +409,7 @@ class _WeeklyCaloriesCardState extends State<_WeeklyCaloriesCard> {
                               'kcal/วัน',
                               style: AppTypography.caption2(
                                       NutritionDetailScreen._neutral500)
-                                  .copyWith(fontSize: 10),
+                                  .copyWith(fontSize: 11),
                             ),
                           ),
                         ],
@@ -419,7 +419,7 @@ class _WeeklyCaloriesCardState extends State<_WeeklyCaloriesCard> {
                         displayDate,
                         style: AppTypography.caption2(
                                 NutritionDetailScreen._neutral500)
-                            .copyWith(fontSize: 10),
+                            .copyWith(fontSize: 11),
                       ),
                     ],
                   ),
@@ -431,7 +431,7 @@ class _WeeklyCaloriesCardState extends State<_WeeklyCaloriesCard> {
                       'เป้าหมาย',
                       style: AppTypography.caption2(
                               NutritionDetailScreen._neutral500)
-                          .copyWith(fontSize: 10),
+                          .copyWith(fontSize: 11),
                     ),
                     const SizedBox(height: 8),
                     Row(
@@ -453,7 +453,7 @@ class _WeeklyCaloriesCardState extends State<_WeeklyCaloriesCard> {
                           'kcal/วัน',
                           style: AppTypography.caption2(
                                   NutritionDetailScreen._neutral500)
-                              .copyWith(fontSize: 10),
+                              .copyWith(fontSize: 11),
                         ),
                       ],
                     ),
@@ -597,7 +597,7 @@ class _WeeklyChartState extends State<_WeeklyChart>
                               style: AppTypography.caption2(
                                       NutritionDetailScreen._textTertiary)
                                   .copyWith(
-                                fontSize: 10,
+                                fontSize: 11,
                                 letterSpacing: 0.6,
                                 height: 1,
                               ),
@@ -623,7 +623,7 @@ class _WeeklyChartState extends State<_WeeklyChart>
                               style: AppTypography.caption2(
                                       NutritionDetailScreen._textTertiary)
                                   .copyWith(
-                                fontSize: 10,
+                                fontSize: 11,
                                 letterSpacing: 0.6,
                               ),
                             ),
@@ -907,7 +907,7 @@ class _Macro extends StatelessWidget {
               label,
               style: AppTypography.caption2(
                       NutritionDetailScreen._textSecondary)
-                  .copyWith(fontSize: 10),
+                  .copyWith(fontSize: 11),
             ),
           ],
         ),
@@ -932,7 +932,7 @@ class _Macro extends StatelessWidget {
                 unit,
                 style: AppTypography.caption2(
                         NutritionDetailScreen._neutral500)
-                    .copyWith(fontSize: 8),
+                    .copyWith(fontSize: 10),
               ),
             ),
           ],
@@ -1022,7 +1022,7 @@ class _MealListItem extends StatelessWidget {
                       '$grams g',
                       style: AppTypography.caption2(
                               NutritionDetailScreen._textTertiary)
-                          .copyWith(fontSize: 10, height: 15 / 10),
+                          .copyWith(fontSize: 11, height: 15 / 10),
                     ),
                   ],
                 ),
@@ -1052,7 +1052,7 @@ class _Meta extends StatelessWidget {
           text,
           style: AppTypography.caption2(
                   NutritionDetailScreen._textTertiary)
-              .copyWith(fontSize: 10, height: 15 / 10),
+              .copyWith(fontSize: 11, height: 15 / 10),
         ),
       ],
     );
@@ -1084,7 +1084,7 @@ class _OptionSectionState extends State<_OptionSection> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Option',
+          'ตัวเลือก',
           style: AppTypography.callout(NutritionDetailScreen._textPrimary)
               .copyWith(fontSize: 16, fontWeight: FontWeight.w700),
         ),

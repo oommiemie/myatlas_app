@@ -139,7 +139,7 @@ class _CgmDetailScreenState extends State<CgmDetailScreen> {
   Future<void> _addMeasurement() async {
     final result = await showAddMeasurement(
       context,
-      title: 'เพิ่มค่า CGM',
+      title: 'เพิ่มค่าน้ำตาลต่อเนื่อง',
       animation: MeasureAnimationKind.sugarDrop,
       icon: CupertinoIcons.waveform_path_ecg,
       color: const Color(0xFFF59E0B),
@@ -152,7 +152,7 @@ class _CgmDetailScreenState extends State<CgmDetailScreen> {
       ],
     );
     if (result != null && mounted) {
-      AppToast.success(context, 'บันทึกค่า CGM แล้ว');
+      AppToast.success(context, 'บันทึกค่าน้ำตาลต่อเนื่องแล้ว');
     }
   }
 
@@ -255,7 +255,7 @@ class _CgmDetailScreenState extends State<CgmDetailScreen> {
             child: ValueListenableBuilder<double>(
               valueListenable: _scrollOffset,
               builder: (_, offset, __) => HealthDetailAppBar(
-                title: 'CGM',
+                title: 'น้ำตาลต่อเนื่อง',
                 scrollOffset: offset,
                 onBack: () => Navigator.of(context).pop(),
                 action: LiquidGlassButton(
@@ -383,7 +383,7 @@ class _CgmHeroGauge extends StatelessWidget {
                     '$timeLabel น.',
                     style: const TextStyle(
                       color: Color(0xFF6D756E),
-                      fontSize: 10,
+                      fontSize: 11,
                       letterSpacing: -0.6,
                       height: 1.4,
                     ),
@@ -772,7 +772,7 @@ class _AxisLabelsPainter extends CustomPainter {
     final chartHeight = size.height - topPad - bottomPad;
     final labelStyle = TextStyle(
       color: const Color(0xFF6D756E),
-      fontSize: 10,
+      fontSize: 11,
       letterSpacing: 0.6,
     );
     for (int i = 0; i < _yLabels.length; i++) {
@@ -822,7 +822,7 @@ class _CgmChartPainter extends CustomPainter {
 
     final labelStyle = TextStyle(
       color: const Color(0xFF6D756E),
-      fontSize: 10,
+      fontSize: 11,
       letterSpacing: 0.6,
     );
 
@@ -1076,7 +1076,7 @@ class _AboutCgmCard extends StatelessWidget {
                           style: AppTypography.caption2(
                             const Color(0xFF6D756E),
                           ).copyWith(
-                            fontSize: 10,
+                            fontSize: 11,
                             fontWeight: FontWeight.w700,
                             height: 1,
                           ),
@@ -1133,7 +1133,7 @@ class _OptionLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Text(
-      'Option',
+      'ตัวเลือก',
       style: AppTypography.headline(const Color(0xFF1A1A1A)).copyWith(
         fontSize: 16,
         fontWeight: FontWeight.w700,

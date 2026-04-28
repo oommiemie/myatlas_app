@@ -110,7 +110,7 @@ class _FoodLensCameraScreenState extends State<FoodLensCameraScreen> {
                     icon: CupertinoIcons.xmark,
                     onTap: () => Navigator.of(context).maybePop(),
                   ),
-                  title: 'Food Lens',
+                  title: 'วิเคราะห์อาหาร',
                 ),
                 const Spacer(),
                 const _ViewfinderFrame(),
@@ -332,7 +332,7 @@ class _PreviewScreen extends StatelessWidget {
                 const Padding(
                   padding: EdgeInsets.only(top: 16),
                   child: Text(
-                    'Food Lens',
+                    'วิเคราะห์อาหาร',
                     style: TextStyle(
                       color: CupertinoColors.white,
                       fontSize: 16,
@@ -821,7 +821,7 @@ class _FoodLensResultsScreenState extends State<FoodLensResultsScreen> {
               valueListenable: _scrollOffset,
               builder: (_, offset, __) => _PinnedTopBar(
                 scrollOffset: offset,
-                title: widget.readOnly ? 'Nutrition' : 'Food Lens',
+                title: widget.readOnly ? 'โภชนาการ' : 'วิเคราะห์อาหาร',
                 leadingIcon: widget.readOnly
                     ? CupertinoIcons.chevron_back
                     : CupertinoIcons.xmark,
@@ -1319,7 +1319,7 @@ class _NutritionTipsCard extends StatelessWidget {
         child: Text(
           text,
           style: AppTypography.caption2(const Color(0xFF6D756E))
-              .copyWith(fontSize: 10),
+              .copyWith(fontSize: 11),
           overflow: TextOverflow.ellipsis,
         ),
       );
@@ -1673,7 +1673,7 @@ class _NutrientStatCard extends StatelessWidget {
                         child: Text(
                           unit,
                           style: AppTypography.caption2(CupertinoColors.white)
-                              .copyWith(fontSize: 10),
+                              .copyWith(fontSize: 11),
                         ),
                       ),
                     ],
@@ -1684,7 +1684,7 @@ class _NutrientStatCard extends StatelessWidget {
                       Text(
                         label,
                         style: AppTypography.caption1(CupertinoColors.white)
-                            .copyWith(fontSize: 11, height: 1.1),
+                            .copyWith(fontSize: 12, height: 1.1),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -1701,7 +1701,7 @@ class _NutrientStatCard extends StatelessWidget {
                           progressLabel ?? '',
                           style: AppTypography.caption2(
                             CupertinoColors.white.withValues(alpha: 0.85),
-                          ).copyWith(fontSize: 10),
+                          ).copyWith(fontSize: 11),
                         ),
                       ],
                       if (subLabel != null)
@@ -1709,7 +1709,7 @@ class _NutrientStatCard extends StatelessWidget {
                           subLabel!,
                           style: AppTypography.caption2(
                             CupertinoColors.white.withValues(alpha: 0.85),
-                          ).copyWith(fontSize: 10, height: 1.2),
+                          ).copyWith(fontSize: 11, height: 1.2),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -1927,7 +1927,7 @@ class _HealthRatingCard extends StatelessWidget {
                                 style: AppTypography.caption2(
                                   const Color(0xFF3E453F),
                                 ).copyWith(
-                                    fontSize: 10,
+                                    fontSize: 11,
                                     letterSpacing: 0.275),
                               ),
                             ],
@@ -2129,7 +2129,7 @@ class _VitalSignsSheet extends StatelessWidget {
                           _VitalDetailCard(
                             iconBg: Color(0xFFBE123C),
                             icon: CupertinoIcons.waveform_path_ecg,
-                            title: 'Heart Rate',
+                            title: 'อัตราการเต้นหัวใจ',
                             value: 'ค่าปัจจุบัน: 72 bpm',
                             status: '(ปกติ)',
                             statusColor: Color(0xFF1D8B6B),
@@ -2334,7 +2334,7 @@ class _VitalDetailCard extends StatelessWidget {
                           style: AppTypography.caption2(
                             const Color(0xFF6D756E),
                           ).copyWith(
-                            fontSize: 10,
+                            fontSize: 11,
                             fontWeight: FontWeight.w700,
                             height: 1,
                           ),
@@ -2347,7 +2347,7 @@ class _VitalDetailCard extends StatelessWidget {
                           style: AppTypography.caption2(
                             const Color(0xFF1A1A1A),
                           ).copyWith(
-                            fontSize: 10,
+                            fontSize: 11,
                             height: 2,
                             letterSpacing: 0.1,
                           ),

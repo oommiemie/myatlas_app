@@ -55,7 +55,7 @@ class _DividerHeader extends StatelessWidget {
           child: Text(
             label,
             style: const TextStyle(
-              fontSize: 10,
+              fontSize: 11,
               color: Color(0xFFA5ACA6),
               height: 20 / 10,
             ),

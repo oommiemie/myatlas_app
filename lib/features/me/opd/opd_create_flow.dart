@@ -53,8 +53,14 @@ class _OpdCreateFlowState extends State<OpdCreateFlow> {
   // Stage 2 — symptoms
   final Set<String> _symptoms = {};
   static const _symptomOptions = [
-    'ไอ', 'น้ำมูก', 'ปวดศีรษะ', 'เป็นไข้',
-    'อาเจียน', 'ท้องเสีย', 'ปวดท้อง', 'ปัสสาวะแสบขัด',
+    'ไอ',
+    'น้ำมูก',
+    'ปวดศีรษะ',
+    'เป็นไข้',
+    'อาเจียน',
+    'ท้องเสีย',
+    'ปวดท้อง',
+    'ปัสสาวะแสบขัด',
   ];
   final _chiefComplaint = TextEditingController();
   final _durationValue = TextEditingController(text: '1');
@@ -163,64 +169,63 @@ class _OpdCreateFlowState extends State<OpdCreateFlow> {
         onTap: () => FocusScope.of(context).unfocus(),
         behavior: HitTestBehavior.translucent,
         child: Padding(
-        padding: EdgeInsets.only(top: topInset + 10),
-        child: ClipRRect(
-          borderRadius:
-              const BorderRadius.vertical(top: Radius.circular(38)),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 28, sigmaY: 28),
-            child: Container(
-              decoration: BoxDecoration(
-                color: const Color(0xFFF8F8FA).withValues(alpha: 0.92),
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(38)),
-                border: Border(
-                  top: BorderSide(
-                    color: CupertinoColors.white.withValues(alpha: 0.35),
-                    width: 0.5,
+          padding: EdgeInsets.only(top: topInset + 10),
+          child: ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(38)),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 28, sigmaY: 28),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF8F8FA).withValues(alpha: 0.92),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(38),
+                  ),
+                  border: Border(
+                    top: BorderSide(
+                      color: CupertinoColors.white.withValues(alpha: 0.35),
+                      width: 0.5,
+                    ),
                   ),
                 ),
-              ),
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8, bottom: 4),
-                    child: Container(
-                      width: 36,
-                      height: 5,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF1A1A1A).withValues(alpha: 0.25),
-                        borderRadius: BorderRadius.circular(100),
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8, bottom: 4),
+                      child: Container(
+                        width: 36,
+                        height: 5,
+                        decoration: BoxDecoration(
+                          color: const Color(
+                            0xFF1A1A1A,
+                          ).withValues(alpha: 0.25),
+                          borderRadius: BorderRadius.circular(100),
+                        ),
                       ),
                     ),
-                  ),
-                  _Header(
-                    step: _step,
-                    total: _stepsCount,
-                    onBack: _prev,
-                    onClose: () => Navigator.of(context).pop(),
-                  ),
-                  Expanded(
-                    child: PageView(
-                      controller: _pc,
-                      physics: const NeverScrollableScrollPhysics(),
-                      children: [
-                        _buildStep1(),
-                        _buildStep2(),
-                        _buildStep3(),
-                        _buildSummary(),
-                      ],
+                    _Header(
+                      step: _step,
+                      total: _stepsCount,
+                      onBack: _prev,
+                      onClose: () => Navigator.of(context).pop(),
                     ),
-                  ),
-                  _BottomBar(
-                    isLast: _step == _stepsCount - 1,
-                    onTap: _next,
-                  ),
-                ],
+                    Expanded(
+                      child: PageView(
+                        controller: _pc,
+                        physics: const NeverScrollableScrollPhysics(),
+                        children: [
+                          _buildStep1(),
+                          _buildStep2(),
+                          _buildStep3(),
+                          _buildSummary(),
+                        ],
+                      ),
+                    ),
+                    _BottomBar(isLast: _step == _stepsCount - 1, onTap: _next),
+                  ],
+                ),
               ),
             ),
           ),
-        ),
         ),
       ),
     );
@@ -293,13 +298,14 @@ class _OpdCreateFlowState extends State<OpdCreateFlow> {
                 unit: '°C',
                 controller: _temp,
                 keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true),
+                  decimal: true,
+                ),
               ),
               const SizedBox(height: 14),
               _VitalField(
                 icon: CupertinoIcons.waveform_path_ecg,
                 iconColor: const Color(0xFFBE123C),
-                label: 'Heart Rate',
+                label: 'อัตราการเต้นหัวใจ',
                 placeholder: '72',
                 unit: 'bpm',
                 controller: _heartRate,
@@ -314,7 +320,8 @@ class _OpdCreateFlowState extends State<OpdCreateFlow> {
                 unit: 'kg',
                 controller: _weight,
                 keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true),
+                  decimal: true,
+                ),
               ),
               const SizedBox(height: 14),
               _VitalField(
@@ -426,8 +433,7 @@ class _OpdCreateFlowState extends State<OpdCreateFlow> {
               const SizedBox(height: 8),
               _DangerChips(
                 items: _chronicDiseases,
-                onRemove: (v) =>
-                    setState(() => _chronicDiseases.remove(v)),
+                onRemove: (v) => setState(() => _chronicDiseases.remove(v)),
               ),
             ],
           ),
@@ -439,10 +445,8 @@ class _OpdCreateFlowState extends State<OpdCreateFlow> {
             children: [
               _FieldLabelRow(
                 text: 'แพ้ยา',
-                onAdd: () => _addChip(
-                  title: 'เพิ่มการแพ้ยา',
-                  target: _allergies,
-                ),
+                onAdd: () =>
+                    _addChip(title: 'เพิ่มการแพ้ยา', target: _allergies),
               ),
               const SizedBox(height: 8),
               _DangerChips(
@@ -546,10 +550,7 @@ class _OpdCreateFlowState extends State<OpdCreateFlow> {
         title: Text(title),
         content: Padding(
           padding: const EdgeInsets.only(top: 10),
-          child: CupertinoTextField(
-            controller: controller,
-            autofocus: true,
-          ),
+          child: CupertinoTextField(controller: controller, autofocus: true),
         ),
         actions: [
           CupertinoDialogAction(
@@ -558,8 +559,7 @@ class _OpdCreateFlowState extends State<OpdCreateFlow> {
           ),
           CupertinoDialogAction(
             isDefaultAction: true,
-            onPressed: () =>
-                Navigator.of(ctx).pop(controller.text.trim()),
+            onPressed: () => Navigator.of(ctx).pop(controller.text.trim()),
             child: const Text('เพิ่ม'),
           ),
         ],
@@ -617,7 +617,7 @@ class _OpdCreateFlowState extends State<OpdCreateFlow> {
         _SummaryCard(
           icon: CupertinoIcons.heart_fill,
           iconColor: const Color(0xFFBE123C),
-          title: 'Vital Signs',
+          title: 'สัญญาณชีพ',
           child: _VitalGrid(
             items: [
               (
@@ -637,7 +637,7 @@ class _OpdCreateFlowState extends State<OpdCreateFlow> {
               (
                 icon: CupertinoIcons.waveform_path_ecg,
                 color: const Color(0xFFBE123C),
-                label: 'Heart Rate',
+                label: 'อัตราการเต้นหัวใจ',
                 value: _heartRate.text.isEmpty ? '-' : _heartRate.text,
                 unit: 'bpm',
               ),
@@ -676,10 +676,7 @@ class _OpdCreateFlowState extends State<OpdCreateFlow> {
                   runSpacing: 6,
                   children: [
                     for (final s in _symptoms)
-                      _SummaryChip(
-                        label: s,
-                        color: const Color(0xFF2CA989),
-                      ),
+                      _SummaryChip(label: s, color: const Color(0xFF2CA989)),
                   ],
                 ),
               const SizedBox(height: 14),
@@ -697,10 +694,7 @@ class _OpdCreateFlowState extends State<OpdCreateFlow> {
               const SizedBox(height: 14),
               _SummaryLabel('ระยะเวลา'),
               const SizedBox(height: 6),
-              _DurationBadge(
-                value: _durationValue.text,
-                unit: _durationUnit,
-              ),
+              _DurationBadge(value: _durationValue.text, unit: _durationUnit),
             ],
           ),
         ),
@@ -745,10 +739,7 @@ class _OpdCreateFlowState extends State<OpdCreateFlow> {
                   runSpacing: 6,
                   children: [
                     for (final s in _chronicDiseases)
-                      _SummaryChip(
-                        label: s,
-                        color: const Color(0xFFE62E05),
-                      ),
+                      _SummaryChip(label: s, color: const Color(0xFFE62E05)),
                   ],
                 ),
               const SizedBox(height: 14),
@@ -762,10 +753,7 @@ class _OpdCreateFlowState extends State<OpdCreateFlow> {
                   runSpacing: 6,
                   children: [
                     for (final s in _allergies)
-                      _SummaryChip(
-                        label: s,
-                        color: const Color(0xFFD97706),
-                      ),
+                      _SummaryChip(label: s, color: const Color(0xFFD97706)),
                   ],
                 ),
               const SizedBox(height: 14),
@@ -894,10 +882,7 @@ class _Header extends StatelessWidget {
                       decoration: BoxDecoration(
                         gradient: i <= step
                             ? const LinearGradient(
-                                colors: [
-                                  Color(0xFF2CA989),
-                                  Color(0xFF1D8B6B),
-                                ],
+                                colors: [Color(0xFF2CA989), Color(0xFF1D8B6B)],
                               )
                             : null,
                         color: i > step
@@ -972,8 +957,7 @@ class _BottomBar extends StatelessWidget {
 
 class _InfoCard extends StatelessWidget {
   const _InfoCard({required this.rows});
-  final List<
-      ({IconData icon, Color color, String label, String value})> rows;
+  final List<({IconData icon, Color color, String label, String value})> rows;
 
   String _field(String label) =>
       rows.firstWhere((r) => r.label == label, orElse: () => _missing).value;
@@ -1039,7 +1023,9 @@ class _InfoCard extends StatelessWidget {
                 children: [
                   Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 4),
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: CupertinoColors.white.withValues(alpha: 0.22),
                       borderRadius: BorderRadius.circular(100),
@@ -1057,7 +1043,7 @@ class _InfoCard extends StatelessWidget {
                           'MyAtlas · OPD',
                           style: TextStyle(
                             color: CupertinoColors.white,
-                            fontSize: 10,
+                            fontSize: 11,
                             fontWeight: FontWeight.w700,
                             letterSpacing: 0.4,
                           ),
@@ -1070,7 +1056,7 @@ class _InfoCard extends StatelessWidget {
                     'บัตรประจำตัว',
                     style: TextStyle(
                       color: CupertinoColors.white.withValues(alpha: 0.7),
-                      fontSize: 10,
+                      fontSize: 11,
                       fontWeight: FontWeight.w500,
                       letterSpacing: 0.4,
                     ),
@@ -1118,8 +1104,9 @@ class _InfoCard extends StatelessWidget {
                         Text(
                           'CID ${_field('เลขประจำตัว')}',
                           style: TextStyle(
-                            color: CupertinoColors.white
-                                .withValues(alpha: 0.75),
+                            color: CupertinoColors.white.withValues(
+                              alpha: 0.75,
+                            ),
                             fontSize: 12,
                             letterSpacing: 1.2,
                           ),
@@ -1207,7 +1194,7 @@ class _IdCardStat extends StatelessWidget {
               label,
               style: TextStyle(
                 color: CupertinoColors.white.withValues(alpha: 0.75),
-                fontSize: 10,
+                fontSize: 11,
                 fontWeight: FontWeight.w500,
                 letterSpacing: 0.3,
               ),
@@ -1254,14 +1241,14 @@ class _FieldLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Text(
-        text,
-        style: const TextStyle(
-          color: Color(0xFF6D756E),
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
-          letterSpacing: 0.275,
-        ),
-      );
+    text,
+    style: const TextStyle(
+      color: Color(0xFF6D756E),
+      fontSize: 14,
+      fontWeight: FontWeight.w500,
+      letterSpacing: 0.275,
+    ),
+  );
 }
 
 class _FieldLabelRow extends StatelessWidget {
@@ -1360,8 +1347,7 @@ class _VitalFieldState extends State<_VitalField> {
                 color: widget.iconColor,
               ),
               alignment: Alignment.center,
-              child:
-                  Icon(widget.icon, size: 11, color: CupertinoColors.white),
+              child: Icon(widget.icon, size: 11, color: CupertinoColors.white),
             ),
             const SizedBox(width: 8),
             Text(
@@ -1500,9 +1486,7 @@ class _PillTextFieldState extends State<_PillTextField> {
       decoration: BoxDecoration(
         color: CupertinoColors.white,
         border: Border.all(
-          color: _focused
-              ? const Color(0xFF1D8B6B)
-              : const Color(0xFFE5E5E5),
+          color: _focused ? const Color(0xFF1D8B6B) : const Color(0xFFE5E5E5),
           width: _focused ? 1.5 : 1,
         ),
         borderRadius: BorderRadius.circular(16),
@@ -1610,9 +1594,7 @@ class _DurationFieldState extends State<_DurationField> {
       decoration: BoxDecoration(
         color: CupertinoColors.white,
         border: Border.all(
-          color: _focused
-              ? const Color(0xFF1D8B6B)
-              : const Color(0xFFE5E5E5),
+          color: _focused ? const Color(0xFF1D8B6B) : const Color(0xFFE5E5E5),
           width: _focused ? 1.5 : 1,
         ),
         borderRadius: BorderRadius.circular(16),
@@ -1780,7 +1762,9 @@ class _ChoiceChip extends StatelessWidget {
                           height: 16,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: CupertinoColors.white.withValues(alpha: 0.25),
+                            color: CupertinoColors.white.withValues(
+                              alpha: 0.25,
+                            ),
                           ),
                           alignment: Alignment.center,
                           child: Icon(
@@ -1835,10 +1819,10 @@ class _DangerChips extends StatelessWidget {
       children: [
         for (final s in items)
           Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 14, vertical: 6).copyWith(
-              right: 6,
-            ),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: 6,
+            ).copyWith(right: 6),
             decoration: BoxDecoration(
               color: const Color(0xFFE62E05).withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(100),
@@ -2128,24 +2112,22 @@ class _SummaryLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Text(
-        text,
-        style: const TextStyle(
-          color: Color(0xFF6D756E),
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-          letterSpacing: 0.3,
-        ),
-      );
+    text,
+    style: const TextStyle(
+      color: Color(0xFF6D756E),
+      fontSize: 12,
+      fontWeight: FontWeight.w500,
+      letterSpacing: 0.3,
+    ),
+  );
 }
 
 class _EmptyText extends StatelessWidget {
   const _EmptyText();
 
   @override
-  Widget build(BuildContext context) => const Text(
-        '-',
-        style: TextStyle(color: Color(0xFF6D756E), fontSize: 15),
-      );
+  Widget build(BuildContext context) =>
+      const Text('-', style: TextStyle(color: Color(0xFF6D756E), fontSize: 15));
 }
 
 class _SummaryChip extends StatelessWidget {
@@ -2213,13 +2195,9 @@ class _DurationBadge extends StatelessWidget {
 class _VitalGrid extends StatelessWidget {
   const _VitalGrid({required this.items});
   final List<
-      ({
-        IconData icon,
-        Color color,
-        String label,
-        String value,
-        String unit
-      })> items;
+    ({IconData icon, Color color, String label, String value, String unit})
+  >
+  items;
 
   @override
   Widget build(BuildContext context) {
@@ -2269,7 +2247,7 @@ class _VitalGrid extends StatelessWidget {
                               it.label,
                               style: const TextStyle(
                                 color: Color(0xFF6D756E),
-                                fontSize: 11,
+                                fontSize: 12,
                                 fontWeight: FontWeight.w500,
                                 letterSpacing: 0.2,
                               ),
@@ -2298,7 +2276,7 @@ class _VitalGrid extends StatelessWidget {
                             it.unit,
                             style: const TextStyle(
                               color: Color(0xFF9CA3AF),
-                              fontSize: 11,
+                              fontSize: 12,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -2329,10 +2307,7 @@ class _FamilyLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final items = [
-      ...history,
-      if (other.isNotEmpty) other,
-    ];
+    final items = [...history, if (other.isNotEmpty) other];
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -2373,8 +2348,7 @@ class _FamilyLine extends StatelessWidget {
               spacing: 6,
               runSpacing: 6,
               children: [
-                for (final s in items)
-                  _SummaryChip(label: s, color: accent),
+                for (final s in items) _SummaryChip(label: s, color: accent),
               ],
             ),
         ],
@@ -2486,8 +2460,9 @@ Future<String?> _showOptionSheet({
                           width: 36,
                           height: 5,
                           decoration: BoxDecoration(
-                            color: const Color(0xFF1A1A1A)
-                                .withValues(alpha: 0.25),
+                            color: const Color(
+                              0xFF1A1A1A,
+                            ).withValues(alpha: 0.25),
                             borderRadius: BorderRadius.circular(100),
                           ),
                         ),
@@ -2568,7 +2543,8 @@ Future<String?> _showOptionSheet({
                                         ),
                                         AnimatedSwitcher(
                                           duration: const Duration(
-                                              milliseconds: 180),
+                                            milliseconds: 180,
+                                          ),
                                           child: temp == options[i]
                                               ? const Icon(
                                                   CupertinoIcons.check_mark,

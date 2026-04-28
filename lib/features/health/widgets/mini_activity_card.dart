@@ -71,7 +71,7 @@ class MiniActivityCard extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                'Activity',
+                'กิจกรรม',
                 style: AppTypography.caption1(_textTertiary)
                     .copyWith(fontSize: 12, letterSpacing: 0.275),
               ),
@@ -128,7 +128,7 @@ class MiniActivityCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _Stat(
-                      label: 'Move',
+                      label: 'เคลื่อนไหว',
                       labelColor: _moveLabel,
                       value: '$move',
                       unit: 'Kcl',
@@ -137,7 +137,7 @@ class MiniActivityCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 10),
                     _Stat(
-                      label: 'Exerise',
+                      label: 'ออกกำลัง',
                       labelColor: _exerciseLabel,
                       value: '$exercise',
                       unit: 'min',
@@ -146,7 +146,7 @@ class MiniActivityCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 10),
                     _Stat(
-                      label: 'Stand',
+                      label: 'ยืน',
                       labelColor: _standLabel,
                       value: _formatHours(stand, standGoal),
                       unit: 'hr',
@@ -196,7 +196,7 @@ class _Stat extends StatelessWidget {
         Text(
           label,
           style: AppTypography.caption2(labelColor).copyWith(
-            fontSize: 10,
+            fontSize: 11,
             fontWeight: FontWeight.w700,
             letterSpacing: 0.2,
           ),
@@ -219,7 +219,7 @@ class _Stat extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 1.5),
               child: Text(
                 unit,
-                style: AppTypography.caption2(unitColor).copyWith(fontSize: 9),
+                style: AppTypography.caption2(unitColor).copyWith(fontSize: 11),
               ),
             ),
           ],

@@ -197,7 +197,7 @@ class _TimelineRow extends StatelessWidget {
                       formatShortMonth(treatment.date),
                       style: const TextStyle(
                         color: Color(0xFF6D756E),
-                        fontSize: 10,
+                        fontSize: 11,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -302,7 +302,7 @@ class _TypePill extends StatelessWidget {
         type.label,
         style: const TextStyle(
           color: CupertinoColors.white,
-          fontSize: 11,
+          fontSize: 12,
           fontWeight: FontWeight.w500,
         ),
       ),

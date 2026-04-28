@@ -580,15 +580,15 @@ class _MetaItem extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 12, color: const Color(0xFF1A1A1A)),
-        const SizedBox(width: 4),
+        Icon(icon, size: 13, color: const Color(0xFF1A1A1A)),
+        const SizedBox(width: 5),
         Text(
           text,
           style: const TextStyle(
             color: Color(0xFF1A1A1A),
-            fontSize: 10,
-            fontWeight: FontWeight.w400,
-            height: 1.6,
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            height: 1.4,
           ),
         ),
       ],
@@ -779,8 +779,8 @@ class _HistoryRow extends StatelessWidget {
                       monthShort,
                       style: const TextStyle(
                         color: Color(0xFF1A1A1A),
-                        fontSize: 9,
-                        fontWeight: FontWeight.w400,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
                         height: 1,
                       ),
                     ),
@@ -789,7 +789,7 @@ class _HistoryRow extends StatelessWidget {
                       dayLabel,
                       style: const TextStyle(
                         color: Color(0xFF1A1A1A),
-                        fontSize: 16,
+                        fontSize: 18,
                         fontWeight: FontWeight.w700,
                         height: 1,
                       ),
@@ -871,7 +871,7 @@ class _HistoryRow extends StatelessWidget {
                                     'S',
                                     style: TextStyle(
                                       color: CupertinoColors.white,
-                                      fontSize: 9,
+                                      fontSize: 11,
                                       fontWeight: FontWeight.w700,
                                       height: 1,
                                     ),
@@ -883,7 +883,7 @@ class _HistoryRow extends StatelessWidget {
                                   style: const TextStyle(
                                     color: Color(0xFF1A1A1A),
                                     fontSize: 14,
-                                    fontWeight: FontWeight.w400,
+                                    fontWeight: FontWeight.w500,
                                     letterSpacing: 0.14,
                                     height: 1.4,
                                   ),

@@ -318,7 +318,7 @@ class _SymbolDot extends StatelessWidget {
             'N',
             style: TextStyle(
               color: CupertinoColors.white,
-              fontSize: 8,
+              fontSize: 10,
               fontWeight: FontWeight.w700,
               height: 1,
             ),
@@ -327,7 +327,7 @@ class _SymbolDot extends StatelessWidget {
             'i',
             style: TextStyle(
               color: CupertinoColors.white,
-              fontSize: 9,
+              fontSize: 11,
               fontWeight: FontWeight.w700,
               fontStyle: FontStyle.italic,
               height: 1,

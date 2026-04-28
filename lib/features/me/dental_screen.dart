@@ -282,7 +282,7 @@ class _DentalRow extends StatelessWidget {
                       _formatShortMonth(record.date),
                       style: const TextStyle(
                         color: Color(0xFF1A1A1A),
-                        fontSize: 9,
+                        fontSize: 11,
                         fontWeight: FontWeight.w400,
                         letterSpacing: -0.23,
                         height: 1,

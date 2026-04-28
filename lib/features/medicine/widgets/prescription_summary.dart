@@ -26,7 +26,7 @@ class PrescriptionSummary extends StatelessWidget {
           const Text(
             'รายการยาทั้งหมด',
             style: TextStyle(
-              fontSize: 10,
+              fontSize: 11,
               color: AppColors.textSecondary,
             ),
           ),
@@ -42,11 +42,11 @@ class PrescriptionSummary extends StatelessWidget {
                     color: AppColors.textPrimary,
                   ),
                 ),
-                const TextSpan(text: ' ', style: TextStyle(fontSize: 10)),
+                const TextSpan(text: ' ', style: TextStyle(fontSize: 11)),
                 const TextSpan(
                   text: 'รายการ',
                   style: TextStyle(
-                    fontSize: 10,
+                    fontSize: 11,
                     color: AppColors.textTertiary,
                   ),
                 ),

@@ -1,9 +1,12 @@
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 
 import '../../core/theme/app_typography.dart';
+import '../../core/widgets/app_toast.dart';
 import 'add_family_member_sheet.dart';
+import 'fall_alert.dart';
 import 'family_detail_screen.dart';
 import '../../core/widgets/liquid_glass_button.dart';
 
@@ -22,6 +25,9 @@ class FamilyMember {
     required this.heartRate,
     required this.spo2,
     required this.cgm,
+    required this.steps,
+    required this.stepsGoal,
+    required this.stepsWeek,
   });
   final String name;
   final int age;
@@ -32,9 +38,12 @@ class FamilyMember {
   final int heartRate;
   final int spo2;
   final int cgm;
+  final int steps;
+  final int stepsGoal;
+  final List<int> stepsWeek; // จ-อา (7 ค่า ก้าว/วัน)
 }
 
-const _members = <FamilyMember>[
+const kFamilyMembers = <FamilyMember>[
   FamilyMember(
     name: 'สมศรี วงศ์สุวรรณ',
     age: 60,
@@ -45,6 +54,9 @@ const _members = <FamilyMember>[
     heartRate: 72,
     spo2: 95,
     cgm: 120,
+    steps: 6420,
+    stepsGoal: 8000,
+    stepsWeek: [5800, 6200, 7100, 5400, 6800, 7400, 6420],
   ),
   FamilyMember(
     name: 'ใจดี วงศ์สุวรรณ',
@@ -56,6 +68,9 @@ const _members = <FamilyMember>[
     heartRate: 72,
     spo2: 95,
     cgm: 120,
+    steps: 8240,
+    stepsGoal: 10000,
+    stepsWeek: [9100, 7800, 8500, 9400, 7200, 8900, 8240],
   ),
   FamilyMember(
     name: 'สมชาย วงศ์สุวรรณ',
@@ -67,6 +82,9 @@ const _members = <FamilyMember>[
     heartRate: 112,
     spo2: 92,
     cgm: 168,
+    steps: 3120,
+    stepsGoal: 6000,
+    stepsWeek: [2800, 3400, 2600, 3800, 2900, 3500, 3120],
   ),
   FamilyMember(
     name: 'ปรีชา วงศ์สุวรรณ',
@@ -78,6 +96,9 @@ const _members = <FamilyMember>[
     heartRate: 98,
     spo2: 91,
     cgm: 184,
+    steps: 1850,
+    stepsGoal: 5000,
+    stepsWeek: [1600, 2200, 1400, 1900, 1700, 2300, 1850],
   ),
   FamilyMember(
     name: 'มินตรา วงศ์สุวรรณ',
@@ -89,6 +110,9 @@ const _members = <FamilyMember>[
     heartRate: 68,
     spo2: 98,
     cgm: 102,
+    steps: 9650,
+    stepsGoal: 10000,
+    stepsWeek: [10200, 9800, 11400, 8900, 10600, 9200, 9650],
   ),
 ];
 
@@ -101,8 +125,8 @@ class CareGiverScreen extends StatefulWidget {
 
 class _CareGiverScreenState extends State<CareGiverScreen>
     with SingleTickerProviderStateMixin {
-  int _topTab = 0; // 0 = Family, 1 = Security
   late final AnimationController _entryCtrl;
+  late List<FamilyMember> _sortedMembers;
 
   @override
   void initState() {
@@ -111,12 +135,36 @@ class _CareGiverScreenState extends State<CareGiverScreen>
       vsync: this,
       duration: const Duration(milliseconds: 1100),
     )..forward();
+    _sortedMembers = _computeSorted();
+    fallAlertsStore.addListener(_onAlertChange);
   }
 
   @override
   void dispose() {
+    fallAlertsStore.removeListener(_onAlertChange);
     _entryCtrl.dispose();
     super.dispose();
+  }
+
+  void _onAlertChange() {
+    if (!mounted) return;
+    setState(() => _sortedMembers = _computeSorted());
+  }
+
+  List<FamilyMember> _computeSorted() {
+    final store = fallAlertsStore.value;
+    final list = [...kFamilyMembers];
+    list.sort((a, b) {
+      final aAlert = store.containsKey(a.name);
+      final bAlert = store.containsKey(b.name);
+      if (aAlert == bAlert) {
+        return kFamilyMembers
+            .indexOf(a)
+            .compareTo(kFamilyMembers.indexOf(b));
+      }
+      return aAlert ? -1 : 1;
+    });
+    return list;
   }
 
   Widget _staggered(int index, int total, Widget child) {
@@ -152,7 +200,7 @@ class _CareGiverScreenState extends State<CareGiverScreen>
         ),
         slivers: [
           CupertinoSliverNavigationBar(
-            largeTitle: const Text('Care Giver'),
+            largeTitle: const Text('ครอบครัว'),
             backgroundColor: bg.withValues(alpha: 0.85),
             border: null,
             trailing: LiquidGlassButton(
@@ -163,772 +211,40 @@ class _CareGiverScreenState extends State<CareGiverScreen>
               iconColor: const Color(0xFF1D8B6B),
             ),
           ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
-              child: _FamilySecurityTabs(
-                selected: _topTab,
-                onChange: (i) => setState(() => _topTab = i),
-              ),
-            ),
-          ),
-          if (_topTab == 0)
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 110),
-              sliver: SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, i) {
-                    if (i >= _members.length) return null;
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: _staggered(
-                        i,
-                        _members.length,
-                        FamilyMemberCard(
-                          member: _members[i],
-                          onTap: () => Navigator.of(context).push(
-                            CupertinoPageRoute(
-                              builder: (_) =>
-                                  FamilyDetailScreen(member: _members[i]),
-                            ),
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(16, 32, 16, 110),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, i) {
+                  if (i >= _sortedMembers.length) return null;
+                  final m = _sortedMembers[i];
+                  return Padding(
+                    key: ValueKey(m.name),
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: _staggered(
+                      i,
+                      _sortedMembers.length,
+                      FamilyMemberCard(
+                        member: m,
+                        onTap: () => Navigator.of(context).push(
+                          CupertinoPageRoute(
+                            builder: (_) => FamilyDetailScreen(member: m),
                           ),
                         ),
-                      ),
-                    );
-                  },
-                  childCount: _members.length,
-                ),
-              ),
-            )
-          else
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 110),
-                child: _SecurityContent(stagger: _staggered),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-typedef _StaggerWrap = Widget Function(int index, int total, Widget child);
-
-class _SecurityContent extends StatelessWidget {
-  const _SecurityContent({required this.stagger});
-  final _StaggerWrap stagger;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        stagger(0, 4, const _SecurityStatsRow()),
-        const SizedBox(height: 12),
-        stagger(1, 4, const _CurrentTaskCard()),
-        const SizedBox(height: 24),
-        stagger(
-          2,
-          4,
-          Text(
-            'Incident Queue',
-            style: AppTypography.headline(const Color(0xFF1A1A1A)).copyWith(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ),
-        const SizedBox(height: 8),
-        stagger(3, 4, const _IncidentQueueCard()),
-        const SizedBox(height: 8),
-        stagger(3, 4, const _NewIncidentCard()),
-      ],
-    );
-  }
-}
-
-class _SecurityStatsRow extends StatelessWidget {
-  const _SecurityStatsRow();
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: const [
-        Expanded(
-          child: _StatTile(
-            value: '2',
-            label: 'Active',
-            colors: [Color(0xFFF2A288), Color(0xFFB95A48)],
-            glowColor: Color(0xFFD97963),
-          ),
-        ),
-        SizedBox(width: 10),
-        Expanded(
-          child: _StatTile(
-            value: '2',
-            label: 'My Task',
-            colors: [Color(0xFFB9AEE8), Color(0xFF6F63B5)],
-            glowColor: Color(0xFF8C80CD),
-          ),
-        ),
-        SizedBox(width: 10),
-        Expanded(
-          child: _StatTile(
-            value: '1',
-            label: 'Resolved',
-            colors: [Color(0xFF85D5B1), Color(0xFF3E9371)],
-            glowColor: Color(0xFF5FB491),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _StatTile extends StatelessWidget {
-  const _StatTile({
-    required this.value,
-    required this.label,
-    required this.colors,
-    required this.glowColor,
-  });
-  final String value;
-  final String label;
-  final List<Color> colors;
-  final Color glowColor;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: colors,
-        ),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Positioned(
-            right: -30,
-            top: -30,
-            child: Container(
-              width: 110,
-              height: 110,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    glowColor.withValues(alpha: 0.45),
-                    glowColor.withValues(alpha: 0.0),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  value,
-                  textAlign: TextAlign.center,
-                  style: AppTypography.title2(CupertinoColors.white).copyWith(
-                    fontSize: 26,
-                    fontWeight: FontWeight.w700,
-                    height: 1,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  label,
-                  textAlign: TextAlign.center,
-                  style: AppTypography.caption1(
-                    const Color(0xFFF5F5F5),
-                  ).copyWith(fontSize: 12, height: 1),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _CurrentTaskCard extends StatelessWidget {
-  const _CurrentTaskCard();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: CupertinoColors.white,
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Color(0xFFB95A48),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  'Current Task',
-                  style: AppTypography.caption1(const Color(0xFFB95A48))
-                      .copyWith(fontSize: 12),
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                gradient: const LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Color(0xFFF2A288), Color(0xFFB95A48)],
-                ),
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      _AvatarWithAlert(
-                        imagePath: 'assets/images/family/somchai.png',
-                        alertIcon:
-                            CupertinoIcons.exclamationmark_triangle_fill,
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    'สมชาย วงศ์สุวรรณ',
-                                    style: AppTypography.headline(
-                                      CupertinoColors.white,
-                                    ).copyWith(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ),
-                                const _SeverityBadge(
-                                  text: 'HIGH',
-                                  color: Color(0xFFB85936),
-                                  onDark: true,
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 6),
-                            Row(
-                              children: const [
-                                Icon(
-                                  CupertinoIcons.location_solid,
-                                  size: 10,
-                                  color: CupertinoColors.white,
-                                ),
-                                SizedBox(width: 4),
-                                Text(
-                                  'บ้านเลขที่ 42/5 ซอย 3  โซน A',
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    color: CupertinoColors.white,
-                                    height: 1.6,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _ActionButton(
-                          icon: CupertinoIcons.location_solid,
-                          label: 'Arrived On Site',
-                          background: const Color(0xFF2CA989),
-                          foreground: CupertinoColors.white,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: _ActionButton(
-                          icon: CupertinoIcons.phone_fill,
-                          label: 'Call Family',
-                          background: CupertinoColors.white,
-                          foreground: const Color(0xFF2CA989),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _AvatarWithAlert extends StatelessWidget {
-  const _AvatarWithAlert({
-    required this.imagePath,
-    required this.alertIcon,
-    this.alertColor = const Color(0xFFB95A48),
-  });
-  final String imagePath;
-  final IconData alertIcon;
-  final Color alertColor;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 48,
-      height: 48,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              color: CupertinoColors.white,
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: Image.asset(imagePath, fit: BoxFit.cover),
-          ),
-          Positioned(
-            left: 0,
-            bottom: -2,
-            child: Container(
-              width: 18,
-              height: 18,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                color: CupertinoColors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Color(0x0D000000),
-                    blurRadius: 4,
-                    offset: Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Icon(alertIcon, size: 10, color: alertColor),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SeverityBadge extends StatelessWidget {
-  const _SeverityBadge({
-    required this.text,
-    required this.color,
-    this.onDark = false,
-  });
-  final String text;
-  final Color color;
-  final bool onDark;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 20,
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(
-        color: onDark
-            ? CupertinoColors.white
-            : color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      alignment: Alignment.center,
-      child: Text(
-        text,
-        style: TextStyle(
-          color: color,
-          fontSize: 10,
-          letterSpacing: 0.5,
-          fontWeight: FontWeight.w700,
-        ),
-      ),
-    );
-  }
-}
-
-class _ActionButton extends StatelessWidget {
-  const _ActionButton({
-    required this.icon,
-    required this.label,
-    required this.background,
-    required this.foreground,
-  });
-  final IconData icon;
-  final String label;
-  final Color background;
-  final Color foreground;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 48,
-      decoration: BoxDecoration(
-        color: background,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      alignment: Alignment.center,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 16, color: foreground),
-          const SizedBox(width: 10),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 14,
-              color: foreground,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _IncidentQueueCard extends StatelessWidget {
-  const _IncidentQueueCard();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: CupertinoColors.white.withValues(alpha: 0.6),
-        border: Border.all(color: CupertinoColors.white),
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: CupertinoColors.white,
-              borderRadius: BorderRadius.circular(24),
-            ),
-            child: Row(
-              children: [
-                _AvatarWithAlert(
-                  imagePath: 'assets/images/family/somsri.png',
-                  alertIcon: CupertinoIcons.exclamationmark_triangle_fill,
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              'สมศรี วงศ์สุวรรณ',
-                              style: AppTypography.subheadline(
-                                CupertinoColors.black,
-                              ).copyWith(fontSize: 14, height: 16 / 14),
-                            ),
-                          ),
-                          const _SeverityBadge(
-                            text: 'HIGH',
-                            color: Color(0xFFCE8434),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      Row(
-                        children: const [
-                          Icon(
-                            CupertinoIcons.location_solid,
-                            size: 10,
-                            color: Color(0xFF1A1A1A),
-                          ),
-                          SizedBox(width: 4),
-                          Text(
-                            'บ้านเลขที่ 42/5 ซอย 3  โซน A',
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: Color(0xFF1A1A1A),
-                              height: 1.6,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                const Icon(
-                  CupertinoIcons.clock,
-                  size: 12,
-                  color: Color(0xFF3E453F),
-                ),
-                const SizedBox(width: 4),
-                const Text(
-                  '05:20 PM',
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: Color(0xFF3E453F),
-                    height: 1.5,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Container(width: 1, height: 8, color: const Color(0xFFE5E5E5)),
-                const SizedBox(width: 8),
-                const Text(
-                  'Fall Detected',
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: Color(0xFF3E453F),
-                    height: 1.5,
-                  ),
-                ),
-                const Spacer(),
-                const _StatusPill(
-                  text: 'En Route',
-                  color: Color(0xFF6E92D6),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _StatusPill extends StatelessWidget {
-  const _StatusPill({required this.text, required this.color});
-  final String text;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.16),
-        borderRadius: BorderRadius.circular(100),
-        border: Border.all(
-          color: color.withValues(alpha: 0.35),
-          width: 0.8,
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 6,
-            height: 6,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: color,
-            ),
-          ),
-          const SizedBox(width: 6),
-          Text(
-            text,
-            style: TextStyle(
-              color: color,
-              fontSize: 11,
-              letterSpacing: 0.275,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _NewIncidentCard extends StatelessWidget {
-  const _NewIncidentCard();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: CupertinoColors.white.withValues(alpha: 0.6),
-        border: Border.all(color: CupertinoColors.white),
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: CupertinoColors.white,
-              borderRadius: BorderRadius.circular(24),
-            ),
-            child: Row(
-              children: [
-                _AvatarWithAlert(
-                  imagePath: 'assets/images/family/somchai.png',
-                  alertIcon: CupertinoIcons.bolt_fill,
-                  alertColor: const Color(0xFFB95A48),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              'สมชาย วงศ์สุวรรณ',
-                              style: AppTypography.subheadline(
-                                CupertinoColors.black,
-                              ).copyWith(fontSize: 14, height: 16 / 14),
-                            ),
-                          ),
-                          const _SeverityBadge(
-                            text: 'CRITICAL',
-                            color: Color(0xFFB95A48),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      Row(
-                        children: const [
-                          Icon(
-                            CupertinoIcons.location_solid,
-                            size: 10,
-                            color: Color(0xFF1A1A1A),
-                          ),
-                          SizedBox(width: 4),
-                          Text(
-                            'บ้านเลขที่ 43/3 ซอย 3  โซน B',
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: Color(0xFF1A1A1A),
-                              height: 1.6,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    const Icon(
-                      CupertinoIcons.clock,
-                      size: 12,
-                      color: Color(0xFF3E453F),
-                    ),
-                    const SizedBox(width: 4),
-                    const Text(
-                      '05:20 PM',
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: Color(0xFF3E453F),
-                        height: 1.5,
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    Container(
-                      width: 1,
-                      height: 8,
-                      color: const Color(0xFFE5E5E5),
-                    ),
-                    const SizedBox(width: 8),
-                    const Text(
-                      'SOS',
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: Color(0xFF3E453F),
-                        height: 1.5,
-                      ),
-                    ),
-                    const Spacer(),
-                    const _StatusPill(
-                      text: 'New',
-                      color: Color(0xFF6E92D6),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Container(
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFD15E46),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  alignment: Alignment.center,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      Icon(
-                        CupertinoIcons.person_add_solid,
-                        color: CupertinoColors.white,
-                        size: 20,
-                      ),
-                      SizedBox(width: 10),
-                      Text(
-                        'Accept Case',
-                        style: TextStyle(
-                          color: CupertinoColors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+                  );
+                },
+                childCount: _sortedMembers.length,
+                findChildIndexCallback: (key) {
+                  if (key is ValueKey<String>) {
+                    final idx = _sortedMembers
+                        .indexWhere((m) => m.name == key.value);
+                    return idx == -1 ? null : idx;
+                  }
+                  return null;
+                },
+              ),
             ),
           ),
         ],
@@ -937,112 +253,63 @@ class _NewIncidentCard extends StatelessWidget {
   }
 }
 
-class _FamilySecurityTabs extends StatelessWidget {
-  const _FamilySecurityTabs({
-    required this.selected,
-    required this.onChange,
-  });
-  final int selected;
-  final ValueChanged<int> onChange;
-
-  @override
-  Widget build(BuildContext context) {
-    const tabs = ['Family', 'Security'];
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        const padding = 4.0;
-        final innerWidth = constraints.maxWidth - padding * 2;
-        final segmentWidth = innerWidth / tabs.length;
-        return Container(
-          padding: const EdgeInsets.all(padding),
-          decoration: BoxDecoration(
-            color: const Color(0xFFD4D4D4).withValues(alpha: 0.22),
-            borderRadius: BorderRadius.circular(100),
-          ),
-          child: SizedBox(
-            height: 36,
-            child: Stack(
-              children: [
-                AnimatedPositioned(
-                  duration: const Duration(milliseconds: 380),
-                  curve: Curves.easeOutQuint,
-                  left: selected * segmentWidth,
-                  top: 0,
-                  bottom: 0,
-                  width: segmentWidth,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF1D8B6B),
-                      borderRadius: BorderRadius.circular(100),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFF1D8B6B)
-                              .withValues(alpha: 0.24),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Row(
-                  children: [
-                    for (int i = 0; i < tabs.length; i++)
-                      Expanded(
-                        child: GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onTap: () => onChange(i),
-                          child: Center(
-                            child: AnimatedDefaultTextStyle(
-                              duration: const Duration(milliseconds: 280),
-                              curve: Curves.easeOutCubic,
-                              style: AppTypography.subheadline(
-                                i == selected
-                                    ? CupertinoColors.white
-                                    : const Color(0xFF1A1A1A),
-                              ).copyWith(
-                                fontSize: 15,
-                                fontWeight: i == selected
-                                    ? FontWeight.w700
-                                    : FontWeight.w500,
-                                letterSpacing: -0.23,
-                              ),
-                              child: Text(tabs[i]),
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-
-class FamilyMemberCard extends StatelessWidget {
+class FamilyMemberCard extends StatefulWidget {
   const FamilyMemberCard({super.key, required this.member, this.onTap});
   final FamilyMember member;
   final VoidCallback? onTap;
 
   @override
+  State<FamilyMemberCard> createState() => _FamilyMemberCardState();
+}
+
+class _FamilyMemberCardState extends State<FamilyMemberCard>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _pulse;
+
+  FamilyMember get member => widget.member;
+  VoidCallback? get onTap => widget.onTap;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulse = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _pulse.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    return ValueListenableBuilder<Map<String, FallAlert>>(
+      valueListenable: fallAlertsStore,
+      builder: (_, store, __) => _buildCard(context, store.containsKey(member.name)),
+    );
+  }
+
+  Widget _buildCard(BuildContext context, bool hasFallAlert) {
     final isAttention = member.status == _MemberStatus.attentionNeeded;
-    final gradientColors = isAttention
+    final showRed = isAttention || hasFallAlert;
+    final gradientColors = showRed
         ? const [Color(0x80FF9C66), Color(0x80BC1B06)]
         : const [Color(0x8068C7AD), Color(0x801D8B6B)];
-    final statusColor =
-        isAttention ? const Color(0xFFFF383C) : const Color(0xFF166C53);
-    final statusText = isAttention ? 'Attention Needed' : 'All Safe';
+    final statusColor = hasFallAlert
+        ? const Color(0xFFBC1B06)
+        : (isAttention
+            ? const Color(0xFFFF383C)
+            : const Color(0xFF166C53));
+    final statusText =
+        hasFallAlert ? 'พบการล้ม' : (isAttention ? 'ต้องดูแล' : 'ปลอดภัยดี');
+    final statusIcon = hasFallAlert
+        ? CupertinoIcons.exclamationmark_triangle_fill
+        : CupertinoIcons.checkmark_shield_fill;
 
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: onTap,
-      child: ClipRRect(
+    final card = ClipRRect(
       borderRadius: BorderRadius.circular(24),
       child: Stack(
         children: [
@@ -1098,6 +365,9 @@ class FamilyMemberCard extends StatelessWidget {
                     _StatusBadge(
                       label: statusText,
                       color: statusColor,
+                      icon: statusIcon,
+                      filled: hasFallAlert,
+                      pulse: hasFallAlert ? _pulse : null,
                     ),
                     const SizedBox(height: 16),
                     Text(
@@ -1151,7 +421,7 @@ class FamilyMemberCard extends StatelessWidget {
                           Expanded(
                             child: _MetricEntry(
                               icon: CupertinoIcons.waveform_path_ecg,
-                              label: 'Heart Rate',
+                              label: 'อัตราการเต้นหัวใจ',
                               value: member.heartRate.toString(),
                               unit: 'bpm',
                             ),
@@ -1160,7 +430,7 @@ class FamilyMemberCard extends StatelessWidget {
                           Expanded(
                             child: _MetricEntry(
                               icon: CupertinoIcons.sun_max,
-                              label: 'SpO₂',
+                              label: 'ออกซิเจนในเลือด',
                               value: member.spo2.toString(),
                               unit: '%',
                             ),
@@ -1169,7 +439,7 @@ class FamilyMemberCard extends StatelessWidget {
                           Expanded(
                             child: _MetricEntry(
                               icon: CupertinoIcons.drop,
-                              label: 'CGM',
+                              label: 'น้ำตาลต่อเนื่อง',
                               value: member.cgm.toString(),
                               unit: 'mg/dl',
                             ),
@@ -1184,39 +454,108 @@ class FamilyMemberCard extends StatelessWidget {
           ),
         ],
       ),
-      ),
+    );
+
+    final wrapped = hasFallAlert
+        ? AnimatedBuilder(
+            animation: _pulse,
+            builder: (_, __) {
+              // Eased value gives a sharper on/off "blink" feel rather than
+              // a slow breathe.
+              final t = Curves.easeInOut.transform(_pulse.value);
+              return Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFBC1B06)
+                          .withValues(alpha: 0.25 + 0.45 * t),
+                      blurRadius: 10 + 14 * t,
+                      spreadRadius: 0.5 + 2 * t,
+                    ),
+                  ],
+                ),
+                child: card,
+              );
+            },
+          )
+        : card;
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      onLongPress: () {
+        HapticFeedback.heavyImpact();
+        if (hasFallAlert) {
+          clearFallAlertFor(member.name);
+          AppToast.success(context, 'ล้างแจ้งเตือนการล้มแล้ว');
+        } else {
+          triggerFallAlertFor(member.name, location: 'ห้องนอน');
+          AppToast.warning(
+            context,
+            'จำลองแจ้งเตือนการล้ม · ${member.name.split(' ').first}',
+          );
+        }
+      },
+      child: wrapped,
     );
   }
 }
 
 class _StatusBadge extends StatelessWidget {
-  const _StatusBadge({required this.label, required this.color});
+  const _StatusBadge({
+    required this.label,
+    required this.color,
+    this.icon = CupertinoIcons.checkmark_shield_fill,
+    this.filled = false,
+    this.pulse,
+  });
   final String label;
   final Color color;
+  final IconData icon;
+  final bool filled;
+  final Animation<double>? pulse;
 
   @override
   Widget build(BuildContext context) {
+    if (pulse == null) return _build(1.0);
+    return AnimatedBuilder(
+      animation: pulse!,
+      builder: (_, __) => _build(pulse!.value),
+    );
+  }
+
+  Widget _build(double t) {
+    final bg = filled ? color : const Color(0xFFF5F5F5);
+    final fg = filled ? CupertinoColors.white : color;
     return Container(
-      height: 24,
-      padding: const EdgeInsets.symmetric(horizontal: 10),
+      height: filled ? 28 : 24,
+      padding: EdgeInsets.symmetric(horizontal: filled ? 12 : 10),
       decoration: BoxDecoration(
-        color: const Color(0xFFF5F5F5),
-        borderRadius: BorderRadius.circular(12),
+        color: bg,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: filled
+            ? [
+                BoxShadow(
+                  color: color.withValues(alpha: 0.35 + 0.25 * t),
+                  blurRadius: 10 + 6 * t,
+                  spreadRadius: 0.5 + 1.5 * t,
+                ),
+              ]
+            : null,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            CupertinoIcons.checkmark_shield_fill,
-            size: 12,
-            color: color,
-          ),
+          Icon(icon, size: filled ? 13 : 12, color: fg),
           const SizedBox(width: 6),
           Text(
             label,
-            style: AppTypography.caption1(color).copyWith(
-              fontSize: 12,
+            style: AppTypography.caption1(fg).copyWith(
+              fontSize: filled ? 13 : 12,
+              fontWeight: filled ? FontWeight.w800 : FontWeight.w600,
               height: 16 / 12,
+              letterSpacing: filled ? 0.3 : 0,
             ),
           ),
         ],
@@ -1234,8 +573,9 @@ class _InfoText extends StatelessWidget {
     return Text(
       text,
       style: AppTypography.caption2(const Color(0xFF1A1A1A)).copyWith(
-        fontSize: 10,
-        height: 16 / 10,
+        fontSize: 12,
+        fontWeight: FontWeight.w500,
+        height: 1.4,
       ),
     );
   }
@@ -1291,27 +631,32 @@ class _MetricEntry extends StatelessWidget {
           children: [
             Icon(icon, size: 14, color: CupertinoColors.white),
             const SizedBox(width: 8),
-            Text(
-              label,
-              style: AppTypography.caption2(CupertinoColors.white).copyWith(
-                fontSize: 10,
-                letterSpacing: 0.275,
-                height: 16.5 / 10,
+            Expanded(
+              child: Text(
+                label,
+                style: AppTypography.caption2(CupertinoColors.white).copyWith(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: 0.2,
+                  height: 1.4,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Text(
               value,
               style: AppTypography.headline(CupertinoColors.white).copyWith(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                letterSpacing: -0.6,
-                height: 15 / 14,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                letterSpacing: -0.4,
+                height: 1.1,
               ),
             ),
             const SizedBox(width: 2),
@@ -1320,7 +665,7 @@ class _MetricEntry extends StatelessWidget {
               child: Text(
                 unit,
                 style: AppTypography.caption2(CupertinoColors.white).copyWith(
-                  fontSize: 8,
+                  fontSize: 10,
                   letterSpacing: -0.6,
                 ),
               ),

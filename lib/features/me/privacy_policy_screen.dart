@@ -287,7 +287,7 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen>
                           'อัปเดตล่าสุด 22 เม.ย 2569',
                           style: TextStyle(
                             color: Color(0xFF6D756E),
-                            fontSize: 11,
+                            fontSize: 12,
                             letterSpacing: 0.3,
                           ),
                         ),

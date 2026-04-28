@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/liquid_glass_button.dart';
@@ -32,7 +31,7 @@ class HomeUserHeader extends StatelessWidget {
               Text(
                 date,
                 style: const TextStyle(
-                  fontSize: 10,
+                  fontSize: 11,
                   color: AppColors.textSecondary,
                 ),
               ),

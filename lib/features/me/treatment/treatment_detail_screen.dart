@@ -255,7 +255,7 @@ class _TypeChip extends StatelessWidget {
         type.label,
         style: TextStyle(
           color: type.primary,
-          fontSize: 11,
+          fontSize: 12,
           fontWeight: FontWeight.w600,
         ),
       ),
@@ -696,7 +696,7 @@ class _StatusPill extends StatelessWidget {
         status.label,
         style: TextStyle(
           color: status.color,
-          fontSize: 11,
+          fontSize: 12,
           fontWeight: FontWeight.w600,
         ),
       ),
@@ -786,7 +786,7 @@ class _MedicationCard extends StatelessWidget {
                   med.dose,
                   style: const TextStyle(
                     color: Color(0xFF6D756E),
-                    fontSize: 11,
+                    fontSize: 12,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -832,14 +832,14 @@ class _VitalSignsGrid extends StatelessWidget {
       _VitalTile(
         icon: CupertinoIcons.waveform_path_ecg,
         iconColor: const Color(0xFFFF2D55),
-        label: 'Heart Rate',
+        label: 'อัตราการเต้นหัวใจ',
         value: v.heartRate,
         unit: 'bpm',
       ),
       _VitalTile(
         icon: CupertinoIcons.wind,
         iconColor: const Color(0xFF5AC8FA),
-        label: 'SpO₂',
+        label: 'ออกซิเจนในเลือด',
         value: v.spo2,
         unit: '%',
       ),
@@ -933,7 +933,7 @@ class _VitalTile extends StatelessWidget {
                   label,
                   style: const TextStyle(
                     color: Color(0xFF6D756E),
-                    fontSize: 11.5,
+                    fontSize: 12.5,
                     fontWeight: FontWeight.w500,
                   ),
                   overflow: TextOverflow.ellipsis,
@@ -962,7 +962,7 @@ class _VitalTile extends StatelessWidget {
                   unit,
                   style: const TextStyle(
                     color: Color(0xFF9CA3AF),
-                    fontSize: 10,
+                    fontSize: 11,
                   ),
                 ),
               ),

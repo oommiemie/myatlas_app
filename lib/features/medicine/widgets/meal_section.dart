@@ -170,7 +170,7 @@ class _MealCard extends StatelessWidget {
                   const Text(
                     'ยาทั้งหมด',
                     style: TextStyle(
-                      fontSize: 10,
+                      fontSize: 11,
                       color: AppColors.textSecondary,
                     ),
                   ),
@@ -189,7 +189,7 @@ class _MealCard extends StatelessWidget {
                         const TextSpan(
                           text: ' รายการ',
                           style: TextStyle(
-                            fontSize: 10,
+                            fontSize: 11,
                             color: AppColors.textTertiary,
                           ),
                         ),
@@ -330,7 +330,7 @@ class _MedicineCard extends StatelessWidget {
                 Text(
                   item.description,
                   style: const TextStyle(
-                    fontSize: 10,
+                    fontSize: 11,
                     color: AppColors.textTertiary,
                     height: 1.3,
                   ),

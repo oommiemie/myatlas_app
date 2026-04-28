@@ -256,7 +256,7 @@ class _VaccineRow extends StatelessWidget {
                       _formatShortMonth(record.date),
                       style: const TextStyle(
                         color: Color(0xFF1A1A1A),
-                        fontSize: 9,
+                        fontSize: 11,
                         fontWeight: FontWeight.w400,
                         letterSpacing: -0.23,
                         height: 1,
@@ -456,7 +456,7 @@ class _SymbolDot extends StatelessWidget {
             letter!,
             style: const TextStyle(
               color: CupertinoColors.white,
-              fontSize: 8,
+              fontSize: 10,
               fontWeight: FontWeight.w700,
               height: 1,
             ),

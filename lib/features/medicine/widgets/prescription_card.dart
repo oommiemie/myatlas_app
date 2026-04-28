@@ -57,7 +57,7 @@ class PrescriptionCard extends StatelessWidget {
                     child: Text(
                       'วันที่รับบริการ : ${item.serviceDate}',
                       style: const TextStyle(
-                        fontSize: 10,
+                        fontSize: 11,
                         color: AppColors.textTertiary,
                         height: 1.3,
                       ),

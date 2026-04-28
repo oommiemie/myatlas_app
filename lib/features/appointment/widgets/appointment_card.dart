@@ -168,7 +168,7 @@ class _GradientInfoCard extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                            fontSize: 10,
+                            fontSize: 11,
                             color: AppColors.textPrimary,
                             height: 16 / 10,
                           ),
@@ -186,7 +186,7 @@ class _GradientInfoCard extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                            fontSize: 10,
+                            fontSize: 11,
                             color: AppColors.textPrimary,
                             height: 16 / 10,
                           ),
