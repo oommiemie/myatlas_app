@@ -397,17 +397,17 @@ class _BehaviorScreenState extends State<BehaviorScreen>
                         night: _night,
                         format: _fmt,
                         onEditMorning: () => _pickTime(
-                          label: 'เมื้อเช้า',
+                          label: 'มื้อเช้า',
                           initial: _morning,
                           onSet: (v) => setState(() => _morning = v),
                         ),
                         onEditNoon: () => _pickTime(
-                          label: 'เมื้อกลางวัน',
+                          label: 'มื้อกลางวัน',
                           initial: _noon,
                           onSet: (v) => setState(() => _noon = v),
                         ),
                         onEditEvening: () => _pickTime(
-                          label: 'เมื้อเย็น',
+                          label: 'มื้อเย็น',
                           initial: _evening,
                           onSet: (v) => setState(() => _evening = v),
                         ),
@@ -557,9 +557,9 @@ class _IntroCard extends StatelessWidget {
               width: 300,
               height: 300,
               child: _DayPie(
-                morningLabel: 'เมื้อเช้า ${format(morning)}',
-                noonLabel: 'เมื้อกลางวัน ${format(noon)}',
-                eveningLabel: 'เมื้อเย็น ${format(evening)}',
+                morningLabel: 'มื้อเช้า ${format(morning)}',
+                noonLabel: 'มื้อกลางวัน ${format(noon)}',
+                eveningLabel: 'มื้อเย็น ${format(evening)}',
                 nightLabel: 'เวลานอน ${format(night)}',
                 onEditMorning: onEditMorning,
                 onEditNoon: onEditNoon,

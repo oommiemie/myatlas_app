@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../core/widgets/skeleton_box.dart';
 import '../medicine/widgets/date_banner.dart';
 import 'data/mock_data.dart';
 import 'widgets/appointment_header.dart';
@@ -18,9 +21,20 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
   int _selectedTab = 0;
   final ScrollController _scrollController = ScrollController();
   final DateTime _selectedDate = DateTime(2026, 4, 12);
+  bool _loading = true;
+  Timer? _skeletonTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _skeletonTimer = Timer(const Duration(milliseconds: 1100), () {
+      if (mounted) setState(() => _loading = false);
+    });
+  }
 
   @override
   void dispose() {
+    _skeletonTimer?.cancel();
     _scrollController.dispose();
     super.dispose();
   }
@@ -37,6 +51,7 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_loading) return const _AppointmentSkeleton();
     final statusBarHeight = MediaQuery.of(context).padding.top;
     final bundle = _selectedTab == 0
         ? hospitalAppointments
@@ -122,6 +137,55 @@ class _AppointmentScreenState extends State<AppointmentScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _AppointmentSkeleton extends StatelessWidget {
+  const _AppointmentSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    final statusBarHeight = MediaQuery.of(context).padding.top;
+    return Scaffold(
+      backgroundColor: AppColors.bgPrimary,
+      body: SkeletonHost(
+        builder: (_, shimmer) => SingleChildScrollView(
+          physics: const NeverScrollableScrollPhysics(),
+          padding: EdgeInsets.fromLTRB(16, statusBarHeight + 16, 16, 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  SkeletonBox(
+                      shimmer: shimmer,
+                      width: 36,
+                      height: 36,
+                      borderRadius: 100),
+                  const SizedBox(width: 12),
+                  SkeletonBox(shimmer: shimmer, width: 140, height: 24),
+                ],
+              ),
+              const SizedBox(height: 12),
+              SkeletonBox(shimmer: shimmer, height: 36, borderRadius: 100),
+              const SizedBox(height: 24),
+              SkeletonBox(
+                  shimmer: shimmer,
+                  width: 200,
+                  height: 32,
+                  borderRadius: 100),
+              const SizedBox(height: 16),
+              SkeletonBox(shimmer: shimmer, height: 80, borderRadius: 24),
+              const SizedBox(height: 16),
+              for (int i = 0; i < 3; i++) ...[
+                SkeletonBox(shimmer: shimmer, height: 90, borderRadius: 16),
+                const SizedBox(height: 12),
+              ],
+            ],
+          ),
+        ),
       ),
     );
   }

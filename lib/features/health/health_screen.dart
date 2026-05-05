@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Icons;
 
 import '../../core/responsive/responsive.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_typography.dart';
+import '../../core/widgets/skeleton_box.dart';
 import '../nutrition/food_lens/food_lens_flow.dart';
 import '../nutrition/nutrition_detail_screen.dart';
 import 'blood_pressure_detail_screen.dart';
@@ -36,6 +39,8 @@ class _HealthScreenState extends State<HealthScreen>
   late final AnimationController _entryCtrl;
   final HealthRepository _repo = HealthRepository(seed: 7);
   late HealthData _data;
+  bool _loading = true;
+  Timer? _skeletonTimer;
 
   @override
   void initState() {
@@ -44,11 +49,17 @@ class _HealthScreenState extends State<HealthScreen>
     _entryCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 900),
-    )..forward();
+    );
+    _skeletonTimer = Timer(const Duration(milliseconds: 1100), () {
+      if (!mounted) return;
+      setState(() => _loading = false);
+      _entryCtrl.forward();
+    });
   }
 
   @override
   void dispose() {
+    _skeletonTimer?.cancel();
     _entryCtrl.dispose();
     super.dispose();
   }
@@ -85,6 +96,8 @@ class _HealthScreenState extends State<HealthScreen>
     final isDark = CupertinoTheme.brightnessOf(context) == Brightness.dark;
     final bg = isDark ? AppColors.backgroundDark : AppColors.background;
     final padding = Responsive.pagePadding(context);
+
+    if (_loading) return _HealthSkeleton(bg: bg);
 
     return CupertinoPageScaffold(
       backgroundColor: bg,
@@ -744,6 +757,56 @@ class _ActivityMini extends StatelessWidget {
       exerciseGoal: a.exerciseGoal,
       stand: a.stand,
       standGoal: a.standGoal,
+    );
+  }
+}
+
+class _HealthSkeleton extends StatelessWidget {
+  final Color bg;
+
+  const _HealthSkeleton({required this.bg});
+
+  @override
+  Widget build(BuildContext context) {
+    final topInset = MediaQuery.paddingOf(context).top;
+    return CupertinoPageScaffold(
+      backgroundColor: bg,
+      child: SkeletonHost(
+        builder: (_, shimmer) => SingleChildScrollView(
+          physics: const NeverScrollableScrollPhysics(),
+          padding: EdgeInsets.fromLTRB(16, topInset + 16, 16, 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SkeletonBox(shimmer: shimmer, width: 180, height: 32),
+              const SizedBox(height: 24),
+              // Tip card placeholder
+              SkeletonBox(shimmer: shimmer, height: 96, borderRadius: 24),
+              const SizedBox(height: 16),
+              // Metric grid (2x3)
+              for (int row = 0; row < 3; row++) ...[
+                Row(
+                  children: [
+                    Expanded(
+                      child: SkeletonBox(
+                          shimmer: shimmer, height: 120, borderRadius: 20),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: SkeletonBox(
+                          shimmer: shimmer, height: 120, borderRadius: 20),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+              ],
+              const SizedBox(height: 12),
+              // Big chart card
+              SkeletonBox(shimmer: shimmer, height: 200, borderRadius: 24),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

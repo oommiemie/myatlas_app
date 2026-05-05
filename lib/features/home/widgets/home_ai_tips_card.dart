@@ -27,7 +27,11 @@ class HomeAiTipsCard extends StatefulWidget {
 class _HomeAiTipsCardState extends State<HomeAiTipsCard> {
   // Dots bounce only during the initial "thinking" phase. As soon as the
   // label starts typing we hide them so they don't trail behind the title.
-  final ValueNotifier<bool> _typing = ValueNotifier<bool>(true);
+  late final ValueNotifier<bool> _typing;
+
+  // Module-level flag — persists across navigation so the intro animation
+  // only plays once per app session.
+  static bool _hasPlayedOnce = false;
 
   static const String _labelText = 'คำแนะนำจาก AI';
   static const Duration _labelPerChar = Duration(milliseconds: 80);
@@ -39,12 +43,17 @@ class _HomeAiTipsCardState extends State<HomeAiTipsCard> {
       _labelPerChar * _labelText.characters.length +
       _afterLabelBuffer;
 
+  bool get _skipAnimation => _hasPlayedOnce;
+
   @override
   void initState() {
     super.initState();
-    Future<void>.delayed(_thinkDelay, () {
-      if (mounted) _typing.value = false;
-    });
+    _typing = ValueNotifier<bool>(!_skipAnimation);
+    if (!_skipAnimation) {
+      Future<void>.delayed(_thinkDelay, () {
+        if (mounted) _typing.value = false;
+      });
+    }
   }
 
   @override
@@ -73,6 +82,7 @@ class _HomeAiTipsCardState extends State<HomeAiTipsCard> {
               perChar: _labelPerChar,
               startDelay: _thinkDelay,
               showCaret: false,
+              skipAnimation: _skipAnimation,
             ),
           ),
           const SizedBox(height: 8),
@@ -86,6 +96,8 @@ class _HomeAiTipsCardState extends State<HomeAiTipsCard> {
               wordSpacing: 1.5,
             ),
             startDelay: _descStartDelay,
+            skipAnimation: _skipAnimation,
+            onDone: () => _hasPlayedOnce = true,
           ),
           const SizedBox(height: 16),
           _RiskBarsRow(
@@ -107,6 +119,7 @@ class _TypewriterText extends StatefulWidget {
   final Duration perChar;
   final Duration startDelay;
   final bool showCaret;
+  final bool skipAnimation;
   final VoidCallback? onDone;
 
   const _TypewriterText({
@@ -115,6 +128,7 @@ class _TypewriterText extends StatefulWidget {
     this.perChar = const Duration(milliseconds: 40),
     this.startDelay = const Duration(milliseconds: 200),
     this.showCaret = true,
+    this.skipAnimation = false,
     this.onDone,
   });
 
@@ -140,9 +154,16 @@ class _TypewriterTextState extends State<_TypewriterText>
       duration: const Duration(milliseconds: 650),
     )..repeat(reverse: true);
 
-    Future<void>.delayed(widget.startDelay, () {
-      if (mounted) _typeCtrl.forward();
-    });
+    if (widget.skipAnimation) {
+      _typeCtrl.value = 1.0;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) widget.onDone?.call();
+      });
+    } else {
+      Future<void>.delayed(widget.startDelay, () {
+        if (mounted) _typeCtrl.forward();
+      });
+    }
   }
 
   @override

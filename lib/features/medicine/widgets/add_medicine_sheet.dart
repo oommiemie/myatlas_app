@@ -7,6 +7,7 @@ import '../../../core/utils/thai_date.dart';
 import '../../../core/widgets/app_chip.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../../../core/widgets/app_toast.dart';
+import '../../../core/widgets/liquid_glass_button.dart';
 import '../../../core/widgets/press_effect.dart';
 
 enum _MealSlot { morning, day, evening, bedtime }
@@ -429,10 +430,11 @@ class _EditablePhotoPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        // Hook: image picker would go here
-      },
+    return PressEffect(
+      onTap: () => showAddMedicinePhotoSheet(context),
+      haptic: HapticKind.selection,
+      scale: 0.95,
+      rippleShape: BoxShape.circle,
       child: SizedBox(
         width: 120,
         height: 120,
@@ -479,6 +481,379 @@ class _EditablePhotoPlaceholder extends StatelessWidget {
                 ),
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Bottom sheet that mirrors `showAddFamilyMemberSheet`'s frosted-glass chooser
+/// — slides up from below with a hero icon, title/subtitle, and two large
+/// option cards (scan-to-fill vs. pick from gallery).
+Future<void> showAddMedicinePhotoSheet(BuildContext context) {
+  return Navigator.of(context, rootNavigator: true).push(
+    PageRouteBuilder<void>(
+      opaque: false,
+      barrierColor: CupertinoColors.black.withValues(alpha: 0.4),
+      barrierDismissible: true,
+      transitionDuration: const Duration(milliseconds: 380),
+      reverseTransitionDuration: const Duration(milliseconds: 260),
+      pageBuilder: (_, __, ___) => const _PhotoSourceChooserSheet(),
+      transitionsBuilder: (_, anim, __, child) {
+        return SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(0, 1),
+            end: Offset.zero,
+          ).animate(
+            CurvedAnimation(
+              parent: anim,
+              curve: Curves.fastEaseInToSlowEaseOut,
+              reverseCurve: Curves.easeInCubic,
+            ),
+          ),
+          child: child,
+        );
+      },
+    ),
+  );
+}
+
+class _PhotoSourceChooserSheet extends StatelessWidget {
+  const _PhotoSourceChooserSheet();
+
+  @override
+  Widget build(BuildContext context) {
+    final bottomInset = MediaQuery.paddingOf(context).bottom;
+    return Scaffold(
+      backgroundColor: const Color(0x00000000),
+      resizeToAvoidBottomInset: false,
+      body: Align(
+        alignment: Alignment.bottomCenter,
+        child: ClipRRect(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(38)),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 28, sigmaY: 28),
+            child: Container(
+              width: double.infinity,
+              padding: EdgeInsets.only(bottom: bottomInset),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF8F8FA).withValues(alpha: 0.96),
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(38)),
+                border: Border(
+                  top: BorderSide(
+                    color: CupertinoColors.white.withValues(alpha: 0.35),
+                    width: 0.5,
+                  ),
+                ),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Container(
+                      width: 38,
+                      height: 5,
+                      decoration: BoxDecoration(
+                        color:
+                            const Color(0xFF1A1A1A).withValues(alpha: 0.18),
+                        borderRadius: BorderRadius.circular(100),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(14, 10, 14, 0),
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: LiquidGlassButton(
+                        icon: CupertinoIcons.xmark,
+                        iconColor: const Color(0xFF1A1A1A),
+                        onTap: () => Navigator.of(context).pop(),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  // Hero illustration
+                  Container(
+                    width: 76,
+                    height: 76,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: RadialGradient(
+                        colors: [Color(0x331D8B6B), Color(0x111D8B6B)],
+                      ),
+                    ),
+                    alignment: Alignment.center,
+                    child: Container(
+                      width: 60,
+                      height: 60,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: const LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [Color(0xFF26A37E), Color(0xFF157F5E)],
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF1D8B6B)
+                                .withValues(alpha: 0.4),
+                            blurRadius: 14,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        CupertinoIcons.camera_fill,
+                        color: CupertinoColors.white,
+                        size: 28,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  const Text(
+                    'เพิ่มรูปภาพยา',
+                    style: TextStyle(
+                      color: Color(0xFF1A1A1A),
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.2,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 32),
+                    child: Text(
+                      'เลือกวิธีที่เหมาะกับคุณ',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Color(0xFF6D756E),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 22),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 28),
+                    child: Column(
+                      children: [
+                        _PhotoChooserCard(
+                          icon: CupertinoIcons.doc_text_viewfinder,
+                          tone: const Color(0xFF1D8B6B),
+                          title: 'ถ่ายภาพเพื่อสแกนถุงยา',
+                          subtitle:
+                              'อ่านรายละเอียดยาจากซองให้อัตโนมัติ ไม่ต้องกรอกชื่อยาเอง',
+                          onTap: () {
+                            Navigator.of(context).pop();
+                            // Hook: launch camera + OCR scanner here.
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                        _PhotoChooserCard(
+                          icon: CupertinoIcons.photo_on_rectangle,
+                          tone: const Color(0xFF9333EA),
+                          title: 'เลือกจากอัลบั้ม',
+                          subtitle: 'เลือกรูปภาพยาที่บันทึกไว้ในเครื่อง',
+                          onTap: () {
+                            Navigator.of(context).pop();
+                            // Hook: launch gallery picker here.
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PhotoChooserCard extends StatelessWidget {
+  const _PhotoChooserCard({
+    required this.icon,
+    required this.tone,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+    this.highlight = false,
+    this.badge,
+  });
+  final IconData icon;
+  final Color tone;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+  final bool highlight;
+  final String? badge;
+
+  @override
+  Widget build(BuildContext context) {
+    return PressEffect(
+      onTap: onTap,
+      haptic: HapticKind.selection,
+      scale: 0.98,
+      borderRadius: BorderRadius.circular(22),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(22),
+          gradient: highlight
+              ? LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    tone.withValues(alpha: 0.16),
+                    tone.withValues(alpha: 0.04),
+                  ],
+                )
+              : null,
+          color: highlight ? null : CupertinoColors.white,
+          border: Border.all(
+            color: highlight
+                ? tone.withValues(alpha: 0.45)
+                : const Color(0xFF747480).withValues(alpha: 0.1),
+            width: highlight ? 1.5 : 1,
+          ),
+          boxShadow: highlight
+              ? [
+                  BoxShadow(
+                    color: tone.withValues(alpha: 0.18),
+                    blurRadius: 22,
+                    offset: const Offset(0, 8),
+                  ),
+                ]
+              : [
+                  BoxShadow(
+                    color: CupertinoColors.black.withValues(alpha: 0.04),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+        ),
+        padding: const EdgeInsets.all(16),
+        child: Stack(
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        tone,
+                        Color.lerp(tone, CupertinoColors.black, 0.18)!,
+                      ],
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: tone.withValues(alpha: 0.35),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  alignment: Alignment.center,
+                  child: Icon(icon, size: 24, color: CupertinoColors.white),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Padding(
+                        padding:
+                            EdgeInsets.only(right: badge != null ? 56 : 0),
+                        child: Text(
+                          title,
+                          style: const TextStyle(
+                            color: Color(0xFF1A1A1A),
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                            height: 1.3,
+                            letterSpacing: 0.1,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        subtitle,
+                        style: const TextStyle(
+                          color: Color(0xFF6D756E),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          height: 1.5,
+                          letterSpacing: 0.1,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  width: 28,
+                  height: 28,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: highlight ? tone : tone.withValues(alpha: 0.12),
+                  ),
+                  alignment: Alignment.center,
+                  child: Icon(
+                    CupertinoIcons.chevron_forward,
+                    size: 13,
+                    color: highlight ? CupertinoColors.white : tone,
+                  ),
+                ),
+              ],
+            ),
+            if (badge != null)
+              Positioned(
+                top: -4,
+                right: 38,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        tone,
+                        Color.lerp(tone, CupertinoColors.black, 0.15)!,
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(100),
+                    boxShadow: [
+                      BoxShadow(
+                        color: tone.withValues(alpha: 0.35),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Text(
+                    badge!,
+                    style: const TextStyle(
+                      color: CupertinoColors.white,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.4,
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
       ),

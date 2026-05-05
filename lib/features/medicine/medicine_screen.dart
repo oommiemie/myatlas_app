@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/app_toast.dart';
+import '../../core/widgets/skeleton_box.dart';
 import 'theme/time_period.dart';
 import 'widgets/medicine_header.dart';
 import 'widgets/date_banner.dart';
@@ -36,11 +39,16 @@ class _MedicineScreenState extends State<MedicineScreen> {
   DateTime _lastToggleTime = DateTime.fromMillisecondsSinceEpoch(0);
   static const Duration _toggleCooldown = Duration(milliseconds: 320);
   DateTime _selectedDate = DateTime(2026, 4, 21);
+  bool _loading = true;
+  Timer? _skeletonTimer;
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_handleScroll);
+    _skeletonTimer = Timer(const Duration(milliseconds: 1100), () {
+      if (mounted) setState(() => _loading = false);
+    });
   }
 
   @override
@@ -50,6 +58,7 @@ class _MedicineScreenState extends State<MedicineScreen> {
 
   @override
   void dispose() {
+    _skeletonTimer?.cancel();
     _scrollController
       ..removeListener(_handleScroll)
       ..dispose();
@@ -119,6 +128,7 @@ class _MedicineScreenState extends State<MedicineScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_loading) return const _MedicineSkeleton();
     final bool isPrescription = _selectedTab == 1;
     final Color currentColor = isPrescription
         ? AppColors.primary400
@@ -229,15 +239,52 @@ class _MedicineListContent extends StatefulWidget {
   State<_MedicineListContent> createState() => _MedicineListContentState();
 }
 
-class _MedicineListContentState extends State<_MedicineListContent> {
+class _MedicineListContentState extends State<_MedicineListContent>
+    with SingleTickerProviderStateMixin {
   // Per-period taken state (before + after meal lists)
   final Map<TimePeriod, List<bool>> _takenBefore = {};
   final Map<TimePeriod, List<bool>> _takenAfter = {};
 
+  late final AnimationController _entryCtrl;
+
   @override
   void initState() {
     super.initState();
+    _entryCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) => _entryCtrl.forward());
     _initState(widget.date);
+  }
+
+  @override
+  void dispose() {
+    _entryCtrl.dispose();
+    super.dispose();
+  }
+
+  Widget _stagger(int index, int total, Widget child) {
+    final start = (index / total) * 0.5;
+    final end = (start + 0.55).clamp(0.0, 1.0);
+    final anim = CurvedAnimation(
+      parent: _entryCtrl,
+      curve: Interval(start, end, curve: Curves.easeOutCubic),
+    );
+    return AnimatedBuilder(
+      animation: anim,
+      builder: (_, c) {
+        final t = anim.value;
+        return Opacity(
+          opacity: t,
+          child: Transform.translate(
+            offset: Offset(0, (1 - t) * 18),
+            child: c,
+          ),
+        );
+      },
+      child: child,
+    );
   }
 
   @override
@@ -338,11 +385,15 @@ class _MedicineListContentState extends State<_MedicineListContent> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SummaryCard(
-            morningCount: data.morningCount,
-            dayCount: data.dayCount,
-            eveningCount: data.eveningCount,
-            bedtimeCount: data.bedtimeCount,
+          _stagger(
+            0,
+            4,
+            SummaryCard(
+              morningCount: data.morningCount,
+              dayCount: data.dayCount,
+              eveningCount: data.eveningCount,
+              bedtimeCount: data.bedtimeCount,
+            ),
           ),
           Expanded(
             child: SingleChildScrollView(
@@ -352,12 +403,16 @@ class _MedicineListContentState extends State<_MedicineListContent> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: TimeSlotsRow(
-                      selected: period,
-                      onSelected: widget.onSelectPeriod,
-                      doneByPeriod: doneByPeriod,
+                  _stagger(
+                    1,
+                    4,
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: TimeSlotsRow(
+                        selected: period,
+                        onSelected: widget.onSelectPeriod,
+                        doneByPeriod: doneByPeriod,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -375,35 +430,45 @@ class _MedicineListContentState extends State<_MedicineListContent> {
                       ),
                     ),
                   if (periodData.beforeMeal.isNotEmpty) ...[
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: MealSection(
-                        label1: 'ก่อน',
-                        label2: 'อาหาร',
-                        itemCount: periodData.beforeMeal.length,
-                        medicines: periodData.beforeMeal,
-                        takenStates: beforeTaken,
-                        allTaken: beforeTaken.isNotEmpty &&
-                            beforeTaken.every((v) => v),
-                        onToggleAll: () => _toggleAllBefore(period),
-                        onToggleItem: (i) => _toggleBeforeItem(period, i),
+                    _stagger(
+                      2,
+                      4,
+                      Padding(
+                        padding:
+                            const EdgeInsets.symmetric(horizontal: 16),
+                        child: MealSection(
+                          label1: 'ก่อน',
+                          label2: 'อาหาร',
+                          itemCount: periodData.beforeMeal.length,
+                          medicines: periodData.beforeMeal,
+                          takenStates: beforeTaken,
+                          allTaken: beforeTaken.isNotEmpty &&
+                              beforeTaken.every((v) => v),
+                          onToggleAll: () => _toggleAllBefore(period),
+                          onToggleItem: (i) => _toggleBeforeItem(period, i),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 16),
                   ],
                   if (periodData.afterMeal.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: MealSection(
-                        label1: 'หลัง',
-                        label2: 'อาหาร',
-                        itemCount: periodData.afterMeal.length,
-                        medicines: periodData.afterMeal,
-                        takenStates: afterTaken,
-                        allTaken: afterTaken.isNotEmpty &&
-                            afterTaken.every((v) => v),
-                        onToggleAll: () => _toggleAllAfter(period),
-                        onToggleItem: (i) => _toggleAfterItem(period, i),
+                    _stagger(
+                      3,
+                      4,
+                      Padding(
+                        padding:
+                            const EdgeInsets.symmetric(horizontal: 16),
+                        child: MealSection(
+                          label1: 'หลัง',
+                          label2: 'อาหาร',
+                          itemCount: periodData.afterMeal.length,
+                          medicines: periodData.afterMeal,
+                          takenStates: afterTaken,
+                          allTaken: afterTaken.isNotEmpty &&
+                              afterTaken.every((v) => v),
+                          onToggleAll: () => _toggleAllAfter(period),
+                          onToggleItem: (i) => _toggleAfterItem(period, i),
+                        ),
                       ),
                     ),
                 ],
@@ -507,6 +572,76 @@ class _PrescriptionContent extends StatelessWidget {
                   ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _MedicineSkeleton extends StatelessWidget {
+  const _MedicineSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    final statusBarHeight = MediaQuery.of(context).padding.top;
+    return Scaffold(
+      backgroundColor: AppColors.bgPrimary,
+      body: SkeletonHost(
+        builder: (_, shimmer) => SingleChildScrollView(
+          physics: const NeverScrollableScrollPhysics(),
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(16, statusBarHeight + 16, 16, 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header (title + tabs placeholder)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    SkeletonBox(shimmer: shimmer, width: 140, height: 24),
+                    SkeletonBox(
+                        shimmer: shimmer,
+                        width: 172,
+                        height: 36,
+                        borderRadius: 100),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                // Date banner
+                SkeletonBox(shimmer: shimmer, width: 90, height: 14),
+                const SizedBox(height: 8),
+                SkeletonBox(
+                    shimmer: shimmer,
+                    width: 200,
+                    height: 32,
+                    borderRadius: 100),
+                const SizedBox(height: 32),
+                // Summary card (rounded top)
+                SkeletonBox(
+                    shimmer: shimmer, height: 64, borderRadius: 24),
+                const SizedBox(height: 16),
+                // Time slots row (4 cards)
+                SizedBox(
+                  height: 96,
+                  child: Row(
+                    children: List.generate(4, (i) {
+                      return Expanded(
+                        child: Padding(
+                          padding: EdgeInsets.only(right: i < 3 ? 12 : 0),
+                          child: SkeletonBox(
+                              shimmer: shimmer, borderRadius: 24),
+                        ),
+                      );
+                    }),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                // Meal section card
+                SkeletonBox(
+                    shimmer: shimmer, height: 200, borderRadius: 24),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

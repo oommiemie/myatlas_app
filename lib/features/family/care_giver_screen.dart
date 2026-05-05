@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
@@ -5,6 +6,7 @@ import 'package:flutter/services.dart';
 
 import '../../core/theme/app_typography.dart';
 import '../../core/widgets/app_toast.dart';
+import '../../core/widgets/skeleton_box.dart';
 import 'add_family_member_sheet.dart';
 import 'fall_alert.dart';
 import 'family_detail_screen.dart';
@@ -116,6 +118,69 @@ const kFamilyMembers = <FamilyMember>[
   ),
 ];
 
+/// Patients the nurse takes care of. Reuses [FamilyMember] so cards render
+/// identically to the family list.
+const kNursePatients = <FamilyMember>[
+  FamilyMember(
+    name: 'คุณสมหวัง ใจดี',
+    age: 72,
+    bloodType: 'A',
+    batteryPercent: 54,
+    imagePath: 'assets/images/family/somchai.png',
+    status: _MemberStatus.allSafe,
+    heartRate: 76,
+    spo2: 96,
+    cgm: 132,
+    steps: 3120,
+    stepsGoal: 5000,
+    stepsWeek: [2800, 3400, 2900, 3700, 3100, 3500, 3120],
+  ),
+  FamilyMember(
+    name: 'คุณวิภา รักษ์สุขภาพ',
+    age: 68,
+    bloodType: 'B',
+    batteryPercent: 41,
+    imagePath: 'assets/images/family/somsri.png',
+    status: _MemberStatus.attentionNeeded,
+    heartRate: 92,
+    spo2: 93,
+    cgm: 168,
+    steps: 1480,
+    stepsGoal: 5000,
+    stepsWeek: [1200, 1500, 1100, 1600, 1300, 1700, 1480],
+  ),
+  FamilyMember(
+    name: 'คุณประยูร นพรัตน์',
+    age: 75,
+    bloodType: 'O',
+    batteryPercent: 79,
+    imagePath: 'assets/images/family/preecha.png',
+    status: _MemberStatus.allSafe,
+    heartRate: 70,
+    spo2: 97,
+    cgm: 118,
+    steps: 4250,
+    stepsGoal: 6000,
+    stepsWeek: [3800, 4500, 4100, 4700, 4000, 4300, 4250],
+  ),
+  FamilyMember(
+    name: 'คุณมานี ภักดี',
+    age: 80,
+    bloodType: 'AB',
+    batteryPercent: 22,
+    imagePath: 'assets/images/family/jaidee.png',
+    status: _MemberStatus.attentionNeeded,
+    heartRate: 96,
+    spo2: 90,
+    cgm: 192,
+    steps: 920,
+    stepsGoal: 4000,
+    stepsWeek: [800, 1100, 700, 1200, 900, 1000, 920],
+  ),
+];
+
+enum CareGiverTab { family, nurse }
+
 class CareGiverScreen extends StatefulWidget {
   const CareGiverScreen({super.key});
 
@@ -127,6 +192,9 @@ class _CareGiverScreenState extends State<CareGiverScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController _entryCtrl;
   late List<FamilyMember> _sortedMembers;
+  CareGiverTab _selectedTab = CareGiverTab.family;
+  bool _loading = true;
+  Timer? _skeletonTimer;
 
   @override
   void initState() {
@@ -134,13 +202,19 @@ class _CareGiverScreenState extends State<CareGiverScreen>
     _entryCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1100),
-    )..forward();
+    );
     _sortedMembers = _computeSorted();
     fallAlertsStore.addListener(_onAlertChange);
+    _skeletonTimer = Timer(const Duration(milliseconds: 1100), () {
+      if (!mounted) return;
+      setState(() => _loading = false);
+      _entryCtrl.forward();
+    });
   }
 
   @override
   void dispose() {
+    _skeletonTimer?.cancel();
     fallAlertsStore.removeListener(_onAlertChange);
     _entryCtrl.dispose();
     super.dispose();
@@ -152,19 +226,31 @@ class _CareGiverScreenState extends State<CareGiverScreen>
   }
 
   List<FamilyMember> _computeSorted() {
+    final source = _selectedTab == CareGiverTab.family
+        ? kFamilyMembers
+        : kNursePatients;
     final store = fallAlertsStore.value;
-    final list = [...kFamilyMembers];
+    final list = [...source];
     list.sort((a, b) {
       final aAlert = store.containsKey(a.name);
       final bAlert = store.containsKey(b.name);
       if (aAlert == bAlert) {
-        return kFamilyMembers
-            .indexOf(a)
-            .compareTo(kFamilyMembers.indexOf(b));
+        return source.indexOf(a).compareTo(source.indexOf(b));
       }
       return aAlert ? -1 : 1;
     });
     return list;
+  }
+
+  void _onTabChanged(CareGiverTab tab) {
+    if (tab == _selectedTab) return;
+    setState(() {
+      _selectedTab = tab;
+      _sortedMembers = _computeSorted();
+    });
+    _entryCtrl
+      ..reset()
+      ..forward();
   }
 
   Widget _staggered(int index, int total, Widget child) {
@@ -192,6 +278,7 @@ class _CareGiverScreenState extends State<CareGiverScreen>
   @override
   Widget build(BuildContext context) {
     const bg = Color(0xFFF4F8F5);
+    if (_loading) return const _CareGiverSkeleton();
     return CupertinoPageScaffold(
       backgroundColor: bg,
       child: CustomScrollView(
@@ -211,8 +298,19 @@ class _CareGiverScreenState extends State<CareGiverScreen>
               iconColor: const Color(0xFF1D8B6B),
             ),
           ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              child: _CareGiverTabBar(
+                selected: _selectedTab,
+                onChanged: _onTabChanged,
+                familyCount: kFamilyMembers.length,
+                nurseCount: kNursePatients.length,
+              ),
+            ),
+          ),
           SliverPadding(
-            padding: const EdgeInsets.fromLTRB(16, 32, 16, 110),
+            padding: const EdgeInsets.fromLTRB(16, 24, 16, 110),
             sliver: SliverList(
               delegate: SliverChildBuilderDelegate(
                 (context, i) {
@@ -673,6 +771,192 @@ class _MetricEntry extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+}
+
+class _CareGiverTabBar extends StatelessWidget {
+  const _CareGiverTabBar({
+    required this.selected,
+    required this.onChanged,
+    required this.familyCount,
+    required this.nurseCount,
+  });
+
+  final CareGiverTab selected;
+  final ValueChanged<CareGiverTab> onChanged;
+  final int familyCount;
+  final int nurseCount;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: const Color(0xFFD4D4D4).withValues(alpha: 0.22),
+        borderRadius: BorderRadius.circular(100),
+      ),
+      child: SizedBox(
+        height: 40,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final segW = constraints.maxWidth / 2;
+            final selIdx = selected == CareGiverTab.family ? 0 : 1;
+            return Stack(
+              children: [
+                AnimatedPositioned(
+                  duration: const Duration(milliseconds: 320),
+                  curve: Curves.easeOutQuint,
+                  left: selIdx * segW,
+                  top: 0,
+                  bottom: 0,
+                  width: segW,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: CupertinoColors.white,
+                      borderRadius: BorderRadius.circular(100),
+                      boxShadow: [
+                        BoxShadow(
+                          color: CupertinoColors.black.withValues(alpha: 0.06),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Row(
+                  children: [
+                    _CareGiverTabSegment(
+                      icon: CupertinoIcons.person_2_fill,
+                      label: 'ครอบครัว',
+                      count: familyCount,
+                      selected: selected == CareGiverTab.family,
+                      onTap: () => onChanged(CareGiverTab.family),
+                    ),
+                    _CareGiverTabSegment(
+                      icon: CupertinoIcons.heart_circle_fill,
+                      label: 'พยาบาล',
+                      count: nurseCount,
+                      selected: selected == CareGiverTab.nurse,
+                      onTap: () => onChanged(CareGiverTab.nurse),
+                    ),
+                  ],
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _CareGiverTabSegment extends StatelessWidget {
+  const _CareGiverTabSegment({
+    required this.icon,
+    required this.label,
+    required this.count,
+    required this.selected,
+    required this.onTap,
+  });
+  final IconData icon;
+  final String label;
+  final int count;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final tone = selected ? const Color(0xFF1D8B6B) : const Color(0xFF6D756E);
+    return Expanded(
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: Center(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 16, color: tone),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: TextStyle(
+                  color: selected
+                      ? const Color(0xFF1D8B6B)
+                      : const Color(0xFF1A1A1A),
+                  fontSize: 14,
+                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                  letterSpacing: 0.1,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 6,
+                  vertical: 1,
+                ),
+                decoration: BoxDecoration(
+                  color: selected
+                      ? const Color(0xFF1D8B6B)
+                      : const Color(0xFFB0B4B1),
+                  borderRadius: BorderRadius.circular(100),
+                ),
+                child: Text(
+                  '$count',
+                  style: const TextStyle(
+                    color: CupertinoColors.white,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CareGiverSkeleton extends StatelessWidget {
+  const _CareGiverSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    final topInset = MediaQuery.paddingOf(context).top;
+    return CupertinoPageScaffold(
+      backgroundColor: const Color(0xFFF4F8F5),
+      child: SkeletonHost(
+        builder: (_, shimmer) => SingleChildScrollView(
+          physics: const NeverScrollableScrollPhysics(),
+          padding: EdgeInsets.fromLTRB(16, topInset + 16, 16, 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  SkeletonBox(shimmer: shimmer, width: 120, height: 32),
+                  SkeletonBox(
+                      shimmer: shimmer,
+                      width: 36,
+                      height: 36,
+                      borderRadius: 100),
+                ],
+              ),
+              const SizedBox(height: 12),
+              SkeletonBox(shimmer: shimmer, height: 40, borderRadius: 100),
+              const SizedBox(height: 24),
+              for (int i = 0; i < 4; i++) ...[
+                SkeletonBox(
+                    shimmer: shimmer, height: 168, borderRadius: 24),
+                const SizedBox(height: 12),
+              ],
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
