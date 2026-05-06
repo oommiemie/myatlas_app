@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import '../../core/services/app_strings.dart';
 import '../../core/widgets/liquid_glass_button.dart';
 import '../../core/widgets/press_effect.dart';
+import '../auth/login_screen.dart';
 import 'about_app_screen.dart';
 import 'delete_account_screen.dart';
 import 'display_settings_screen.dart';
@@ -193,7 +194,6 @@ class _SettingsScreenState extends State<SettingsScreen>
       ),
     );
     if (ok == true && mounted) {
-      // Logout logic placeholder — show confirmation toast / route to login.
       await showCupertinoDialog<void>(
         context: context,
         builder: (ctx) => CupertinoAlertDialog(
@@ -210,6 +210,12 @@ class _SettingsScreenState extends State<SettingsScreen>
           ],
         ),
       );
+      if (mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          CupertinoPageRoute(builder: (_) => const LoginScreen()),
+          (_) => false,
+        );
+      }
     }
   }
 

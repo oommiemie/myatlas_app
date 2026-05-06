@@ -5,9 +5,9 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'core/services/app_settings_service.dart';
 import 'core/theme/app_theme.dart';
+import 'features/auth/login_screen.dart';
 import 'features/family/fall_push_overlay.dart';
 import 'features/family/mini_call_overlay.dart';
-import 'features/shell/main_shell.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -79,7 +79,7 @@ class MyAtlasApp extends StatelessWidget {
                   ),
                 );
               },
-              home: const MainShell(),
+              home: const LoginScreen(),
             );
           },
         ),

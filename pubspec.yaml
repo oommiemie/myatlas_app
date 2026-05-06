@@ -72,6 +72,16 @@ flutter:
 
   assets:
     - assets/banner.png
+    - assets/loginimage.png
+    - assets/healthid.png
+    - assets/google.png
+    - assets/facebook.png
+    - assets/line.png
+    - assets/apple.png
+    - assets/vital.png
+    - assets/fam.png
+    - assets/med.png
+    - assets/kcal.png
     - assets/images/
     - assets/images/family/
     - assets/images/me/
