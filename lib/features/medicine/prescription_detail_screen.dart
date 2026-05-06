@@ -86,7 +86,7 @@ class _PrescriptionDetailSheet extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   for (int i = 0; i < medicines.length; i++) ...[
-                    _MedicineDetailCard(item: medicines[i]),
+                    MedicineDetailCard(item: medicines[i]),
                     if (i < medicines.length - 1) const SizedBox(height: 12),
                   ],
                 ],
@@ -298,10 +298,10 @@ class _InfoCol extends StatelessWidget {
   }
 }
 
-class _MedicineDetailCard extends StatelessWidget {
+class MedicineDetailCard extends StatelessWidget {
   final MedicineDetailItem item;
 
-  const _MedicineDetailCard({required this.item});
+  const MedicineDetailCard({super.key, required this.item});
 
   @override
   Widget build(BuildContext context) {

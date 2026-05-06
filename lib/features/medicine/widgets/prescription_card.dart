@@ -88,8 +88,10 @@ class PrescriptionCard extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: 8),
-              _DetailsButton(onTap: onTapDetails),
+              if (onTapDetails != null) ...[
+                const SizedBox(height: 8),
+                _DetailsButton(onTap: onTapDetails),
+              ],
             ],
           ),
         ),

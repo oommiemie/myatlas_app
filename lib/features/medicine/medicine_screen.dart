@@ -15,7 +15,6 @@ import 'widgets/prescription_summary.dart';
 import 'widgets/prescription_card.dart';
 import 'widgets/date_picker_bottom_sheet.dart';
 import 'data/mock_data.dart' as mock;
-import '../../core/utils/thai_date.dart';
 import 'prescription_detail_screen.dart';
 
 class MedicineScreen extends StatefulWidget {
@@ -490,21 +489,6 @@ class _PrescriptionContent extends StatelessWidget {
     required this.date,
   });
 
-  void _openDetail(
-    BuildContext context,
-    PrescriptionItem item,
-    List<MedicineDetailItem> medicines,
-  ) {
-    showPrescriptionDetailSheet(
-      context,
-      serviceDate: ThaiDate.format(date),
-      hospital: item.hospital,
-      symptoms: item.symptoms,
-      coverage: 'UC',
-      medicines: medicines,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final data = mock.prescriptionFor(date);
@@ -520,7 +504,15 @@ class _PrescriptionContent extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          PrescriptionSummary(itemCount: prescriptions.length),
+          PrescriptionSummary(
+            itemCount: prescriptions.length,
+            onAcknowledge: prescriptions.isEmpty
+                ? null
+                : () => AppToast.success(
+                      context,
+                      'เพิ่มยาในตารางการทานยาแล้ว',
+                    ),
+          ),
           Expanded(
             child: prescriptions.isEmpty
                 ? const Center(
@@ -548,18 +540,23 @@ class _PrescriptionContent extends StatelessWidget {
                                 const EdgeInsets.symmetric(horizontal: 16),
                             child: PrescriptionCard(
                               item: prescriptions[i],
-                              onTapDetails: () => _openDetail(
-                                context,
-                                prescriptions[i],
-                                data.detailByHospital[
-                                        prescriptions[i].hospital] ??
-                                    const [],
-                              ),
                             ),
                           ),
+                          const SizedBox(height: 12),
+                          for (final med in data.detailByHospital[
+                                  prescriptions[i].hospital] ??
+                              const <MedicineDetailItem>[]) ...[
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 16),
+                              child: MedicineDetailCard(item: med),
+                            ),
+                            const SizedBox(height: 12),
+                          ],
                           if (i < prescriptions.length - 1)
                             const Padding(
-                              padding: EdgeInsets.symmetric(vertical: 16),
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 8),
                               child: Divider(
                                 height: 1,
                                 thickness: 1,
