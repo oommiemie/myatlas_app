@@ -2,33 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../../core/theme/app_colors.dart';
 
-class PrescriptionSummary extends StatefulWidget {
+class PrescriptionSummary extends StatelessWidget {
   final int itemCount;
-  final VoidCallback? onAcknowledge;
+  final bool allSaved;
+  final VoidCallback? onSaveAll;
 
   const PrescriptionSummary({
     super.key,
     required this.itemCount,
-    this.onAcknowledge,
+    required this.allSaved,
+    this.onSaveAll,
   });
-
-  @override
-  State<PrescriptionSummary> createState() => _PrescriptionSummaryState();
-}
-
-class _PrescriptionSummaryState extends State<PrescriptionSummary> {
-  bool _acknowledged = false;
-
-  void _handleTap() {
-    if (_acknowledged) return;
-    setState(() => _acknowledged = true);
-    widget.onAcknowledge?.call();
-  }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 72,
       padding: const EdgeInsets.all(16),
       decoration: const BoxDecoration(
         color: AppColors.bgSurface,
@@ -42,12 +30,11 @@ class _PrescriptionSummaryState extends State<PrescriptionSummary> {
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Text(
-                  'รายการใบสั่งยาทั้งหมด',
+                  'ใบสั่งยาทั้งหมด',
                   style: TextStyle(
-                    fontSize: 11,
+                    fontSize: 10,
                     color: AppColors.textSecondary,
                   ),
                 ),
@@ -56,18 +43,18 @@ class _PrescriptionSummaryState extends State<PrescriptionSummary> {
                   text: TextSpan(
                     children: [
                       TextSpan(
-                        text: '${widget.itemCount}',
+                        text: '$itemCount',
                         style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
                           color: AppColors.textPrimary,
                         ),
                       ),
-                      const TextSpan(text: ' ', style: TextStyle(fontSize: 11)),
+                      const TextSpan(text: ' ', style: TextStyle(fontSize: 10)),
                       const TextSpan(
                         text: 'รายการ',
                         style: TextStyle(
-                          fontSize: 11,
+                          fontSize: 10,
                           color: AppColors.textTertiary,
                         ),
                       ),
@@ -77,9 +64,10 @@ class _PrescriptionSummaryState extends State<PrescriptionSummary> {
               ],
             ),
           ),
-          _AcknowledgeButton(
-            acknowledged: _acknowledged,
-            onTap: widget.itemCount == 0 ? null : _handleTap,
+          SavePillButton(
+            label: allSaved ? 'บันทึกแล้ว' : 'บันทึกทั้งหมด',
+            saved: allSaved,
+            onTap: itemCount == 0 || allSaved ? null : onSaveAll,
           ),
         ],
       ),
@@ -87,24 +75,30 @@ class _PrescriptionSummaryState extends State<PrescriptionSummary> {
   }
 }
 
-class _AcknowledgeButton extends StatelessWidget {
-  final bool acknowledged;
+/// Pill button matching "ทานทั้งหมด" style (sun → check icon).
+class SavePillButton extends StatelessWidget {
+  final String label;
+  final bool saved;
   final VoidCallback? onTap;
 
-  const _AcknowledgeButton({required this.acknowledged, required this.onTap});
+  const SavePillButton({
+    super.key,
+    required this.label,
+    required this.saved,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 32,
+        constraints: const BoxConstraints(minHeight: 32),
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: acknowledged ? AppColors.success600 : Colors.transparent,
-          border: acknowledged
-              ? null
-              : Border.all(color: AppColors.border, width: 1),
+          color: saved ? AppColors.success600 : Colors.transparent,
+          border:
+              saved ? null : Border.all(color: AppColors.border, width: 1),
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(
@@ -114,7 +108,7 @@ class _AcknowledgeButton extends StatelessWidget {
               width: 14,
               height: 14,
               child: Center(
-                child: acknowledged
+                child: saved
                     ? SvgPicture.asset(
                         'assets/svg/icon_done_check.svg',
                         width: 14,
@@ -132,15 +126,18 @@ class _AcknowledgeButton extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 5),
-            Text(
-              acknowledged ? 'เพิ่มในตารางแล้ว' : 'รับทราบ',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: acknowledged
-                    ? const Color(0xFFFCFCFC)
-                    : const Color(0xFF18181B),
-                height: 20 / 12,
+            Flexible(
+              child: Text(
+                label,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: saved
+                      ? const Color(0xFFFCFCFC)
+                      : const Color(0xFF18181B),
+                  height: 20 / 12,
+                ),
               ),
             ),
           ],

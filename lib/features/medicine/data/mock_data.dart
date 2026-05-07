@@ -248,6 +248,30 @@ const _warfarinDetail = MedicineDetailItem(
   pillCount: 30,
   startDate: '14/05/68',
 );
+const _mucosolvanDetail = MedicineDetailItem(
+  name: 'Mucosolvan Tab.30',
+  dosage: 'รับประทาน ครั้งละ 1 เม็ด วันละ 3 ครั้ง\n(เช้า-กลางวัน-เย็น)',
+  pillCount: 15,
+  startDate: '21/04/69',
+);
+const _amoxicillinDetail = MedicineDetailItem(
+  name: 'Amoxicillin 500 mg',
+  dosage: 'รับประทาน ครั้งละ 1 แคปซูล วันละ 3 ครั้ง\nก่อนอาหาร 30 นาที',
+  pillCount: 21,
+  startDate: '21/04/69',
+);
+const _cetirizineDetail = MedicineDetailItem(
+  name: 'Cetirizine 10 mg',
+  dosage: 'รับประทาน ครั้งละ 1 เม็ด ก่อนนอน',
+  pillCount: 7,
+  startDate: '21/04/69',
+);
+const _paracetamol500Detail = MedicineDetailItem(
+  name: 'Paracetamol 500 mg',
+  dosage: 'รับประทานครั้งละ 1 เม็ด ทุก 4-6 ชม.\nเมื่อมีไข้หรืออาการปวด',
+  pillCount: 10,
+  startDate: '21/04/69',
+);
 
 final Map<DateTime, PrescriptionDayData> _prescriptionByDate = {
   _key(DateTime(2026, 4, 20)): const PrescriptionDayData(
@@ -276,7 +300,12 @@ final Map<DateTime, PrescriptionDayData> _prescriptionByDate = {
       ),
     ],
     detailByHospital: {
-      'โรงพยาบาลเอกชัย': [_paracetamolDetail],
+      'โรงพยาบาลเอกชัย': [
+        _mucosolvanDetail,
+        _amoxicillinDetail,
+        _cetirizineDetail,
+        _paracetamol500Detail,
+      ],
     },
   ),
   _key(DateTime(2026, 4, 23)): const PrescriptionDayData(

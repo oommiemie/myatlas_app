@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/utils/thai_date.dart';
 import '../../core/widgets/app_toast.dart';
 import '../../core/widgets/skeleton_box.dart';
 import 'theme/time_period.dart';
@@ -480,7 +481,7 @@ class _MedicineListContentState extends State<_MedicineListContent>
   }
 }
 
-class _PrescriptionContent extends StatelessWidget {
+class _PrescriptionContent extends StatefulWidget {
   final ScrollController scrollController;
   final DateTime date;
 
@@ -490,9 +491,41 @@ class _PrescriptionContent extends StatelessWidget {
   });
 
   @override
+  State<_PrescriptionContent> createState() => _PrescriptionContentState();
+}
+
+class _PrescriptionContentState extends State<_PrescriptionContent> {
+  final Set<int> _saved = {};
+
+  @override
+  void didUpdateWidget(covariant _PrescriptionContent oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.date != widget.date) {
+      _saved.clear();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final data = mock.prescriptionFor(date);
+    final data = mock.prescriptionFor(widget.date);
     final prescriptions = data.prescriptions;
+    final allSaved =
+        prescriptions.isNotEmpty && _saved.length == prescriptions.length;
+
+    void saveOne(int index) {
+      setState(() => _saved.add(index));
+      AppToast.success(context, 'เพิ่มยาในตารางการทานยาแล้ว');
+    }
+
+    void saveAll() {
+      setState(() {
+        for (int i = 0; i < prescriptions.length; i++) {
+          _saved.add(i);
+        }
+      });
+      AppToast.success(context, 'เพิ่มยาในตารางการทานยาแล้ว');
+    }
+
     return Container(
       decoration: const BoxDecoration(
         color: AppColors.bgPrimary,
@@ -506,12 +539,8 @@ class _PrescriptionContent extends StatelessWidget {
         children: [
           PrescriptionSummary(
             itemCount: prescriptions.length,
-            onAcknowledge: prescriptions.isEmpty
-                ? null
-                : () => AppToast.success(
-                      context,
-                      'เพิ่มยาในตารางการทานยาแล้ว',
-                    ),
+            allSaved: allSaved,
+            onSaveAll: saveAll,
           ),
           Expanded(
             child: prescriptions.isEmpty
@@ -528,41 +557,25 @@ class _PrescriptionContent extends StatelessWidget {
                     ),
                   )
                 : SingleChildScrollView(
-                    controller: scrollController,
+                    controller: widget.scrollController,
                     physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.only(top: 16, bottom: 120),
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
+                        _DateLabel(date: widget.date),
+                        const SizedBox(height: 8),
                         for (int i = 0; i < prescriptions.length; i++) ...[
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 16),
-                            child: PrescriptionCard(
-                              item: prescriptions[i],
-                            ),
+                          PrescriptionCard(
+                            item: prescriptions[i],
+                            medicines: data.detailByHospital[
+                                    prescriptions[i].hospital] ??
+                                const <MedicineDetailItem>[],
+                            saved: _saved.contains(i),
+                            onSave: () => saveOne(i),
                           ),
-                          const SizedBox(height: 12),
-                          for (final med in data.detailByHospital[
-                                  prescriptions[i].hospital] ??
-                              const <MedicineDetailItem>[]) ...[
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 16),
-                              child: MedicineDetailCard(item: med),
-                            ),
-                            const SizedBox(height: 12),
-                          ],
                           if (i < prescriptions.length - 1)
-                            const Padding(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 8),
-                              child: Divider(
-                                height: 1,
-                                thickness: 1,
-                                color: AppColors.borderDefault,
-                              ),
-                            ),
+                            const SizedBox(height: 12),
                         ],
                       ],
                     ),
@@ -570,6 +583,54 @@ class _PrescriptionContent extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _DateLabel extends StatelessWidget {
+  final DateTime date;
+  const _DateLabel({required this.date});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'วัน${ThaiDate.weekdayName(date)} ที่',
+          style: const TextStyle(
+            fontSize: 12,
+            color: AppColors.textTertiary,
+          ),
+        ),
+        RichText(
+          text: TextSpan(
+            children: [
+              TextSpan(
+                text: '${date.day}',
+                style: const TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const TextSpan(
+                text: ' ',
+                style: TextStyle(fontSize: 20),
+              ),
+              TextSpan(
+                text:
+                    '${ThaiDate.monthName(date.month)} ${date.year + 543}',
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: AppColors.textTertiary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

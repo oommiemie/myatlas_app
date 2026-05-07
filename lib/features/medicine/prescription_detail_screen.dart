@@ -306,23 +306,11 @@ class MedicineDetailCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: AppColors.bgSurface,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.borderDefault, width: 0.5),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 2,
-            offset: const Offset(0, 1),
-          ),
-        ],
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -336,50 +324,49 @@ class MedicineDetailCard extends StatelessWidget {
               fit: BoxFit.cover,
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        item.name,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.textPrimary,
-                          height: 1.43,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    _PillCountBadge(count: item.pillCount),
-                  ],
+                Text(
+                  item.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   item.dosage,
                   style: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textSecondary,
-                    height: 1.34,
+                    fontSize: 10,
+                    color: AppColors.textTertiary,
+                    height: 1.3,
                   ),
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  'วันที่เริ่มทาน : ${item.startDate}',
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: Color(0xFFA5ACA6),
-                    height: 1.34,
+                RichText(
+                  text: TextSpan(
+                    style: const TextStyle(
+                      fontSize: 10,
+                      color: Color(0xFFA5ACA6),
+                      height: 1.34,
+                    ),
+                    children: [
+                      const TextSpan(text: 'วันที่เริ่มทาน : '),
+                      TextSpan(text: item.startDate),
+                    ],
                   ),
                 ),
               ],
             ),
           ),
+          const SizedBox(width: 8),
+          _PillCountBadge(count: item.pillCount),
         ],
       ),
     );
@@ -388,7 +375,6 @@ class MedicineDetailCard extends StatelessWidget {
 
 class _PillCountBadge extends StatelessWidget {
   final int count;
-
   const _PillCountBadge({required this.count});
 
   @override
@@ -407,11 +393,13 @@ class _PillCountBadge extends StatelessWidget {
           fontWeight: FontWeight.w500,
           color: AppColors.success600,
           height: 1.25,
+          letterSpacing: 0.275,
         ),
       ),
     );
   }
 }
+
 
 class _ConfirmButton extends StatelessWidget {
   final VoidCallback onTap;
