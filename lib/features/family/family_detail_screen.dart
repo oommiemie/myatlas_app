@@ -54,7 +54,7 @@ class _FamilyDetailScreenState extends State<FamilyDetailScreen>
 
   Set<DeviceKind> _seedDevicesFor(FamilyMember m) {
     // Pre-fill plausible devices based on which vitals the member already has.
-    final s = <DeviceKind>{DeviceKind.watch};
+    final s = <DeviceKind>{DeviceKind.smartwatch};
     if (m.cgm > 0) s.add(DeviceKind.cgm);
     if (m.spo2 > 0) s.add(DeviceKind.spo2);
     return s;
@@ -149,7 +149,7 @@ class _FamilyDetailScreenState extends State<FamilyDetailScreen>
                 ),
               ),
               SliverPadding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 110),
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 120),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate.fixed([
                     _stagger(0, 7, _ProfileCard(member: member)),
@@ -744,8 +744,12 @@ class _DevicesCard extends StatelessWidget {
   int _batteryFor(DeviceKind kind) {
     final base = member.batteryPercent;
     switch (kind) {
-      case DeviceKind.watch:
+      case DeviceKind.smartwatch:
         return base;
+      case DeviceKind.loopBand:
+        return (base + 10).clamp(8, 100);
+      case DeviceKind.smartRing:
+        return (base - 8).clamp(8, 100);
       case DeviceKind.cgm:
         return (base - 5).clamp(8, 100);
       case DeviceKind.bp:
@@ -953,16 +957,6 @@ class _ConnectedDeviceRow extends StatelessWidget {
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
                   height: 1.3,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                kind.brands,
-                style: const TextStyle(
-                  color: Color(0xFF6D756E),
-                  fontSize: 12,
-                  fontWeight: FontWeight.w400,
-                  height: 1.4,
                 ),
               ),
             ],
