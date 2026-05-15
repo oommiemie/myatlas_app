@@ -260,7 +260,7 @@ class _TabButton extends StatelessWidget {
         duration: const Duration(milliseconds: 140),
         curve: Curves.easeOut,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(8, 6, 8, 7),
+          padding: const EdgeInsets.fromLTRB(8, 10, 8, 11),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,

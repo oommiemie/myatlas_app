@@ -310,7 +310,7 @@ class _CareGiverScreenState extends State<CareGiverScreen>
             ),
           ),
           SliverPadding(
-            padding: const EdgeInsets.fromLTRB(16, 24, 16, 110),
+            padding: const EdgeInsets.fromLTRB(16, 24, 16, 120),
             sliver: SliverList(
               delegate: SliverChildBuilderDelegate(
                 (context, i) {

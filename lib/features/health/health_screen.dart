@@ -6,9 +6,14 @@ import 'package:flutter/material.dart' show Icons;
 import '../../core/responsive/responsive.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_typography.dart';
+import '../../core/widgets/liquid_glass_button.dart';
 import '../../core/widgets/skeleton_box.dart';
+import '../family/family_devices.dart';
 import '../nutrition/food_lens/food_lens_flow.dart';
 import '../nutrition/nutrition_detail_screen.dart';
+import 'health_metric_prefs.dart';
+import 'widgets/health_metric_edit_sheet.dart';
+import 'add_health_data_screen.dart';
 import 'blood_pressure_detail_screen.dart';
 import 'blood_sugar_detail_screen.dart';
 import 'bmi_detail_screen.dart';
@@ -41,6 +46,24 @@ class _HealthScreenState extends State<HealthScreen>
   late HealthData _data;
   bool _loading = true;
   Timer? _skeletonTimer;
+  final Set<DeviceKind> _userDevices = {
+    DeviceKind.smartwatch,
+    DeviceKind.cgm,
+  };
+
+  void _openDevicePairing() {
+    showManageDevicesSheet(
+      context,
+      selected: _userDevices,
+      onChanged: (next) {
+        setState(() {
+          _userDevices
+            ..clear()
+            ..addAll(next);
+        });
+      },
+    );
+  }
 
   @override
   void initState() {
@@ -113,6 +136,26 @@ class _HealthScreenState extends State<HealthScreen>
                 largeTitle: const Text('สรุปสุขภาพ'),
                 backgroundColor: bg.withValues(alpha: 0.85),
                 border: null,
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    LiquidGlassButton(
+                      icon: Icons.bluetooth,
+                      onTap: _openDevicePairing,
+                      size: 36,
+                      iconSize: 18,
+                      iconColor: const Color(0xFF1D8B6B),
+                    ),
+                    const SizedBox(width: 8),
+                    LiquidGlassButton(
+                      icon: CupertinoIcons.square_grid_2x2_fill,
+                      onTap: () => showHealthMetricEditSheet(context),
+                      size: 36,
+                      iconSize: 18,
+                      iconColor: const Color(0xFF1D8B6B),
+                    ),
+                  ],
+                ),
               ),
               CupertinoSliverRefreshControl(onRefresh: _refresh),
               SliverPadding(
@@ -120,7 +163,7 @@ class _HealthScreenState extends State<HealthScreen>
                   padding.horizontal / 2,
                   8,
                   padding.horizontal / 2,
-                  110,
+                  120,
                 ),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate.fixed([
@@ -222,52 +265,94 @@ class _VitalSignSection extends StatelessWidget {
   const _VitalSignSection({required this.data});
   final HealthData data;
 
+  Widget _cardFor(HealthMetricKey key) {
+    switch (key) {
+      case HealthMetricKey.bloodPressure:
+        return _BloodPressureCard(data: data);
+      case HealthMetricKey.bmi:
+        return _BmiCard(data: data);
+      case HealthMetricKey.temperature:
+        return _TemperatureCard(data: data);
+      case HealthMetricKey.sleep:
+        return _SleepCard(data: data);
+      case HealthMetricKey.heartRate:
+        return _HeartRateCard(data: data);
+      case HealthMetricKey.cgm:
+        return _CgmCard(data: data);
+      case HealthMetricKey.waist:
+        return _WaistCard(data: data);
+      case HealthMetricKey.spo2:
+        return _SpO2Card(data: data);
+      case HealthMetricKey.bloodSugar:
+        return _BloodSugarCard(data: data);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     const spacing = 12.0;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _sectionTitle(context, 'สัญญาณชีพ'),
-        _BloodPressureCard(data: data),
-        const SizedBox(height: spacing),
-        IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(child: _BmiCard(data: data)),
-              const SizedBox(width: spacing),
-              Expanded(child: _TemperatureCard(data: data)),
-            ],
-          ),
+    return ValueListenableBuilder<HealthMetricPrefs>(
+      valueListenable: healthMetricPrefsStore,
+      builder: (_, prefs, __) {
+        final visible = prefs.order
+            .where((k) => prefs.pinned.contains(k))
+            .toList(growable: false);
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _sectionTitle(context, 'สัญญาณชีพ'),
+            if (visible.isEmpty)
+              const _EmptyVitals()
+            else
+              for (var i = 0; i < visible.length; i++) ...[
+                _cardFor(visible[i]),
+                if (i < visible.length - 1) const SizedBox(height: spacing),
+              ],
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _EmptyVitals extends StatelessWidget {
+  const _EmptyVitals();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: CupertinoColors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: const Color(0xFF747480).withValues(alpha: 0.12),
         ),
-        const SizedBox(height: spacing),
-        IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(child: _SleepCard(data: data)),
-              const SizedBox(width: spacing),
-              Expanded(child: _HeartRateCard(data: data)),
-            ],
+      ),
+      child: Column(
+        children: [
+          const Icon(
+            CupertinoIcons.pin_slash,
+            color: Color(0xFF8E8E93),
+            size: 28,
           ),
-        ),
-        const SizedBox(height: spacing),
-        _CgmCard(data: data),
-        const SizedBox(height: spacing),
-        IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(child: _WaistCard(data: data)),
-              const SizedBox(width: spacing),
-              Expanded(child: _SpO2Card(data: data)),
-            ],
+          const SizedBox(height: 10),
+          Text(
+            'ยังไม่ได้ปักหมุดรายการใด',
+            style: AppTypography.headline(const Color(0xFF1A1A1A))
+                .copyWith(fontSize: 14, fontWeight: FontWeight.w700),
           ),
-        ),
-        const SizedBox(height: spacing),
-        _BloodSugarCard(data: data),
-      ],
+          const SizedBox(height: 4),
+          const Text(
+            'กดปุ่มจัดเรียงด้านบนเพื่อเลือกรายการ',
+            style: TextStyle(
+              color: Color(0xFF6D756E),
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -288,6 +373,10 @@ class _BloodPressureCard extends StatelessWidget {
           ),
         );
       },
+      onAdd: () => showAddHealthDataScreen(
+        context,
+        initial: HealthMetricKey.bloodPressure,
+      ),
       icon: CupertinoIcons.heart_fill,
       iconColor: const Color(0xFFB7185E),
       label: 'ความดันโลหิต',
@@ -328,6 +417,10 @@ class _BmiCard extends StatelessWidget {
           ),
         );
       },
+      onAdd: () => showAddHealthDataScreen(
+        context,
+        initial: HealthMetricKey.bmi,
+      ),
       icon: CupertinoIcons.chart_pie_fill,
       iconColor: AppColors.nutrition,
       label: 'ดัชนีมวลกาย',
@@ -424,6 +517,10 @@ class _TemperatureCard extends StatelessWidget {
             ),
           );
         },
+        onAdd: () => showAddHealthDataScreen(
+          context,
+          initial: HealthMetricKey.temperature,
+        ),
         icon: CupertinoIcons.thermometer,
         iconColor: AppColors.mindfulness,
         label: 'อุณหภูมิ',
@@ -462,6 +559,10 @@ class _SleepCard extends StatelessWidget {
             ),
           );
         },
+        onAdd: () => showAddHealthDataScreen(
+          context,
+          initial: HealthMetricKey.sleep,
+        ),
         icon: CupertinoIcons.moon_fill,
         iconColor: AppColors.sleep,
         label: 'การนอน',
@@ -498,6 +599,10 @@ class _HeartRateCard extends StatelessWidget {
             ),
           );
         },
+        onAdd: () => showAddHealthDataScreen(
+          context,
+          initial: HealthMetricKey.heartRate,
+        ),
         icon: CupertinoIcons.waveform_path_ecg,
         iconColor: AppColors.health,
         label: 'อัตราการเต้นหัวใจ',
@@ -535,6 +640,10 @@ class _CgmCard extends StatelessWidget {
             ),
           );
         },
+        onAdd: () => showAddHealthDataScreen(
+          context,
+          initial: HealthMetricKey.cgm,
+        ),
         icon: CupertinoIcons.drop_fill,
         iconColor: AppColors.sleep,
         label: 'น้ำตาลต่อเนื่อง',
@@ -572,6 +681,10 @@ class _WaistCard extends StatelessWidget {
             ),
           );
         },
+        onAdd: () => showAddHealthDataScreen(
+          context,
+          initial: HealthMetricKey.waist,
+        ),
         icon: CupertinoIcons.circle_fill,
         iconColor: AppColors.nutrition,
         label: 'รอบเอว',
@@ -609,6 +722,10 @@ class _SpO2Card extends StatelessWidget {
             ),
           );
         },
+        onAdd: () => showAddHealthDataScreen(
+          context,
+          initial: HealthMetricKey.spo2,
+        ),
         icon: CupertinoIcons.wind,
         iconColor: AppColors.mindfulness,
         label: 'ออกซิเจนในเลือด',
@@ -647,6 +764,10 @@ class _BloodSugarCard extends StatelessWidget {
             ),
           );
         },
+        onAdd: () => showAddHealthDataScreen(
+          context,
+          initial: HealthMetricKey.bloodSugar,
+        ),
         icon: CupertinoIcons.drop_fill,
         iconColor: AppColors.health,
         label: 'น้ำตาลในเลือด',

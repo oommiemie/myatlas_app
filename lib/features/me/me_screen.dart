@@ -102,7 +102,7 @@ class _MeScreenState extends State<MeScreen>
             ),
           ),
           SliverPadding(
-            padding: const EdgeInsets.fromLTRB(0, 0, 0, 110),
+            padding: const EdgeInsets.fromLTRB(0, 0, 0, 120),
             sliver: SliverList(
               delegate: SliverChildListDelegate.fixed([
                 _stagger(

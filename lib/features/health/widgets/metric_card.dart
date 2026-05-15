@@ -16,6 +16,7 @@ class MetricCard extends StatefulWidget {
     this.chartHeight,
     this.bottom,
     this.onTap,
+    this.onAdd,
     this.padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
     this.showChevron = true,
   });
@@ -29,11 +30,37 @@ class MetricCard extends StatefulWidget {
   final double? chartHeight;
   final Widget? bottom;
   final VoidCallback? onTap;
+  final VoidCallback? onAdd;
   final EdgeInsets padding;
   final bool showChevron;
 
   @override
   State<MetricCard> createState() => _MetricCardState();
+}
+
+class _AddButton extends StatelessWidget {
+  const _AddButton({required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    const tone = Color(0xFF1D8B6B);
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: Container(
+        width: 32,
+        height: 32,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: CupertinoColors.white,
+          border: Border.all(color: tone.withValues(alpha: 0.35)),
+        ),
+        alignment: Alignment.center,
+        child: const Icon(CupertinoIcons.plus, size: 17, color: tone),
+      ),
+    );
+  }
 }
 
 class _MetricCardState extends State<MetricCard> {
@@ -45,8 +72,6 @@ class _MetricCardState extends State<MetricCard> {
     final primary = isDark ? AppColors.labelDark : AppColors.label;
     final secondary =
         isDark ? AppColors.secondaryLabelDark : AppColors.secondaryLabel;
-    final chevron =
-        isDark ? AppColors.tertiaryLabelDark : AppColors.tertiaryLabel;
     final chartWidget = widget.chart;
     final bottomWidget = widget.bottom;
     final hasValue = widget.value.isNotEmpty || widget.unit.isNotEmpty;
@@ -92,9 +117,8 @@ class _MetricCardState extends State<MetricCard> {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    if (widget.showChevron)
-                      Icon(CupertinoIcons.chevron_right,
-                          size: 12, color: chevron),
+                    if (widget.onAdd != null)
+                      _AddButton(onTap: widget.onAdd!),
                   ],
                 ),
                 if (hasValue) ...[
