@@ -14,7 +14,7 @@ class HomeAiTipsCard extends StatefulWidget {
   const HomeAiTipsCard({
     super.key,
     this.tip =
-        'จากข้อมูลสุขภาพล่าสุด พบความดันโลหิตและระดับน้ำตาลในเลือดอยู่ในช่วงเสี่ยง แนะนำให้ลดอาหารเค็มและน้ำตาล เพิ่มผักใบเขียวและธัญพืชไม่ขัดสี พร้อมออกกำลังกายระดับปานกลางอย่างน้อย 30 นาที/วัน 5 วัน/สัปดาห์',
+        'แนะนำให้ทาน Metformin 500mg หลังอาหารเช้า-เย็น และ Atorvastatin 20mg ก่อนนอน ดื่มน้ำเปล่าตาม 1 แก้วทุกครั้ง หลีกเลี่ยงเครื่องดื่มที่มีคาเฟอีนหรือแอลกอฮอล์ระหว่างทานยา และอย่าลืมเตรียมเติมยาก่อนของเดิมหมด',
     this.normalCount = 5,
     this.mediumCount = 2,
     this.highCount = 2,
@@ -25,23 +25,20 @@ class HomeAiTipsCard extends StatefulWidget {
 }
 
 class _HomeAiTipsCardState extends State<HomeAiTipsCard> {
-  // Dots bounce only during the initial "thinking" phase. As soon as the
-  // label starts typing we hide them so they don't trail behind the title.
   late final ValueNotifier<bool> _typing;
-
-  // Module-level flag — persists across navigation so the intro animation
-  // only plays once per app session.
   static bool _hasPlayedOnce = false;
 
-  static const String _labelText = 'คำแนะนำจาก AI';
-  static const Duration _labelPerChar = Duration(milliseconds: 80);
+  static const String _labelText = 'คำแนะนำกินยา';
+  static const Duration _titlePerChar = Duration(milliseconds: 80);
   static const Duration _thinkDelay = Duration(seconds: 3);
-  static const Duration _afterLabelBuffer = Duration(milliseconds: 200);
+  static const Duration _afterTitleBuffer = Duration(milliseconds: 200);
 
-  Duration get _descStartDelay =>
-      _thinkDelay +
-      _labelPerChar * _labelText.characters.length +
-      _afterLabelBuffer;
+  Duration get _tipStartDelay {
+    final title = _riskLabel();
+    return _thinkDelay +
+        _titlePerChar * title.characters.length +
+        _afterTitleBuffer;
+  }
 
   bool get _skipAnimation => _hasPlayedOnce;
 
@@ -66,48 +63,230 @@ class _HomeAiTipsCardState extends State<HomeAiTipsCard> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: Container(
+          color: Colors.white,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Positioned(
+                right: -4,
+                top: 4,
+                width: 110,
+                height: 110,
+                child: Image.asset(
+                  'assets/Pill.png',
+                  fit: BoxFit.contain,
+                  alignment: Alignment.topCenter,
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+                    child: _AiTipsHeaderChip(
+                      typing: _typing,
+                      labelChild: const Text(
+                        _labelText,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
+                          height: 1.2,
+                        ),
+                      ),
+                    ),
+                  ),
+                  _AiInsightCard(
+                    riskTitle: _riskLabel(),
+                    riskColor: _riskColor(),
+                    titleStartDelay: _thinkDelay,
+                    titlePerChar: _titlePerChar,
+                    tip: widget.tip,
+                    tipStartDelay: _tipStartDelay,
+                    skipAnimation: _skipAnimation,
+                    onTipDone: () => _hasPlayedOnce = true,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _riskLabel() {
+    if (widget.highCount > 0) return 'อย่าลืมทานยา';
+    if (widget.mediumCount > 0) return 'เฝ้าระวังการทานยา';
+    return 'ทานยาตรงเวลา';
+  }
+
+  Color _riskColor() {
+    if (widget.highCount > 0) return AppColors.primary600;
+    if (widget.mediumCount > 0) return const Color(0xFFEAAA08);
+    return const Color(0xFF2CA989);
+  }
+}
+
+class _AiInsightCard extends StatelessWidget {
+  final String riskTitle;
+  final Color riskColor;
+  final Duration titleStartDelay;
+  final Duration titlePerChar;
+  final String tip;
+  final Duration tipStartDelay;
+  final bool skipAnimation;
+  final VoidCallback? onTipDone;
+
+  const _AiInsightCard({
+    required this.riskTitle,
+    required this.riskColor,
+    required this.titleStartDelay,
+    required this.titlePerChar,
+    required this.tip,
+    required this.tipStartDelay,
+    required this.skipAnimation,
+    required this.onTipDone,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        color: riskColor,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _AiTipsHeaderChip(
-            typing: _typing,
-            labelChild: _TypewriterText(
-              text: _labelText,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
-                height: 1.2,
-              ),
-              perChar: _labelPerChar,
-              startDelay: _thinkDelay,
-              showCaret: false,
-              skipAnimation: _skipAnimation,
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _TypewriterText(
+                  text: riskTitle,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                    height: 1.2,
+                  ),
+                  perChar: titlePerChar,
+                  startDelay: titleStartDelay,
+                  showCaret: false,
+                  skipAnimation: skipAnimation,
+                  skeleton: const _AiSkeleton(
+                    lines: [_AiSkelLine(width: 140, height: 18)],
+                  ),
+                ),
+                const SizedBox(height: 4),
+                _TypewriterText(
+                  text: tip,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.white.withValues(alpha: 0.92),
+                    height: 1.45,
+                    letterSpacing: 0.2,
+                  ),
+                  startDelay: tipStartDelay,
+                  skipAnimation: skipAnimation,
+                  onDone: onTipDone,
+                  // Tip skeleton stays until its own typing starts so the
+                  // card doesn't collapse during the title-typing gap.
+                  skeleton: const _AiSkeleton(
+                    lines: [
+                      _AiSkelLine(height: 10),
+                      _AiSkelLine(height: 10),
+                      _AiSkelLine(width: 220, height: 10),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 8),
-          _TypewriterText(
-            text: widget.tip,
-            style: const TextStyle(
-              fontSize: 14,
-              color: AppColors.textSecondary,
-              height: 24 / 14,
-              letterSpacing: 0.3,
-              wordSpacing: 1.5,
-            ),
-            startDelay: _descStartDelay,
-            skipAnimation: _skipAnimation,
-            onDone: () => _hasPlayedOnce = true,
-          ),
-          const SizedBox(height: 16),
-          _RiskBarsRow(
-            normal: widget.normalCount,
-            medium: widget.mediumCount,
-            high: widget.highCount,
-          ),
-          const SizedBox(height: 8),
-          const _HealthMetricsRow(),
         ],
+      ),
+    );
+  }
+}
+
+class _AiSkelLine {
+  final double? width;
+  final double height;
+  const _AiSkelLine({this.width, this.height = 10});
+}
+
+class _AiSkeleton extends StatefulWidget {
+  final List<_AiSkelLine> lines;
+  const _AiSkeleton({required this.lines});
+
+  @override
+  State<_AiSkeleton> createState() => _AiSkeletonState();
+}
+
+class _AiSkeletonState extends State<_AiSkeleton>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1600),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _ctrl,
+      builder: (_, __) {
+        final t = _ctrl.value;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            for (int i = 0; i < widget.lines.length; i++) ...[
+              if (i > 0) const SizedBox(height: 6),
+              _shimmerBar(widget.lines[i], t, i),
+            ],
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _shimmerBar(_AiSkelLine line, double t, int index) {
+    // Slight phase offset per line so they shimmer in a wave.
+    final phase = (t + index * 0.12) % 1.0;
+    return Container(
+      width: line.width,
+      height: line.height,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(line.height / 2),
+        gradient: LinearGradient(
+          begin: Alignment(-1 - phase * 2, 0),
+          end: Alignment(1 - phase * 2 + 1, 0),
+          colors: [
+            Colors.white.withValues(alpha: 0.18),
+            Colors.white.withValues(alpha: 0.55),
+            const Color(0xFF7BD8B7).withValues(alpha: 0.85),
+            Colors.white.withValues(alpha: 0.55),
+            Colors.white.withValues(alpha: 0.18),
+          ],
+          stops: const [0.0, 0.35, 0.5, 0.65, 1.0],
+        ),
       ),
     );
   }
@@ -121,6 +300,8 @@ class _TypewriterText extends StatefulWidget {
   final bool showCaret;
   final bool skipAnimation;
   final VoidCallback? onDone;
+  final Widget? skeleton;
+  final Duration? skeletonHideAt;
 
   const _TypewriterText({
     required this.text,
@@ -130,6 +311,8 @@ class _TypewriterText extends StatefulWidget {
     this.showCaret = true,
     this.skipAnimation = false,
     this.onDone,
+    this.skeleton,
+    this.skeletonHideAt,
   });
 
   @override
@@ -140,6 +323,8 @@ class _TypewriterTextState extends State<_TypewriterText>
     with TickerProviderStateMixin {
   late final AnimationController _typeCtrl;
   late final AnimationController _caretCtrl;
+  bool _started = false;
+  bool _showSkeleton = true;
 
   @override
   void initState() {
@@ -156,12 +341,21 @@ class _TypewriterTextState extends State<_TypewriterText>
 
     if (widget.skipAnimation) {
       _typeCtrl.value = 1.0;
+      _started = true;
+      _showSkeleton = false;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) widget.onDone?.call();
       });
     } else {
+      final hideAt = widget.skeletonHideAt ?? widget.startDelay;
+      Future<void>.delayed(hideAt, () {
+        if (!mounted) return;
+        setState(() => _showSkeleton = false);
+      });
       Future<void>.delayed(widget.startDelay, () {
-        if (mounted) _typeCtrl.forward();
+        if (!mounted) return;
+        setState(() => _started = true);
+        _typeCtrl.forward();
       });
     }
   }
@@ -175,6 +369,12 @@ class _TypewriterTextState extends State<_TypewriterText>
 
   @override
   Widget build(BuildContext context) {
+    if (_showSkeleton && widget.skeleton != null) {
+      return widget.skeleton!;
+    }
+    if (!_started) {
+      return const SizedBox.shrink();
+    }
     final chars = widget.text.characters.toList();
     final total = chars.length;
     return AnimatedBuilder(
@@ -182,8 +382,6 @@ class _TypewriterTextState extends State<_TypewriterText>
       builder: (context, _) {
         final revealed = (total * _typeCtrl.value).floor().clamp(0, total);
         final visibleText = chars.take(revealed).join();
-        // Caret appears only during active typing, not during start delay or
-        // after completion.
         final actuallyTyping = revealed > 0 && revealed < total;
         return RichText(
           text: TextSpan(
@@ -251,7 +449,6 @@ class _AiTipsHeaderChipState extends State<_AiTipsHeaderChip>
           child: Stack(
             alignment: Alignment.center,
             children: [
-              // Outer ambient glow that breathes with the light
               Container(
                 margin: const EdgeInsets.all(2),
                 decoration: BoxDecoration(
@@ -270,7 +467,6 @@ class _AiTipsHeaderChipState extends State<_AiTipsHeaderChip>
                   ],
                 ),
               ),
-              // Rotating gradient border — the running light
               Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(radius),
@@ -392,12 +588,9 @@ class _BouncingDotsState extends State<_BouncingDots>
   }
 
   double _offsetFor(int i) {
-    // Each dot's phase is offset by 1/6 of the cycle (staggered wave).
     final phase = (_ctrl.value - i * 0.16) % 1.0;
-    // One quick bounce in the first third, then rest.
     if (phase < 0.33) {
-      final t = phase / 0.33; // 0..1
-      // Sine: goes up then back down
+      final t = phase / 0.33;
       return -4 * math.sin(t * math.pi);
     }
     return 0;
@@ -430,181 +623,6 @@ class _BouncingDotsState extends State<_BouncingDots>
             ],
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _RiskBarsRow extends StatelessWidget {
-  final int normal;
-  final int medium;
-  final int high;
-
-  const _RiskBarsRow({
-    required this.normal,
-    required this.medium,
-    required this.high,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Expanded(
-          child: _RiskBarBlock(
-            label: 'ปกติ $normal',
-            color: AppColors.success600,
-          ),
-        ),
-        const SizedBox(width: 4),
-        SizedBox(
-          width: 70,
-          child: _RiskBarBlock(
-            label: 'ปานกลาง $medium',
-            color: const Color(0xFFEAAA08),
-          ),
-        ),
-        const SizedBox(width: 4),
-        SizedBox(
-          width: 70,
-          child: _RiskBarBlock(
-            label: 'เสี่ยง $high',
-            color: const Color(0xFFE62E05),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _RiskBarBlock extends StatelessWidget {
-  final String label;
-  final Color color;
-
-  const _RiskBarBlock({required this.label, required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(fontSize: 10, color: AppColors.textSecondary),
-        ),
-        const SizedBox(height: 2),
-        Container(
-          height: 12,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _HealthMetricsRow extends StatelessWidget {
-  const _HealthMetricsRow();
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        _HealthMetricChip(
-          icon: Icons.monitor_heart_outlined,
-          label: 'ความดันโลหิต',
-          value: '120/80',
-          unit: 'mmHg',
-        ),
-        const SizedBox(width: 8),
-        _HealthMetricChip(
-          icon: Icons.water_drop_outlined,
-          label: 'ค่าน้ำตาลในเลือด',
-          value: '110',
-          unit: 'mg/dL',
-        ),
-      ],
-    );
-  }
-}
-
-class _HealthMetricChip extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-  final String unit;
-
-  const _HealthMetricChip({
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.unit,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: AppColors.bgSurface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.borderDefault, width: 0.5),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 20,
-                height: 20,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFBC1B06),
-                  shape: BoxShape.circle,
-                ),
-                alignment: Alignment.center,
-                child: Icon(icon, size: 12, color: Colors.white),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          RichText(
-            text: TextSpan(
-              children: [
-                TextSpan(
-                  text: value,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFFE62E05),
-                  ),
-                ),
-                const TextSpan(text: ' ', style: TextStyle(fontSize: 11)),
-                TextSpan(
-                  text: unit,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: AppColors.textTertiary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }

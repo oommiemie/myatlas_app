@@ -10,12 +10,21 @@ import '../medicine/medicine_screen.dart';
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
 
+  static void switchTab(BuildContext context, int index) {
+    context.findAncestorStateOfType<_MainShellState>()?.setTab(index);
+  }
+
   @override
   State<MainShell> createState() => _MainShellState();
 }
 
 class _MainShellState extends State<MainShell> {
   int _tabIndex = 0;
+
+  void setTab(int i) {
+    if (i == _tabIndex) return;
+    setState(() => _tabIndex = i);
+  }
 
   @override
   Widget build(BuildContext context) {

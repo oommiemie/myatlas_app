@@ -8,6 +8,7 @@ import '../appointment/data/mock_data.dart' as appt;
 import 'widgets/home_ai_tips_card.dart';
 import 'widgets/home_latest_meal_card.dart';
 import 'widgets/home_medicine_reminder.dart';
+import 'widgets/home_product_section.dart';
 import 'widgets/home_promo_banner.dart';
 import 'widgets/home_upcoming_appointments.dart';
 import 'widgets/home_user_header.dart';
@@ -79,7 +80,6 @@ class _HomeScreenState extends State<HomeScreen>
             const [];
     final sections = <Widget>[
       const _HeroSection(),
-      const HomePromoBanner(items: _samplePromoBanners),
       const HomeAiTipsCard(),
       const HomeMedicineReminder(
         reminders: [
@@ -117,6 +117,8 @@ class _HomeScreenState extends State<HomeScreen>
       ),
       const HomeLatestMealCard(),
       HomeUpcomingAppointments(items: upcoming),
+      const HomePromoBanner(items: _samplePromoBanners),
+      const HomeProductSection(items: _sampleProducts),
       const SizedBox(height: 120),
     ];
     return Scaffold(
@@ -159,6 +161,34 @@ const _samplePromoBanners = <PromoBannerItem>[
   PromoBannerItem(imageAsset: 'assets/banner.png'),
   PromoBannerItem(imageAsset: 'assets/banner.png'),
   PromoBannerItem(imageAsset: 'assets/banner.png'),
+];
+
+const _sampleProducts = <ProductItem>[
+  ProductItem(
+    name: 'วิตามินรวม Multivitamin 30 เม็ด',
+    imageAsset: 'assets/Pill.png',
+    price: 320,
+    originalPrice: 450,
+    badge: 'ขายดี',
+  ),
+  ProductItem(
+    name: 'น้ำมันปลา Omega-3 1000mg',
+    imageAsset: 'assets/Pill.png',
+    price: 480,
+    originalPrice: 600,
+  ),
+  ProductItem(
+    name: 'แคลเซียม + วิตามินดี',
+    imageAsset: 'assets/Pill.png',
+    price: 290,
+  ),
+  ProductItem(
+    name: 'โปรไบโอติก 60 แคปซูล',
+    imageAsset: 'assets/Pill.png',
+    price: 520,
+    originalPrice: 700,
+    badge: 'ใหม่',
+  ),
 ];
 
 // ── Skeleton loading ──────────────────────────────────────────────────────────
