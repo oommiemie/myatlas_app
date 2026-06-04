@@ -297,6 +297,42 @@ class _VitalSignSection extends StatelessWidget {
         final visible = prefs.order
             .where((k) => prefs.pinned.contains(k))
             .toList(growable: false);
+        const fullWidth = {
+          HealthMetricKey.sleep,
+          HealthMetricKey.cgm,
+        };
+        final rows = <Widget>[];
+        var i = 0;
+        while (i < visible.length) {
+          final k = visible[i];
+          if (fullWidth.contains(k)) {
+            rows.add(_cardFor(k));
+            i += 1;
+          } else {
+            final hasNext = i + 1 < visible.length;
+            final next = hasNext ? visible[i + 1] : null;
+            if (hasNext && !fullWidth.contains(next)) {
+              rows.add(
+                IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Expanded(child: _cardFor(k)),
+                      const SizedBox(width: spacing),
+                      Expanded(child: _cardFor(next!)),
+                    ],
+                  ),
+                ),
+              );
+              i += 2;
+            } else {
+              // Orphan (can't pair with next because it's full-width) →
+              // render the orphan full-width too.
+              rows.add(_cardFor(k));
+              i += 1;
+            }
+          }
+        }
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -304,9 +340,9 @@ class _VitalSignSection extends StatelessWidget {
             if (visible.isEmpty)
               const _EmptyVitals()
             else
-              for (var i = 0; i < visible.length; i++) ...[
-                _cardFor(visible[i]),
-                if (i < visible.length - 1) const SizedBox(height: spacing),
+              for (var j = 0; j < rows.length; j++) ...[
+                rows[j],
+                if (j < rows.length - 1) const SizedBox(height: spacing),
               ],
           ],
         );
@@ -629,37 +665,51 @@ class _CgmCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final s = data.cgm;
-    return _LiveValue(
-      initialIndex: s.latestIndex,
-      builder: (idx, onTouch) => MetricCard(
-        onTap: () {
-          Navigator.of(context).push(
-            CupertinoPageRoute(
-              builder: (_) => const CgmDetailScreen(),
-            ),
-          );
-        },
-        onAdd: () => showAddHealthDataScreen(
-          context,
-          initial: HealthMetricKey.cgm,
-        ),
-        icon: CupertinoIcons.drop_fill,
-        iconColor: AppColors.sleep,
-        label: 'น้ำตาลต่อเนื่อง',
-        value: s.values[idx].round().toString(),
-        unit: 'mg/dl',
-        chartHeight: 76,
-        chart: MiniLineChart(
-          data: s.values,
-          dates: s.dates,
-          color: AppColors.sleep,
-          indicatorIndex: idx,
-          unit: ' mg/dl',
-          interactive: false,
-        ),
-        bottom: WeekLabels(labels: WeekLabels.fromDates(s.dates)),
+    final values = kCgm24hValues;
+    final latestIdx = values.length - 1;
+    // Synthetic dates spanning ~24h ending now, just so the chart's date
+    // parameter has plausible non-null inputs.
+    final now = DateTime.now();
+    final dates = List<DateTime>.generate(
+      values.length,
+      (i) => now.subtract(Duration(minutes: 30 * (latestIdx - i))),
+    );
+    String hhmm(DateTime d) =>
+        '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
+    final labels = [
+      hhmm(now.subtract(const Duration(hours: 24))),
+      hhmm(now.subtract(const Duration(hours: 18))),
+      hhmm(now.subtract(const Duration(hours: 12))),
+      hhmm(now.subtract(const Duration(hours: 6))),
+      hhmm(now),
+    ];
+    return MetricCard(
+      onTap: () {
+        Navigator.of(context).push(
+          CupertinoPageRoute(
+            builder: (_) => const CgmDetailScreen(),
+          ),
+        );
+      },
+      onAdd: () => showAddHealthDataScreen(
+        context,
+        initial: HealthMetricKey.cgm,
       ),
+      icon: CupertinoIcons.drop_fill,
+      iconColor: AppColors.sleep,
+      label: 'น้ำตาลต่อเนื่อง · 24 ชม.',
+      value: values[latestIdx].round().toString(),
+      unit: 'mg/dl',
+      chartHeight: 76,
+      chart: MiniLineChart(
+        data: values,
+        dates: dates,
+        color: AppColors.sleep,
+        indicatorIndex: latestIdx,
+        unit: ' mg/dl',
+        interactive: false,
+      ),
+      bottom: WeekLabels(labels: labels),
     );
   }
 }

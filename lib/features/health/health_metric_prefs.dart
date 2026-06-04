@@ -105,7 +105,17 @@ class HealthMetricPrefs {
       );
 
   static HealthMetricPrefs initial() => HealthMetricPrefs(
-        order: List<HealthMetricKey>.from(HealthMetricKey.values),
+        order: const [
+          HealthMetricKey.bloodPressure,
+          HealthMetricKey.bmi,
+          HealthMetricKey.temperature,
+          HealthMetricKey.waist,
+          HealthMetricKey.heartRate,
+          HealthMetricKey.bloodSugar,
+          HealthMetricKey.spo2,
+          HealthMetricKey.sleep,
+          HealthMetricKey.cgm,
+        ],
         pinned: HealthMetricKey.values.toSet(),
       );
 }

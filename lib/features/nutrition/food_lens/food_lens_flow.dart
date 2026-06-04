@@ -7,7 +7,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/press_effect.dart';
 import '../data/meal_store.dart';
+import 'food_chat_screen.dart';
 
 const _fallbackImage = 'assets/images/meal_basil_chicken.png';
 
@@ -110,11 +112,23 @@ class _FoodLensCameraScreenState extends State<FoodLensCameraScreen> {
                     icon: CupertinoIcons.xmark,
                     onTap: () => Navigator.of(context).maybePop(),
                   ),
-                  title: 'วิเคราะห์อาหาร',
+                  title: '',
                 ),
                 const Spacer(),
                 const _ViewfinderFrame(),
                 const Spacer(),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 14),
+                  child: Text(
+                    'ถ่ายภาพ',
+                    style: AppTypography.callout(CupertinoColors.white)
+                        .copyWith(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.2,
+                    ),
+                  ),
+                ),
                 _BottomActions(
                   onGallery: () => _pick(ImageSource.gallery),
                   onCapture: () => _pick(ImageSource.camera),
@@ -329,18 +343,19 @@ class _PreviewScreen extends StatelessWidget {
           SafeArea(
             child: Column(
               children: [
-                const Padding(
-                  padding: EdgeInsets.only(top: 16),
+                const Spacer(),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 14),
                   child: Text(
-                    'วิเคราะห์อาหาร',
+                    'เริ่มวิเคราะห์อาหาร',
                     style: TextStyle(
                       color: CupertinoColors.white,
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
+                      letterSpacing: 0.2,
                     ),
                   ),
                 ),
-                const Spacer(),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
                   child: Row(
@@ -811,6 +826,7 @@ class _FoodLensResultsScreenState extends State<FoodLensResultsScreen> {
             child: _WarningCard(analysis: a),
           ),
               const SizedBox(height: 32),
+              const SizedBox(height: 80),
             ],
           ),
           Positioned(
@@ -832,7 +848,70 @@ class _FoodLensResultsScreenState extends State<FoodLensResultsScreen> {
               ),
             ),
           ),
+          Positioned(
+            right: 20,
+            bottom: MediaQuery.paddingOf(context).bottom + 20,
+            child: _AskAiFab(
+              onTap: () => showFoodChat(context, analysis: a),
+            ),
+          ),
         ],
+      ),
+    );
+  }
+}
+
+class _AskAiFab extends StatelessWidget {
+  const _AskAiFab({required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return PressEffect(
+      onTap: onTap,
+      haptic: HapticKind.medium,
+      borderRadius: BorderRadius.circular(100),
+      scale: 0.95,
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(18, 14, 22, 14),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFF9333EA), // purple
+              Color(0xFF3B82F6), // blue
+            ],
+          ),
+          borderRadius: BorderRadius.circular(100),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFFA855F7).withValues(alpha: 0.30),
+              blurRadius: 16,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              CupertinoIcons.sparkles,
+              color: CupertinoColors.white,
+              size: 18,
+            ),
+            SizedBox(width: 8),
+            Text(
+              'ถาม AI',
+              style: TextStyle(
+                color: CupertinoColors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.3,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
