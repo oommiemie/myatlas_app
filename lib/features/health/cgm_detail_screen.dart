@@ -33,7 +33,7 @@ class _CgmSample {
 // Index 0 = 10:30 (yesterday), index 47 = 10:00 today (= "NOW").
 // Hand-tuned to look realistic: lunch + dinner peaks, overnight low, dawn rise,
 // breakfast spike then recovery. Last value (90) shows on the hero gauge.
-const _cgm24hValues = <double>[
+const kCgm24hValues = <double>[
   142, 130, 122, 118,            // 10:30-12:00 (post-breakfast settling)
   122, 134, 152, 172,            // 12:30-14:00 (lunch climb)
   178, 162, 148, 138,            // 14:30-16:00 (recovery)
@@ -67,11 +67,11 @@ List<_CgmSample> _buildCgmSamples() {
     required int hours,
     required int strideHours,
   }) {
-    final total = _cgm24hValues.length;
+    final total = kCgm24hValues.length;
     // Number of readings spanning the window: hours * 2 (every 30min) + 1 to include both endpoints.
     final count = hours * 2 + 1;
     final start = (total - count).clamp(0, total - 1);
-    final values = _cgm24hValues.sublist(start);
+    final values = kCgm24hValues.sublist(start);
     // Build labels every `strideHours` from start, plus "NOW" at the end.
     // Window length in indices = values.length - 1.
     final lastIdx = values.length - 1;

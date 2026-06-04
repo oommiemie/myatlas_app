@@ -3,13 +3,31 @@ import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Icons;
+import 'package:flutter/services.dart';
 
 import '../../core/theme/app_typography.dart';
+import '../../core/widgets/liquid_glass_button.dart';
 import '../health/data/health_data.dart';
 import 'data/meal_store.dart';
+import 'food_lens/food_chat_screen.dart';
 import 'food_lens/food_lens_flow.dart';
 
-class NutritionDetailScreen extends StatelessWidget {
+enum _Period { day, week, month, year }
+
+class _PeriodSnapshot {
+  const _PeriodSnapshot({
+    required this.values,
+    required this.dates,
+    required this.average,
+    required this.range,
+  });
+  final List<double> values;
+  final List<DateTime> dates;
+  final int average;
+  final String range;
+}
+
+class NutritionDetailScreen extends StatefulWidget {
   const NutritionDetailScreen({super.key, required this.data});
 
   final HealthData data;
@@ -37,6 +55,134 @@ class NutritionDetailScreen extends StatelessWidget {
     'พ.ย.',
     'ธ.ค.'
   ];
+
+  @override
+  State<NutritionDetailScreen> createState() => _NutritionDetailScreenState();
+}
+
+class _NutritionDetailScreenState extends State<NutritionDetailScreen> {
+  _Period _period = _Period.week;
+  DateTime _anchor = DateTime.now();
+
+  HealthData get data => widget.data;
+
+  Future<void> _pickDate() async {
+    HapticFeedback.selectionClick();
+    DateTime temp = _anchor;
+    final title = switch (_period) {
+      _Period.day => 'เลือกวัน',
+      _Period.week => 'เลือกสัปดาห์',
+      _Period.month => 'เลือกเดือน',
+      _Period.year => 'เลือกปี',
+    };
+    await showCupertinoModalPopup<void>(
+      context: context,
+      barrierColor: CupertinoColors.black.withValues(alpha: 0.35),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(38),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 28, sigmaY: 28),
+            child: Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFFF8F8FA).withValues(alpha: 0.92),
+                borderRadius: BorderRadius.circular(38),
+                border: Border.all(
+                  color: CupertinoColors.white.withValues(alpha: 0.35),
+                  width: 0.5,
+                ),
+              ),
+              child: SafeArea(
+                top: false,
+                bottom: false,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Container(
+                        width: 36,
+                        height: 5,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF1A1A1A)
+                              .withValues(alpha: 0.25),
+                          borderRadius: BorderRadius.circular(100),
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                      child: Row(
+                        children: [
+                          LiquidGlassButton(
+                            icon: CupertinoIcons.xmark,
+                            iconColor: const Color(0xFF1A1A1A),
+                            onTap: () => Navigator.of(ctx).pop(),
+                          ),
+                          Expanded(
+                            child: Center(
+                              child: Padding(
+                                padding: const EdgeInsets.only(bottom: 2),
+                                child: Text(
+                                  title,
+                                  style: const TextStyle(
+                                    color: Color(0xFF1A1A1A),
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          LiquidGlassButton(
+                            icon: CupertinoIcons.check_mark,
+                            iconColor: CupertinoColors.white,
+                            tint: const Color(0xFF1D8B6B),
+                            onTap: () {
+                              HapticFeedback.mediumImpact();
+                              setState(() => _anchor = temp);
+                              Navigator.of(ctx).pop();
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: CupertinoColors.white,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        clipBehavior: Clip.antiAlias,
+                        child: SizedBox(
+                          height: 240,
+                          child: CupertinoDatePicker(
+                            mode: CupertinoDatePickerMode.date,
+                            initialDateTime: _anchor,
+                            maximumDate: DateTime.now(),
+                            onDateTimeChanged: (d) => temp = d,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Re-expose parent's static const as instance shortcuts so the rest of
+  // this state class can keep using bare names.
+  static const _bgPrimary = NutritionDetailScreen._bgPrimary;
+  static const _primary600 = NutritionDetailScreen._primary600;
+  static const _primary900 = NutritionDetailScreen._primary900;
+  static const _thMonth = NutritionDetailScreen._thMonth;
 
   void _openMealDetail(BuildContext context, MealEntry m) {
     final analysis = MealAnalysis(
@@ -74,6 +220,121 @@ class NutritionDetailScreen extends StatelessWidget {
     if (h == 0) h = 12;
     final m = t.minute.toString().padLeft(2, '0');
     return '$h:$m $ampm';
+  }
+
+  List<MealEntry> _filterByPeriod(List<MealEntry> meals) {
+    final now = DateTime.now();
+    late final DateTime from;
+    switch (_period) {
+      case _Period.day:
+        from = DateTime(now.year, now.month, now.day);
+      case _Period.week:
+        from = now.subtract(const Duration(days: 7));
+      case _Period.month:
+        from = now.subtract(const Duration(days: 30));
+      case _Period.year:
+        from = now.subtract(const Duration(days: 365));
+    }
+    final result = [
+      for (final m in meals)
+        if (!m.time.isBefore(from)) m,
+    ];
+    result.sort((a, b) => b.time.compareTo(a.time));
+    return result;
+  }
+
+  String _periodTimeLabel(DateTime t) {
+    switch (_period) {
+      case _Period.day:
+        return _formatTime(t);
+      case _Period.week:
+      case _Period.month:
+        final dow = NutritionDetailScreen._thMonth;
+        return '${t.day} ${dow[t.month - 1]} · ${_formatTime(t)}';
+      case _Period.year:
+        return '${t.day} ${NutritionDetailScreen._thMonth[t.month - 1]}';
+    }
+  }
+
+  _PeriodSnapshot _periodData() {
+    final now = _anchor;
+    final base = data.dailyCalories.values.isEmpty
+        ? 1900.0
+        : data.dailyCalories.values
+                .reduce((a, b) => a + b) /
+            data.dailyCalories.values.length;
+    switch (_period) {
+      case _Period.day:
+        // 24 hourly buckets — small calories spread across breakfast/lunch/dinner.
+        const buckets = [
+          0, 0, 0, 0, 0, 0,
+          120, 350, 80, 30, 40,
+          0, 480, 220, 90, 60,
+          40, 30, 600, 280, 90,
+          40, 0, 0,
+        ];
+        final values = buckets.map((e) => e.toDouble()).toList();
+        final dates = List.generate(
+          24,
+          (i) => DateTime(now.year, now.month, now.day, i),
+        );
+        final total = values.fold<double>(0, (a, b) => a + b).round();
+        final dayName = NutritionDetailScreen._thMonth[now.month - 1];
+        return _PeriodSnapshot(
+          values: values,
+          dates: dates,
+          average: total,
+          range: '${now.day} $dayName ${(now.year + 543) % 100}',
+        );
+      case _Period.week:
+        return _PeriodSnapshot(
+          values: data.dailyCalories.values,
+          dates: data.dailyCalories.dates,
+          average: data.dailyCalories.average.round(),
+          range: _weekRange(data.dailyCalories.dates),
+        );
+      case _Period.month:
+        // 30 days centered on `now`.
+        final rng = base;
+        final values = List<double>.generate(30, (i) {
+          // Wave between 70-130% of base for visual variety.
+          final t = i / 29 * 6.283;
+          return (rng * (0.75 + 0.18 * (1 - (i % 7) / 7) + 0.07 * sin(t)))
+              .clamp(800, 2800)
+              .toDouble();
+        });
+        final dates = List.generate(
+          30,
+          (i) => DateTime(now.year, now.month, now.day - 29 + i),
+        );
+        final avg = values.reduce((a, b) => a + b) / values.length;
+        return _PeriodSnapshot(
+          values: values,
+          dates: dates,
+          average: avg.round(),
+          range:
+              '${dates.first.day} ${NutritionDetailScreen._thMonth[dates.first.month - 1]} - ${dates.last.day} ${NutritionDetailScreen._thMonth[dates.last.month - 1]} ${(now.year + 543) % 100}',
+        );
+      case _Period.year:
+        // 12 months averaged.
+        final values = List<double>.generate(12, (i) {
+          final t = i / 11 * 6.283;
+          return (base * (0.92 + 0.08 * (1 - i % 3 / 3) + 0.05 * cos(t)))
+              .clamp(1200, 2600)
+              .toDouble();
+        });
+        final dates = List.generate(
+          12,
+          (i) => DateTime(now.year, i + 1, 1),
+        );
+        final avg = values.reduce((a, b) => a + b) / values.length;
+        return _PeriodSnapshot(
+          values: values,
+          dates: dates,
+          average: avg.round(),
+          range: 'พ.ศ. ${(now.year + 543)}',
+        );
+    }
   }
 
   String _weekRange(List<DateTime> dates) {
@@ -128,48 +389,75 @@ class NutritionDetailScreen extends StatelessWidget {
                       child: ListView(
                         padding: const EdgeInsets.fromLTRB(16, 16, 16, 40),
                         children: [
-                          _WeeklyCaloriesCard(
-                            average: data.dailyCalories.average.round(),
-                            target: data.calorieTarget,
-                            dateRange: _weekRange(data.dailyCalories.dates),
-                            weekly: data.dailyCalories.values,
-                            dates: data.dailyCalories.dates,
+                          Builder(
+                            builder: (_) {
+                              final p = _periodData();
+                              return _WeeklyCaloriesCard(
+                                period: _period,
+                                onPeriodChanged: (next) =>
+                                    setState(() => _period = next),
+                                onTapDate: _pickDate,
+                                average: p.average,
+                                target: data.calorieTarget,
+                                dateRange: p.range,
+                                weekly: p.values,
+                                dates: p.dates,
+                              );
+                            },
                           ),
                           const SizedBox(height: 16),
                           ValueListenableBuilder<List<MealEntry>>(
                             valueListenable: MealStore.instance.meals,
                             builder: (_, __, ___) {
                               final store = MealStore.instance;
+                              final baseCal = store.todayCalories() > 0
+                                  ? store.todayCalories()
+                                  : data.meal.calories;
+                              final baseCount = store.todayCount() > 0
+                                  ? store.todayCount()
+                                  : data.meal.mealsEaten;
+                              final mult = switch (_period) {
+                                _Period.day => 1,
+                                _Period.week => 7,
+                                _Period.month => 30,
+                                _Period.year => 365,
+                              };
                               return _TodaySummaryCard(
-                                calories: store.todayCalories() > 0
-                                    ? store.todayCalories()
-                                    : data.meal.calories,
-                                mealsEaten: store.todayCount() > 0
-                                    ? store.todayCount()
-                                    : data.meal.mealsEaten,
+                                period: _period,
+                                calories: baseCal * mult,
+                                mealsEaten: baseCount * mult,
                               );
                             },
                           ),
+                          const SizedBox(height: 12),
+                          _AiNutritionTipsCard(period: _period),
                           const SizedBox(height: 10),
                           ValueListenableBuilder<List<MealEntry>>(
                             valueListenable: MealStore.instance.meals,
-                            builder: (_, meals, __) => Column(
-                              children: [
-                                for (final m in meals) ...[
-                                  _MealListItem(
-                                    name: m.name,
-                                    time: _formatTime(m.time),
-                                    calories: m.calories,
-                                    grams: m.grams,
-                                    imagePath: m.imagePath,
-                                    imageAsset: m.assetImage ??
-                                        'assets/images/meal_basil_chicken.png',
-                                    onTap: () => _openMealDetail(context, m),
-                                  ),
-                                  const SizedBox(height: 10),
+                            builder: (_, meals, __) {
+                              final filtered = _filterByPeriod(meals);
+                              if (filtered.isEmpty) {
+                                return _EmptyMealsHint(period: _period);
+                              }
+                              return Column(
+                                children: [
+                                  for (final m in filtered) ...[
+                                    _MealListItem(
+                                      name: m.name,
+                                      time: _periodTimeLabel(m.time),
+                                      calories: m.calories,
+                                      grams: m.grams,
+                                      imagePath: m.imagePath,
+                                      imageAsset: m.assetImage ??
+                                          'assets/images/meal_basil_chicken.png',
+                                      onTap: () =>
+                                          _openMealDetail(context, m),
+                                    ),
+                                    const SizedBox(height: 10),
+                                  ],
                                 ],
-                              ],
-                            ),
+                              );
+                            },
                           ),
                           const SizedBox(height: 14),
                           _OptionSection(),
@@ -274,8 +562,96 @@ class _LiquidGlassCircle extends StatelessWidget {
   }
 }
 
+class _PeriodTabs extends StatelessWidget {
+  const _PeriodTabs({required this.value, required this.onChanged});
+  final _Period value;
+  final ValueChanged<_Period> onChanged;
+
+  static const _tabs = ['วัน', 'สัปดาห์', 'เดือน', 'ปี'];
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const padding = 4.0;
+        final innerWidth = constraints.maxWidth - padding * 2;
+        final segmentWidth = innerWidth / _tabs.length;
+        final selected = value.index;
+        return Container(
+          padding: const EdgeInsets.all(padding),
+          decoration: BoxDecoration(
+            color: const Color(0xFFD4D4D4).withValues(alpha: 0.22),
+            borderRadius: BorderRadius.circular(100),
+          ),
+          child: SizedBox(
+            height: 36,
+            child: Stack(
+              children: [
+                AnimatedPositioned(
+                  duration: const Duration(milliseconds: 380),
+                  curve: Curves.easeOutQuint,
+                  left: selected * segmentWidth,
+                  top: 0,
+                  bottom: 0,
+                  width: segmentWidth,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: CupertinoColors.white,
+                      borderRadius: BorderRadius.circular(100),
+                      boxShadow: [
+                        BoxShadow(
+                          color:
+                              CupertinoColors.black.withValues(alpha: 0.05),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Row(
+                  children: [
+                    for (int i = 0; i < _tabs.length; i++)
+                      Expanded(
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () => onChanged(_Period.values[i]),
+                          child: Center(
+                            child: AnimatedDefaultTextStyle(
+                              duration: const Duration(milliseconds: 280),
+                              curve: Curves.easeOutCubic,
+                              style: AppTypography.subheadline(
+                                i == selected
+                                    ? const Color(0xFF0088FF)
+                                    : const Color(0xFF1A1A1A),
+                              ).copyWith(
+                                fontSize: 15,
+                                fontWeight: i == selected
+                                    ? FontWeight.w700
+                                    : FontWeight.w500,
+                                letterSpacing: -0.23,
+                              ),
+                              child: Text(_tabs[i]),
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
 class _WeeklyCaloriesCard extends StatefulWidget {
   const _WeeklyCaloriesCard({
+    required this.period,
+    required this.onPeriodChanged,
+    required this.onTapDate,
     required this.average,
     required this.target,
     required this.dateRange,
@@ -283,6 +659,9 @@ class _WeeklyCaloriesCard extends StatefulWidget {
     required this.dates,
   });
 
+  final _Period period;
+  final ValueChanged<_Period> onPeriodChanged;
+  final VoidCallback onTapDate;
   final int average;
   final int target;
   final String dateRange;
@@ -308,8 +687,49 @@ class _WeeklyCaloriesCardState extends State<_WeeklyCaloriesCard> {
 
   static const _thShort = ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'];
 
-  List<String> _weekdayShort(List<DateTime> ds) =>
-      [for (final d in ds) _thShort[d.weekday % 7]];
+  static const _thMonthShort = [
+    'ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.',
+    'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.',
+  ];
+
+  String _touchLabel(DateTime d) {
+    switch (widget.period) {
+      case _Period.day:
+        return '${d.hour.toString().padLeft(2, '0')}:00';
+      case _Period.week:
+        return _thDays[d.weekday % 7];
+      case _Period.month:
+        return '${d.day} ${_thMonthShort[d.month - 1]}';
+      case _Period.year:
+        return _thMonthShort[d.month - 1];
+    }
+  }
+
+  List<String> _xLabels(List<DateTime> ds) {
+    switch (widget.period) {
+      case _Period.day:
+        // 24 hourly points — show only 00, 06, 12, 18, others blank.
+        return List<String>.generate(
+          ds.length,
+          (i) {
+            final h = ds[i].hour;
+            return h % 6 == 0 ? h.toString().padLeft(2, '0') : '';
+          },
+        );
+      case _Period.week:
+        return [for (final d in ds) _thShort[d.weekday % 7]];
+      case _Period.month:
+        // ~30 days — show every ~5 days as date number.
+        return List<String>.generate(
+          ds.length,
+          (i) => i % 5 == 0 || i == ds.length - 1
+              ? ds[i].day.toString()
+              : '',
+        );
+      case _Period.year:
+        return [for (final d in ds) _thMonthShort[d.month - 1]];
+    }
+  }
 
   String _dayDate(DateTime d) {
     final beYear = (d.year + 543) % 100;
@@ -345,7 +765,9 @@ class _WeeklyCaloriesCardState extends State<_WeeklyCaloriesCard> {
     final displayValue = isTouched
         ? widget.weekly[_touched!].round()
         : widget.average;
-    final displayLabel = isTouched ? _thDays[_touched!] : 'AVERAGE';
+    final displayLabel = isTouched
+        ? _touchLabel(widget.dates[_touched!])
+        : 'AVERAGE';
     final displayDate = isTouched
         ? _dayDate(widget.dates[_touched!])
         : widget.dateRange;
@@ -360,6 +782,11 @@ class _WeeklyCaloriesCardState extends State<_WeeklyCaloriesCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            _PeriodTabs(
+              value: widget.period,
+              onChanged: widget.onPeriodChanged,
+            ),
+            const SizedBox(height: 16),
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
@@ -368,7 +795,12 @@ class _WeeklyCaloriesCardState extends State<_WeeklyCaloriesCard> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'แคลอรี่รายสัปดาห์',
+                        switch (widget.period) {
+                          _Period.day => 'แคลอรี่รายวัน',
+                          _Period.week => 'แคลอรี่รายสัปดาห์',
+                          _Period.month => 'แคลอรี่รายเดือน',
+                          _Period.year => 'แคลอรี่รายปี',
+                        },
                         style: AppTypography.callout(
                                 NutritionDetailScreen._textPrimary)
                             .copyWith(
@@ -415,11 +847,26 @@ class _WeeklyCaloriesCardState extends State<_WeeklyCaloriesCard> {
                         ],
                       ),
                       const SizedBox(height: 6),
-                      Text(
-                        displayDate,
-                        style: AppTypography.caption2(
-                                NutritionDetailScreen._neutral500)
-                            .copyWith(fontSize: 11),
+                      GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: widget.onTapDate,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              displayDate,
+                              style: AppTypography.caption2(
+                                      NutritionDetailScreen._neutral500)
+                                  .copyWith(fontSize: 11),
+                            ),
+                            const SizedBox(width: 4),
+                            const Icon(
+                              CupertinoIcons.calendar,
+                              size: 12,
+                              color: Color(0xFF1D8B6B),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -467,7 +914,7 @@ class _WeeklyCaloriesCardState extends State<_WeeklyCaloriesCard> {
               child: _WeeklyChart(
                 values: widget.weekly,
                 yLabels: yLabels,
-                dayLabels: _weekdayShort(widget.dates),
+                dayLabels: _xLabels(widget.dates),
                 touchedIndex: _touched,
                 onTouch: (i) {
                   if (i == _touched) return;
@@ -620,11 +1067,14 @@ class _WeeklyChartState extends State<_WeeklyChart>
                           child: Center(
                             child: Text(
                               d,
+                              maxLines: 1,
+                              softWrap: false,
+                              overflow: TextOverflow.visible,
                               style: AppTypography.caption2(
                                       NutritionDetailScreen._textTertiary)
                                   .copyWith(
                                 fontSize: 11,
-                                letterSpacing: 0.6,
+                                letterSpacing: 0.2,
                               ),
                             ),
                           ),
@@ -760,11 +1210,392 @@ class _WeeklyChartPainter extends CustomPainter {
       old.touchedIndex != touchedIndex;
 }
 
-class _TodaySummaryCard extends StatelessWidget {
-  const _TodaySummaryCard({required this.calories, required this.mealsEaten});
+class _AiNutritionTipsCard extends StatelessWidget {
+  const _AiNutritionTipsCard({required this.period});
+  final _Period period;
 
+  String get _periodLabel => switch (period) {
+        _Period.day => 'วันนี้',
+        _Period.week => 'สัปดาห์นี้',
+        _Period.month => 'เดือนนี้',
+        _Period.year => 'ปีนี้',
+      };
+
+  List<_AiTip> get _tips => switch (period) {
+        _Period.day => const [
+            _AiTip(
+              icon: CupertinoIcons.flame_fill,
+              color: Color(0xFFFF6B3D),
+              title: 'แคลอรี่อยู่ในเกณฑ์ดี',
+              body:
+                  'วันนี้ได้รับ ~1,940 kcal ใกล้เคียงเป้า ลองเพิ่มผักใบเขียวมื้อเย็น',
+            ),
+            _AiTip(
+              icon: CupertinoIcons.leaf_arrow_circlepath,
+              color: Color(0xFF1D8B6B),
+              title: 'โปรตีนเหมาะสม',
+              body: 'สลัดอกไก่ + กุ้งให้โปรตีนเพียงพอ ดีต่อกล้ามเนื้อ',
+            ),
+            _AiTip(
+              icon: CupertinoIcons.drop_fill,
+              color: Color(0xFFEC4899),
+              title: 'น้ำตาลค่อนข้างสูง',
+              body: 'กาแฟลาเต้กับขนมปังเช้านี้มีน้ำตาลรวมสูง ลองเปลี่ยนเป็นชาเขียว',
+            ),
+          ],
+        _Period.week => const [
+            _AiTip(
+              icon: CupertinoIcons.chart_bar_alt_fill,
+              color: Color(0xFF1D8B6B),
+              title: 'พลังงานเฉลี่ยดี',
+              body: 'สัปดาห์นี้ทานเฉลี่ย 1,840 kcal/วัน ต่ำกว่าเป้า 2,200 เล็กน้อย',
+            ),
+            _AiTip(
+              icon: CupertinoIcons.heart_circle_fill,
+              color: Color(0xFFEF6B7A),
+              title: 'หวาน-โซเดียมสูง 3 มื้อ',
+              body: 'กะเพราไก่ไข่ดาว ปรับลดน้ำปลา/น้ำตาลปรุงเพิ่มจะดีต่อความดัน',
+            ),
+            _AiTip(
+              icon: CupertinoIcons.calendar_today,
+              color: Color(0xFF6366F1),
+              title: 'มื้อเช้าสม่ำเสมอ',
+              body: 'ทานมื้อเช้าครบ 5/7 วัน ทำต่อให้ครบสัปดาห์',
+            ),
+          ],
+        _Period.month => const [
+            _AiTip(
+              icon: CupertinoIcons.graph_circle_fill,
+              color: Color(0xFF1D8B6B),
+              title: 'สัดส่วนสมดุล',
+              body: 'เดือนนี้คาร์บ 50% โปรตีน 25% ไขมัน 25% ตรงตามแนวทาง',
+            ),
+            _AiTip(
+              icon: CupertinoIcons.drop_fill,
+              color: Color(0xFFAF52DE),
+              title: 'น้ำตาลเฉลี่ยสูง',
+              body: 'เครื่องดื่มหวานวันละ 1 แก้ว ลดลงจะช่วยเรื่องน้ำตาลในเลือด',
+            ),
+            _AiTip(
+              icon: CupertinoIcons.checkmark_seal_fill,
+              color: Color(0xFF3B82F6),
+              title: 'ไฟเบอร์เพียงพอ',
+              body: 'ทานผัก/ผลไม้เฉลี่ย 4 หน่วยบริโภค/วัน ดีต่อระบบขับถ่าย',
+            ),
+          ],
+        _Period.year => const [
+            _AiTip(
+              icon: CupertinoIcons.arrow_down_circle_fill,
+              color: Color(0xFF1D8B6B),
+              title: 'แคลอรี่เฉลี่ยลดลง',
+              body: 'ปีนี้เฉลี่ย 1,920 kcal/วัน ลดจากปีก่อน ~150 kcal/วัน',
+            ),
+            _AiTip(
+              icon: CupertinoIcons.star_circle_fill,
+              color: Color(0xFFFFB020),
+              title: 'พฤติกรรมการกินสม่ำเสมอ',
+              body: 'บันทึกอาหารต่อเนื่อง 312 วัน ดีมาก!',
+            ),
+            _AiTip(
+              icon: CupertinoIcons.heart_fill,
+              color: Color(0xFFEC4899),
+              title: 'แนะนำสำหรับปีหน้า',
+              body: 'เพิ่มมื้อปลาทะเลสัปดาห์ละ 2 ครั้ง เพื่อ Omega-3',
+            ),
+          ],
+      };
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+      decoration: BoxDecoration(
+        color: CupertinoColors.white,
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 28,
+                height: 28,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Color(0xFF9333EA), Color(0xFF3B82F6)],
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF9333EA).withValues(alpha: 0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                alignment: Alignment.center,
+                child: const Icon(
+                  CupertinoIcons.sparkles,
+                  color: CupertinoColors.white,
+                  size: 14,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'แนะนำโดย AI',
+                      style: AppTypography.callout(
+                              NutritionDetailScreen._textPrimary)
+                          .copyWith(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    Text(
+                      'จากพฤติกรรมการทาน$_periodLabel',
+                      style: AppTypography.caption2(
+                              NutritionDetailScreen._textTertiary)
+                          .copyWith(fontSize: 11),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          for (int i = 0; i < _tips.length; i++) ...[
+            _AiTipRow(tip: _tips[i]),
+            if (i < _tips.length - 1) const SizedBox(height: 10),
+          ],
+          const SizedBox(height: 14),
+          _AskAiButton(period: period),
+        ],
+      ),
+    );
+  }
+}
+
+class _AskAiButton extends StatelessWidget {
+  const _AskAiButton({required this.period});
+  final _Period period;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        final periodLabel = switch (period) {
+          _Period.day => 'วันนี้',
+          _Period.week => 'สัปดาห์นี้',
+          _Period.month => 'เดือนนี้',
+          _Period.year => 'ปีนี้',
+        };
+        final analysis = MealAnalysis(
+          name: 'โภชนาการ$periodLabel',
+          nameEn: 'Nutrition Overview',
+          calories: 1940,
+          grams: 0,
+          description: 'สรุปโภชนาการรวมจากมื้ออาหารของคุณ$periodLabel',
+          protein: 86,
+          carbs: 230,
+          fat: 58,
+          fiber: 24,
+          sugar: 42,
+          tips: const [],
+        );
+        showFoodChat(context, analysis: analysis);
+      },
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF9333EA), Color(0xFF3B82F6)],
+          ),
+          borderRadius: BorderRadius.circular(100),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF9333EA).withValues(alpha: 0.25),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: const Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              CupertinoIcons.sparkles,
+              color: CupertinoColors.white,
+              size: 16,
+            ),
+            SizedBox(width: 8),
+            Text(
+              'ถาม AI เพิ่มเติม',
+              style: TextStyle(
+                color: CupertinoColors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.3,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _AiTip {
+  const _AiTip({
+    required this.icon,
+    required this.color,
+    required this.title,
+    required this.body,
+  });
+  final IconData icon;
+  final Color color;
+  final String title;
+  final String body;
+}
+
+class _AiTipRow extends StatelessWidget {
+  const _AiTipRow({required this.tip});
+  final _AiTip tip;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 30,
+          height: 30,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: tip.color.withValues(alpha: 0.14),
+          ),
+          alignment: Alignment.center,
+          child: Icon(tip.icon, color: tip.color, size: 15),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                tip.title,
+                style: AppTypography.subheadline(
+                        NutritionDetailScreen._textPrimary)
+                    .copyWith(fontSize: 14, fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                tip.body,
+                style: AppTypography.caption2(
+                        NutritionDetailScreen._textSecondary)
+                    .copyWith(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  height: 1.45,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _EmptyMealsHint extends StatelessWidget {
+  const _EmptyMealsHint({required this.period});
+  final _Period period;
+
+  @override
+  Widget build(BuildContext context) {
+    final label = switch (period) {
+      _Period.day => 'วันนี้',
+      _Period.week => '7 วันที่ผ่านมา',
+      _Period.month => '30 วันที่ผ่านมา',
+      _Period.year => '12 เดือนที่ผ่านมา',
+    };
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: CupertinoColors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: const Color(0xFF747480).withValues(alpha: 0.12),
+        ),
+      ),
+      child: Column(
+        children: [
+          const Icon(
+            CupertinoIcons.tray,
+            color: Color(0xFF8E8E93),
+            size: 28,
+          ),
+          const SizedBox(height: 10),
+          Text(
+            'ยังไม่มีอาหารบันทึกใน$label',
+            style: AppTypography.headline(const Color(0xFF1A1A1A))
+                .copyWith(fontSize: 14, fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 4),
+          const Text(
+            'สแกนหรือบันทึกมื้อใหม่เพื่อเริ่มต้น',
+            style: TextStyle(
+              color: Color(0xFF6D756E),
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TodaySummaryCard extends StatelessWidget {
+  const _TodaySummaryCard({
+    required this.period,
+    required this.calories,
+    required this.mealsEaten,
+  });
+
+  final _Period period;
   final int calories;
   final int mealsEaten;
+
+  String get _title => switch (period) {
+        _Period.day => 'สรุปวันนี้',
+        _Period.week => 'สรุปสัปดาห์นี้',
+        _Period.month => 'สรุปเดือนนี้',
+        _Period.year => 'สรุปปีนี้',
+      };
+
+  String get _caloriesLabel => switch (period) {
+        _Period.day => 'แคลอรี่วันนี้',
+        _Period.week => 'แคลอรี่สัปดาห์นี้',
+        _Period.month => 'แคลอรี่เดือนนี้',
+        _Period.year => 'แคลอรี่ปีนี้',
+      };
+
+  String get _mealsLabel => switch (period) {
+        _Period.day => 'มื้อ',
+        _Period.week => 'มื้อในสัปดาห์',
+        _Period.month => 'มื้อในเดือน',
+        _Period.year => 'มื้อในปี',
+      };
 
   @override
   Widget build(BuildContext context) {
@@ -795,7 +1626,7 @@ class _TodaySummaryCard extends StatelessWidget {
                   child: Row(
                     children: [
                       Text(
-                        'สรุปวันนี้',
+                        _title,
                         style: AppTypography.callout(
                                 NutritionDetailScreen._textPrimary)
                             .copyWith(
@@ -831,7 +1662,7 @@ class _TodaySummaryCard extends StatelessWidget {
                               child: _Macro(
                                 iconBg: const Color(0xFFFF6B3D),
                                 icon: CupertinoIcons.flame_fill,
-                                label: 'แคลอรี่วันนี้',
+                                label: _caloriesLabel,
                                 value: '$calories',
                                 unit: 'kcl',
                               ),
@@ -847,9 +1678,9 @@ class _TodaySummaryCard extends StatelessWidget {
                                 iconBg: NutritionDetailScreen._primary600,
                                 icon: Icons.restaurant,
                                 iconSize: 10,
-                                label: 'เมื่ออาหารที่ทาน',
+                                label: 'จำนวนมื้ออาหาร',
                                 value: '$mealsEaten',
-                                unit: 'เมื่อ',
+                                unit: _mealsLabel,
                               ),
                             ),
                           ],
