@@ -1,17 +1,14 @@
-import 'dart:async';
-
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart' show Icons, Scaffold;
 
 import '../../core/theme/app_colors.dart';
-import '../../core/widgets/skeleton_box.dart';
-import '../appointment/data/mock_data.dart' as appt;
-import 'widgets/home_ai_tips_card.dart';
-import 'widgets/home_latest_meal_card.dart';
-import 'widgets/home_medicine_reminder.dart';
-import 'widgets/home_product_section.dart';
-import 'widgets/home_promo_banner.dart';
-import 'widgets/home_upcoming_appointments.dart';
-import 'widgets/home_user_header.dart';
+import '../../core/widgets/liquid_glass_button.dart';
+import '../family/family_devices.dart';
+import '../health/data/health_data.dart';
+import '../health/health_screen.dart' show HealthSummarySections;
+import 'widgets/home_votagex_hero.dart';
+import 'widgets/home_water_intake_card.dart';
+import 'widgets/home_workout_streak_card.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -20,318 +17,148 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _enter;
-  bool _loading = true;
-  Timer? _skeletonTimer;
+class _HomeScreenState extends State<HomeScreen> {
+  final HealthRepository _repo = HealthRepository(seed: 7);
+  late final HealthData _healthData = _repo.load();
 
-  @override
-  void initState() {
-    super.initState();
-    _enter = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 900),
-    );
-    _skeletonTimer = Timer(const Duration(milliseconds: 1100), () {
-      if (!mounted) return;
-      setState(() => _loading = false);
-      _enter.forward();
-    });
-  }
+  final Set<DeviceKind> _userDevices = {
+    DeviceKind.smartwatch,
+    DeviceKind.cgm,
+  };
 
-  @override
-  void dispose() {
-    _skeletonTimer?.cancel();
-    _enter.dispose();
-    super.dispose();
-  }
-
-  Widget _stagger(int index, int total, Widget child) {
-    final start = (index / total) * 0.5;
-    final end = (start + 0.55).clamp(0.0, 1.0);
-    final anim = CurvedAnimation(
-      parent: _enter,
-      curve: Interval(start, end, curve: Curves.easeOutCubic),
-    );
-    return AnimatedBuilder(
-      animation: anim,
-      builder: (_, c) {
-        final t = anim.value;
-        return Opacity(
-          opacity: t,
-          child: Transform.translate(
-            offset: Offset(0, (1 - t) * 18),
-            child: c,
-          ),
-        );
+  void _openDevicePairing() {
+    showManageDevicesSheet(
+      context,
+      selected: _userDevices,
+      onChanged: (next) {
+        setState(() {
+          _userDevices
+            ..clear()
+            ..addAll(next);
+        });
       },
-      child: child,
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_loading) {
-      return const _HomeSkeleton();
-    }
-    final upcoming =
-        appt.hospitalAppointments.byBucket[appt.AppointmentBucket.soon] ??
-            const [];
-    final sections = <Widget>[
-      const _HeroSection(),
-      const HomeAiTipsCard(),
-      const HomeMedicineReminder(
-        reminders: [
-          MedicineReminder(
-            mealLabel: 'มื้อเช้า',
-            time: '06:20 น.',
-            name: 'Metformin 500 mg',
-            description:
-                'รับประทาน ครั้งละ 1 เม็ด วันละ 3 ครั้ง (เช้า-กลางวัน-เย็น)',
-            foodTiming: 'ก่อนอาหาร',
-          ),
-          MedicineReminder(
-            mealLabel: 'มื้อกลางวัน',
-            time: '12:30 น.',
-            name: 'Metformin 500 mg',
-            description:
-                'รับประทาน ครั้งละ 1 เม็ด วันละ 3 ครั้ง (หลังอาหารกลางวัน)',
-            foodTiming: 'หลังอาหาร',
-          ),
-          MedicineReminder(
-            mealLabel: 'มื้อเย็น',
-            time: '18:00 น.',
-            name: 'Atorvastatin 20 mg',
-            description:
-                'รับประทาน ครั้งละ 1 เม็ด วันละ 1 ครั้ง (หลังอาหารเย็น)',
-            foodTiming: 'หลังอาหาร',
-          ),
-          MedicineReminder(
-            mealLabel: 'ก่อนนอน',
-            time: '21:00 น.',
-            name: 'Aspirin 81 mg',
-            description: 'รับประทาน ครั้งละ 1 เม็ด วันละ 1 ครั้ง (ก่อนนอน)',
-          ),
-        ],
-      ),
-      const HomeLatestMealCard(),
-      HomeUpcomingAppointments(items: upcoming),
-      const HomePromoBanner(items: _samplePromoBanners),
-      const HomeProductSection(items: _sampleProducts),
-      const SizedBox(height: 120),
-    ];
+    // Top-right action — Bluetooth (pair devices). The "arrange" button now
+    // lives inline with the "สัญญาณชีพ" section heading.
+    final heroActions = LiquidGlassButton(
+      icon: Icons.bluetooth,
+      onTap: _openDevicePairing,
+      size: 40,
+      iconSize: 20,
+      iconColor: const Color(0xFF1D8B6B),
+    );
+
+    // The connected watch shown (left-aligned) with model + status + battery.
+    final watch = _userDevices.contains(DeviceKind.smartwatch)
+        ? HomeHeroDevice(
+            icon: Icons.watch,
+            color: DeviceKind.smartwatch.tone,
+            name: DeviceKind.smartwatch.label,
+            battery: 85,
+          )
+        : null;
+
+    // Sample workout days — a 6-day streak ending today (shows flames + badge).
+    final now2 = DateTime.now();
+    final workoutDays = <DateTime>{
+      for (var i = 0; i < 6; i++)
+        DateTime(now2.year, now2.month, now2.day - i),
+    };
+    // Per-day dance results (score, accuracy %) for the donut.
+    final workoutResults = <DateTime, (int, int)>{
+      DateTime(now2.year, now2.month, now2.day): (1280, 94),
+      DateTime(now2.year, now2.month, now2.day - 1): (1175, 91),
+      DateTime(now2.year, now2.month, now2.day - 2): (1340, 96),
+      DateTime(now2.year, now2.month, now2.day - 3): (990, 84),
+      DateTime(now2.year, now2.month, now2.day - 4): (1210, 92),
+      DateTime(now2.year, now2.month, now2.day - 5): (1080, 88),
+    };
+
     return Scaffold(
       backgroundColor: AppColors.bgPrimary,
-      body: ListView.builder(
+      body: ListView(
         padding: EdgeInsets.zero,
-        itemCount: sections.length,
-        itemBuilder: (_, i) => _stagger(i, sections.length, sections[i]),
+        children: [
+          _HeroSection(
+            trailing: heroActions,
+            statusDevice: watch,
+            workoutDays: workoutDays,
+            workoutResults: workoutResults,
+          ),
+          // Health summary UI moved onto the Home page. The workout-streak card
+          // is slotted in right under the activity (ก้าวเดินและกิจกรรม) block.
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
+            child: HealthSummarySections(
+              data: _healthData,
+              // Workout-streak card + water-intake card, stacked below the
+              // activity block.
+              afterActivity: Column(
+                children: [
+                  // Interactive demo: today not done yet (start button is
+                  // tappable → opens the clip picker), with past workout days,
+                  // a missed day, and upcoming days — tapping around the week
+                  // shows every state (flame/score, rest, start, future).
+                  HomeWorkoutStreakCard(
+                    // 16th (yesterday) intentionally has no workout → rest day.
+                    // day-2..4 are consecutive (streak → Aerobic2). day-6 is a
+                    // lone workout with no neighbours (not a streak → Aerobic1).
+                    workoutDays: {
+                      DateTime(now2.year, now2.month, now2.day - 2),
+                      DateTime(now2.year, now2.month, now2.day - 3),
+                      DateTime(now2.year, now2.month, now2.day - 4),
+                      DateTime(now2.year, now2.month, now2.day - 6),
+                    },
+                    dayResults: {
+                      DateTime(now2.year, now2.month, now2.day - 2): (1260, 93),
+                      DateTime(now2.year, now2.month, now2.day - 3): (1040, 86),
+                      DateTime(now2.year, now2.month, now2.day - 4): (1320, 95),
+                      DateTime(now2.year, now2.month, now2.day - 6): (910, 81),
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  // Water-intake tracker — settable goal, ml per glass, tap to
+                  // stamp glasses.
+                  const HomeWaterIntakeCard(initialGlasses: 3),
+                ],
+              ),
+            ),
+          ),
+          // Empty state: never used yet — the start invitation card.
+          // HIDDEN for now (kept on purpose, do not delete). Un-comment & slot
+          // it back in (e.g. as another afterActivity) to show.
+          // HomeWorkoutStreakCard(workoutDays: {}),
+        ],
       ),
     );
   }
 }
 
 class _HeroSection extends StatelessWidget {
-  const _HeroSection();
+  const _HeroSection({
+    this.trailing,
+    this.statusDevice,
+    this.workoutDays = const {},
+    this.workoutResults = const {},
+  });
+
+  final Widget? trailing;
+  final HomeHeroDevice? statusDevice;
+  final Set<DateTime> workoutDays;
+  final Map<DateTime, (int, int)> workoutResults;
 
   @override
   Widget build(BuildContext context) {
-    final statusBarHeight = MediaQuery.of(context).padding.top;
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0xFFE4F5F0), AppColors.bgPrimary],
-          stops: [0.0, 0.5],
-        ),
-      ),
-      padding: EdgeInsets.only(top: statusBarHeight),
-      child: const HomeUserHeader(
-        date: '12 ม.ค. 69',
-        name: 'คุณณัฐพงษ์',
-        hasUnread: true,
-      ),
-    );
-  }
-}
-
-const _samplePromoBanners = <PromoBannerItem>[
-  PromoBannerItem(imageAsset: 'assets/banner.png'),
-  PromoBannerItem(imageAsset: 'assets/banner.png'),
-  PromoBannerItem(imageAsset: 'assets/banner.png'),
-];
-
-const _sampleProducts = <ProductItem>[
-  ProductItem(
-    name: 'วิตามินรวม Multivitamin 30 เม็ด',
-    imageAsset: 'assets/Pill.png',
-    price: 320,
-    originalPrice: 450,
-    badge: 'ขายดี',
-  ),
-  ProductItem(
-    name: 'น้ำมันปลา Omega-3 1000mg',
-    imageAsset: 'assets/Pill.png',
-    price: 480,
-    originalPrice: 600,
-  ),
-  ProductItem(
-    name: 'แคลเซียม + วิตามินดี',
-    imageAsset: 'assets/Pill.png',
-    price: 290,
-  ),
-  ProductItem(
-    name: 'โปรไบโอติก 60 แคปซูล',
-    imageAsset: 'assets/Pill.png',
-    price: 520,
-    originalPrice: 700,
-    badge: 'ใหม่',
-  ),
-];
-
-// ── Skeleton loading ──────────────────────────────────────────────────────────
-
-class _HomeSkeleton extends StatelessWidget {
-  const _HomeSkeleton();
-
-  @override
-  Widget build(BuildContext context) {
-    final statusBarHeight = MediaQuery.of(context).padding.top;
-    return Scaffold(
-      backgroundColor: AppColors.bgPrimary,
-      body: SkeletonHost(
-        builder: (_, shimmer) => ListView(
-          padding: EdgeInsets.zero,
-          physics: const NeverScrollableScrollPhysics(),
-          children: [
-            Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Color(0xFFE4F5F0), AppColors.bgPrimary],
-                  stops: [0.0, 0.5],
-                ),
-              ),
-              padding: EdgeInsets.only(top: statusBarHeight),
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
-                child: Row(
-                  children: [
-                    SkeletonBox(
-                        shimmer: shimmer,
-                        width: 56,
-                        height: 56,
-                        borderRadius: 100),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SkeletonBox(
-                              shimmer: shimmer, width: 80, height: 12),
-                          const SizedBox(height: 8),
-                          SkeletonBox(
-                              shimmer: shimmer, width: 160, height: 18),
-                        ],
-                      ),
-                    ),
-                    SkeletonBox(
-                        shimmer: shimmer,
-                        width: 36,
-                        height: 36,
-                        borderRadius: 100),
-                  ],
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-              child: AspectRatio(
-                aspectRatio: 5 / 2,
-                child: SkeletonBox(shimmer: shimmer, borderRadius: 20),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SkeletonBox(
-                      shimmer: shimmer,
-                      width: 160,
-                      height: 32,
-                      borderRadius: 100),
-                  const SizedBox(height: 16),
-                  SkeletonBox(shimmer: shimmer, height: 14),
-                  const SizedBox(height: 8),
-                  SkeletonBox(shimmer: shimmer, height: 14, width: 280),
-                  const SizedBox(height: 8),
-                  SkeletonBox(shimmer: shimmer, height: 14, width: 240),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(child: SkeletonBox(shimmer: shimmer, height: 12)),
-                      const SizedBox(width: 4),
-                      SkeletonBox(shimmer: shimmer, width: 70, height: 12),
-                      const SizedBox(width: 4),
-                      SkeletonBox(shimmer: shimmer, width: 70, height: 12),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                          child: SkeletonBox(
-                              shimmer: shimmer,
-                              height: 56,
-                              borderRadius: 16)),
-                      const SizedBox(width: 8),
-                      Expanded(
-                          child: SkeletonBox(
-                              shimmer: shimmer,
-                              height: 56,
-                              borderRadius: 16)),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SkeletonBox(shimmer: shimmer, width: 120, height: 16),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      SkeletonBox(
-                          shimmer: shimmer,
-                          width: 280,
-                          height: 163,
-                          borderRadius: 24),
-                      const SizedBox(width: 12),
-                      SkeletonBox(
-                          shimmer: shimmer,
-                          width: 60,
-                          height: 163,
-                          borderRadius: 24),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: SkeletonBox(
-                  shimmer: shimmer, height: 120, borderRadius: 24),
-            ),
-          ],
-        ),
-      ),
+    return HomeVotagexHero(
+      welcomeName: 'คุณณัฐพงษ์',
+      trailing: trailing,
+      statusDevice: statusDevice,
+      workoutDays: workoutDays,
+      workoutResults: workoutResults,
     );
   }
 }

@@ -71,6 +71,15 @@ flutter:
   uses-material-design: true
 
   assets:
+    - assets/header-bg.png
+    - assets/header-bg-sky.png
+    - assets/Aerobic1.png
+    - assets/Aerobic2.png
+    - assets/rest.png
+    - assets/startaerobic.png
+    - assets/bgsky.png
+    - assets/Hospital 3d.png
+    - assets/volunteer 3d.png
     - assets/banner.png
     - assets/loginimage.png
     - assets/healthid.png
