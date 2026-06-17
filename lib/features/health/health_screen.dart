@@ -167,11 +167,13 @@ class _HealthScreenState extends State<HealthScreen>
                 ),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate.fixed([
-                    _staggered(0, 3, _NutritionSection(data: _data)),
+                    _staggered(0, 4, _NutritionSection(data: _data)),
+                    const SizedBox(height: 16),
+                    _staggered(1, 4, _ActivityBlock(data: _data)),
                     const SizedBox(height: 24),
-                    _staggered(1, 3, _VitalSignSection(data: _data)),
+                    _staggered(2, 4, _VitalSignSection(data: _data)),
                     const SizedBox(height: 24),
-                    _staggered(2, 3, _HighlightsSection(data: _data)),
+                    _staggered(3, 4, _HighlightsSection(data: _data)),
                   ]),
                 ),
               ),
@@ -179,6 +181,41 @@ class _HealthScreenState extends State<HealthScreen>
           ),
         ],
       ),
+    );
+  }
+}
+
+/// The health summary body (โภชนาการ / สัญญาณชีพ / รายการเด่น) without the
+/// page scaffold or navigation bar — so it can be embedded in other screens
+/// (e.g. the Home page).
+class HealthSummarySections extends StatelessWidget {
+  const HealthSummarySections({super.key, required this.data, this.afterActivity});
+  final HealthData data;
+
+  /// Optional widget slotted in right under the activity block (used by Home to
+  /// place the workout-streak card there).
+  final Widget? afterActivity;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _NutritionSection(data: data, showTitle: false),
+        const SizedBox(height: 16),
+        // Activity (kcal / ก้าวเดิน / กิจกรรม) right below the food-analysis card.
+        _ActivityBlock(data: data),
+        if (afterActivity != null) ...[
+          const SizedBox(height: 16),
+          afterActivity!,
+        ],
+        // Health summary card lives in the activity section, under the workout
+        // card.
+        const SizedBox(height: 24),
+        _HighlightsSection(data: data),
+        const SizedBox(height: 24),
+        _VitalSignSection(data: data),
+      ],
     );
   }
 }
@@ -231,8 +268,9 @@ Widget _sectionTitle(BuildContext context, String text) {
 }
 
 class _NutritionSection extends StatelessWidget {
-  const _NutritionSection({required this.data});
+  const _NutritionSection({required this.data, this.showTitle = true});
   final HealthData data;
+  final bool showTitle;
 
   @override
   Widget build(BuildContext context) {
@@ -240,7 +278,7 @@ class _NutritionSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _sectionTitle(context, 'โภชนาการ'),
+        if (showTitle) _sectionTitle(context, 'โภชนาการ'),
         GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: () => Navigator.of(context).push(
@@ -336,7 +374,40 @@ class _VitalSignSection extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _sectionTitle(context, 'สัญญาณชีพ'),
+            // Section title with an inline "arrange widgets" button on the right.
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              child: Row(
+                children: [
+                  Text(
+                    'สัญญาณชีพ',
+                    style: AppTypography.callout(const Color(0xFF1A1A1A))
+                        .copyWith(fontSize: 16, fontWeight: FontWeight.w700),
+                  ),
+                  const Spacer(),
+                  GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () => showHealthMetricEditSheet(context),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          CupertinoIcons.square_grid_2x2_fill,
+                          size: 15,
+                          color: Color(0xFF1D8B6B),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'จัดเรียง',
+                          style: AppTypography.caption1(const Color(0xFF1D8B6B))
+                              .copyWith(fontSize: 13, fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
             if (visible.isEmpty)
               const _EmptyVitals()
             else
@@ -844,16 +915,24 @@ class _HighlightsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return TipCard(
+      title: 'ขอสรุปเกี่ยวกับสุขภาพของคุณ',
+      content: data.aiTip,
+    );
+  }
+}
+
+/// Activity block: active energy (kcal), steps (ก้าวเดิน) and activity rings.
+class _ActivityBlock extends StatelessWidget {
+  const _ActivityBlock({required this.data});
+  final HealthData data;
+
+  @override
+  Widget build(BuildContext context) {
     const spacing = 12.0;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _sectionTitle(context, 'รายการเด่น'),
-        TipCard(
-          title: 'ขอสรุปเกี่ยวกับสุขภาพของคุณ',
-          content: data.aiTip,
-        ),
-        const SizedBox(height: spacing),
         _LiveValue(
           initialIndex: data.activeEnergy.latestIndex,
           builder: (idx, onTouch) => ActiveEnergyCard(
