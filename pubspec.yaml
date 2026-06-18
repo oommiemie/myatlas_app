@@ -72,7 +72,13 @@ flutter:
 
   assets:
     - assets/header-bg.png
+    - assets/header-bg.webp
     - assets/header-bg-sky.png
+    - assets/sky1.webp
+    - assets/sky2.webp
+    - assets/sky3.webp
+    - assets/sky4.webp
+    - assets/sky5.webp
     - assets/Aerobic1.png
     - assets/Aerobic2.png
     - assets/rest.png

@@ -127,11 +127,14 @@ class _HomeWaterIntakeCardState extends State<HomeWaterIntakeCard> {
               const Expanded(
                 child: Text(
                   'ดื่มน้ำวันนี้',
+                  // Match the "กิจกรรม" header (size 12, w400, grey).
                   style: TextStyle(
                     fontFamily: 'Google Sans',
-                    fontSize: 15,
-                    fontWeight: FontWeight.w800,
-                    color: _ink,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w400,
+                    letterSpacing: 0.275,
+                    color: Color(0xFF6D756E),
+                    height: 1.33,
                   ),
                 ),
               ),

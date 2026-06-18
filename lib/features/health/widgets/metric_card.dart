@@ -19,6 +19,8 @@ class MetricCard extends StatefulWidget {
     this.onAdd,
     this.padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
     this.showChevron = true,
+    this.labelFontSize,
+    this.labelStyle,
   });
 
   final IconData icon;
@@ -33,6 +35,8 @@ class MetricCard extends StatefulWidget {
   final VoidCallback? onAdd;
   final EdgeInsets padding;
   final bool showChevron;
+  final double? labelFontSize;
+  final TextStyle? labelStyle;
 
   @override
   State<MetricCard> createState() => _MetricCardState();
@@ -111,8 +115,11 @@ class _MetricCardState extends State<MetricCard> {
                     Expanded(
                       child: Text(
                         widget.label,
-                        style: AppTypography.subheadline(primary)
-                            .copyWith(fontWeight: FontWeight.w600),
+                        style: widget.labelStyle ??
+                            AppTypography.subheadline(primary).copyWith(
+                              fontWeight: FontWeight.w600,
+                              fontSize: widget.labelFontSize,
+                            ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
