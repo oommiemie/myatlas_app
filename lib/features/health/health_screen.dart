@@ -167,13 +167,9 @@ class _HealthScreenState extends State<HealthScreen>
                 ),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate.fixed([
-                    _staggered(0, 4, _NutritionSection(data: _data)),
-                    const SizedBox(height: 16),
-                    _staggered(1, 4, _ActivityBlock(data: _data)),
+                    _staggered(0, 2, _VitalSignSection(data: _data)),
                     const SizedBox(height: 24),
-                    _staggered(2, 4, _VitalSignSection(data: _data)),
-                    const SizedBox(height: 24),
-                    _staggered(3, 4, _HighlightsSection(data: _data)),
+                    _staggered(1, 2, _HighlightsSection(data: _data)),
                   ]),
                 ),
               ),
@@ -209,12 +205,9 @@ class HealthSummarySections extends StatelessWidget {
           const SizedBox(height: 16),
           afterActivity!,
         ],
-        // Health summary card lives in the activity section, under the workout
-        // card.
-        const SizedBox(height: 24),
+        // Health summary card — same section/spacing (16) as the cards above.
+        const SizedBox(height: 16),
         _HighlightsSection(data: data),
-        const SizedBox(height: 24),
-        _VitalSignSection(data: data),
       ],
     );
   }
@@ -972,6 +965,9 @@ class _StepsCard extends StatelessWidget {
         icon: Icons.directions_walk,
         iconColor: const Color(0xFFE32616),
         label: 'ก้าวเดิน',
+        // Match the "กิจกรรม" header (caption1, w400, grey).
+        labelStyle: AppTypography.caption1(const Color(0xFF6D756E))
+            .copyWith(fontSize: 12, letterSpacing: 0.275),
         value: _formatInt(s.values[idx]),
         unit: 'ก้าว',
         chartHeight: 56,

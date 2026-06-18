@@ -2,10 +2,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Icons, Scaffold;
 
 import '../../core/theme/app_colors.dart';
-import '../../core/widgets/liquid_glass_button.dart';
 import '../family/family_devices.dart';
 import '../health/data/health_data.dart';
 import '../health/health_screen.dart' show HealthSummarySections;
+import 'widgets/header_clouds.dart';
 import 'widgets/home_votagex_hero.dart';
 import 'widgets/home_water_intake_card.dart';
 import 'widgets/home_workout_streak_card.dart';
@@ -26,32 +26,8 @@ class _HomeScreenState extends State<HomeScreen> {
     DeviceKind.cgm,
   };
 
-  void _openDevicePairing() {
-    showManageDevicesSheet(
-      context,
-      selected: _userDevices,
-      onChanged: (next) {
-        setState(() {
-          _userDevices
-            ..clear()
-            ..addAll(next);
-        });
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    // Top-right action — Bluetooth (pair devices). The "arrange" button now
-    // lives inline with the "สัญญาณชีพ" section heading.
-    final heroActions = LiquidGlassButton(
-      icon: Icons.bluetooth,
-      onTap: _openDevicePairing,
-      size: 40,
-      iconSize: 20,
-      iconColor: const Color(0xFF1D8B6B),
-    );
-
     // The connected watch shown (left-aligned) with model + status + battery.
     final watch = _userDevices.contains(DeviceKind.smartwatch)
         ? HomeHeroDevice(
@@ -78,21 +54,49 @@ class _HomeScreenState extends State<HomeScreen> {
       DateTime(now2.year, now2.month, now2.day - 5): (1080, 88),
     };
 
+    final topInset = MediaQuery.of(context).padding.top;
     return Scaffold(
       backgroundColor: AppColors.bgPrimary,
-      body: ListView(
-        padding: EdgeInsets.zero,
+      body: Stack(
         children: [
-          _HeroSection(
-            trailing: heroActions,
-            statusDevice: watch,
-            workoutDays: workoutDays,
-            workoutResults: workoutResults,
+          // Fixed header background — stays put while the content scrolls over
+          // it (no rounded corners on any side). Clouds drift across the sky.
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: topInset + 360,
+            child: ClipRect(
+              child: Stack(
+                fit: StackFit.expand,
+                children: const [
+                  Image(
+                    image: AssetImage('assets/header-bg.webp'),
+                    fit: BoxFit.cover,
+                    alignment: Alignment.topCenter,
+                  ),
+                  HeaderClouds(),
+                ],
+              ),
+            ),
           ),
-          // Health summary UI moved onto the Home page. The workout-streak card
-          // is slotted in right under the activity (ก้าวเดินและกิจกรรม) block.
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
+          ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              _HeroSection(
+                statusDevice: watch,
+                workoutDays: workoutDays,
+                workoutResults: workoutResults,
+              ),
+          // Content sheet — stacks over the header with rounded top corners.
+          Container(
+            transform: Matrix4.translationValues(0, -48, 0),
+            clipBehavior: Clip.none,
+            decoration: const BoxDecoration(
+              color: AppColors.bgPrimary,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(40)),
+            ),
+            padding: const EdgeInsets.fromLTRB(16, 24, 16, 120),
             child: HealthSummarySections(
               data: _healthData,
               // Workout-streak card + water-intake card, stacked below the
@@ -128,10 +132,12 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-          // Empty state: never used yet — the start invitation card.
-          // HIDDEN for now (kept on purpose, do not delete). Un-comment & slot
-          // it back in (e.g. as another afterActivity) to show.
-          // HomeWorkoutStreakCard(workoutDays: {}),
+              // Empty state: never used yet — the start invitation card.
+              // HIDDEN for now (kept on purpose, do not delete). Un-comment &
+              // slot it back in (e.g. as another afterActivity) to show.
+              // HomeWorkoutStreakCard(workoutDays: {}),
+            ],
+          ),
         ],
       ),
     );
@@ -140,13 +146,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
 class _HeroSection extends StatelessWidget {
   const _HeroSection({
-    this.trailing,
     this.statusDevice,
     this.workoutDays = const {},
     this.workoutResults = const {},
   });
 
-  final Widget? trailing;
   final HomeHeroDevice? statusDevice;
   final Set<DateTime> workoutDays;
   final Map<DateTime, (int, int)> workoutResults;
@@ -155,7 +159,6 @@ class _HeroSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return HomeVotagexHero(
       welcomeName: 'คุณณัฐพงษ์',
-      trailing: trailing,
       statusDevice: statusDevice,
       workoutDays: workoutDays,
       workoutResults: workoutResults,

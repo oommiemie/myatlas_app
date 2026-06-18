@@ -157,7 +157,7 @@ class _HomeWorkoutStreakCardState extends State<HomeWorkoutStreakCard> {
       title = 'เริ่มเต้นกันเลย!';
     } else if (isToday) {
       if (!doneToday) {
-        title = 'วันนี้พร้อมขยับหรือยัง?';
+        title = 'ขยับร่างกายสักหน่อยไหม วันนี้?';
       } else if (streak >= 3) {
         title = 'เต้นต่อเนื่อง $streak วันแล้ว';
       } else {
