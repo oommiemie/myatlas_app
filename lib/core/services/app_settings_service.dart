@@ -9,9 +9,9 @@ class AppSettingsService {
   AppSettingsService._();
   static final AppSettingsService instance = AppSettingsService._();
 
-  /// light / dark / system.
+  /// light / dark / system. Dark mode disabled — defaults to (and stays) light.
   final ValueNotifier<AppThemeMode> themeMode =
-      ValueNotifier<AppThemeMode>(AppThemeMode.system);
+      ValueNotifier<AppThemeMode>(AppThemeMode.light);
 
   /// 0.85 .. 1.30 range; discrete 5 steps mapped from slider 0..4.
   final ValueNotifier<double> textScale = ValueNotifier<double>(1.0);

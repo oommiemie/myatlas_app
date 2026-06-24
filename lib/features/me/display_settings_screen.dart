@@ -129,49 +129,10 @@ class _DisplaySettingsScreenState extends State<DisplaySettingsScreen>
                 bottom: 40,
               ),
               children: [
+                // Dark mode disabled — selector removed; app stays light.
                 _stagger(
                   0,
-                  3,
-                  ValueListenableBuilder<AppThemeMode>(
-                    valueListenable: _settings.themeMode,
-                    builder: (_, theme, __) => _Section(
-                      title: tr(context, 'โหมดมืด', 'Dark mode'),
-                      child: Column(
-                        children: [
-                          _ThemeOption(
-                            icon: CupertinoIcons.moon_fill,
-                            iconColor: const Color(0xFF2563EB),
-                            label: tr(context, 'สว่าง', 'Light'),
-                            selected: theme == AppThemeMode.light,
-                            onTap: () =>
-                                _settings.setThemeMode(AppThemeMode.light),
-                          ),
-                          const _Divider(),
-                          _ThemeOption(
-                            icon: CupertinoIcons.moon_stars_fill,
-                            iconColor: const Color(0xFF475569),
-                            label: tr(context, 'มืด', 'Dark'),
-                            selected: theme == AppThemeMode.dark,
-                            onTap: () =>
-                                _settings.setThemeMode(AppThemeMode.dark),
-                          ),
-                          const _Divider(),
-                          _ThemeOption(
-                            icon: CupertinoIcons.circle_lefthalf_fill,
-                            iconColor: const Color(0xFFD97706),
-                            label: tr(context, 'ตามอุปกรณ์', 'System'),
-                            selected: theme == AppThemeMode.system,
-                            onTap: () =>
-                                _settings.setThemeMode(AppThemeMode.system),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                _stagger(
-                  1,
-                  3,
+                  2,
                   _Section(
                     title: tr(context, 'เปลี่ยนภาษา', 'Language'),
                     child: PressEffect(
@@ -231,8 +192,8 @@ class _DisplaySettingsScreenState extends State<DisplaySettingsScreen>
                   ),
                 ),
                 _stagger(
+                  1,
                   2,
-                  3,
                   ValueListenableBuilder<double>(
                     valueListenable: _settings.textScale,
                     builder: (_, __, ___) {
@@ -407,107 +368,6 @@ class _Section extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _Divider extends StatelessWidget {
-  const _Divider();
-
-  @override
-  Widget build(BuildContext context) => Container(
-        height: 1,
-        color: const Color(0xFFE9EFEA),
-      );
-}
-
-class _ThemeOption extends StatelessWidget {
-  const _ThemeOption({
-    required this.icon,
-    required this.iconColor,
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-  final IconData icon;
-  final Color iconColor;
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return PressEffect(
-      onTap: onTap,
-      haptic: HapticKind.selection,
-      scale: 0.99,
-      dim: 0.96,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        color: CupertinoColors.white,
-        child: Row(
-          children: [
-            Container(
-              width: 24,
-              height: 24,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: iconColor,
-              ),
-              alignment: Alignment.center,
-              child: Icon(icon, color: CupertinoColors.white, size: 12),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                label,
-                style: const TextStyle(
-                  color: Color(0xFF1A1A1A),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  letterSpacing: 0.275,
-                ),
-              ),
-            ),
-            _RadioMark(selected: selected),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _RadioMark extends StatelessWidget {
-  const _RadioMark({required this.selected});
-  final bool selected;
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 180),
-      width: 20,
-      height: 20,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: selected ? const Color(0xFF1D8B6B) : CupertinoColors.white,
-        border: Border.all(
-          color: selected
-              ? const Color(0xFF1D8B6B)
-              : const Color(0xFF1A1A1A).withValues(alpha: 0.2),
-          width: 1.4,
-        ),
-      ),
-      alignment: Alignment.center,
-      child: selected
-          ? Container(
-              width: 7,
-              height: 7,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                color: CupertinoColors.white,
-              ),
-            )
-          : null,
     );
   }
 }

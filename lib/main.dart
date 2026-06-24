@@ -31,20 +31,13 @@ class MyAtlasApp extends StatelessWidget {
             ValueListenableBuilder<Locale>(
           valueListenable: settings.locale,
           builder: (_, locale, __) {
-            final platformBrightness = MediaQueryData.fromView(
-              WidgetsBinding.instance.platformDispatcher.views.first,
-            ).platformBrightness;
-            final brightness = switch (themeMode) {
-              AppThemeMode.light => Brightness.light,
-              AppThemeMode.dark => Brightness.dark,
-              AppThemeMode.system => platformBrightness,
-            };
+            // Dark mode disabled — the app always runs in light mode
+            // regardless of the saved theme setting or system brightness.
+            const brightness = Brightness.light;
             return CupertinoApp(
               title: 'MyAtlas',
               debugShowCheckedModeBanner: false,
-              theme: brightness == Brightness.dark
-                  ? AppTheme.light().copyWith(brightness: Brightness.dark)
-                  : AppTheme.light(),
+              theme: AppTheme.light(),
               locale: locale,
               supportedLocales: const [
                 Locale('th', 'TH'),
