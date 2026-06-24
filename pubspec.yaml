@@ -72,6 +72,8 @@ flutter:
 
   assets:
     - assets/Appname.png
+    - assets/taichi.png
+    - assets/appt_scene.png
     - assets/header-bg.png
     - assets/header-bg.webp
     - assets/header-bg-sky.png
@@ -109,6 +111,11 @@ flutter:
     - assets/3d/
 
   fonts:
+    # Digits-only subset of Nunito — used as the primary family so that
+    # numbers render in Nunito while all letters fall back to IBM Plex.
+    - family: Nunito
+      fonts:
+        - asset: assets/fonts/nunito/NunitoNum.ttf
     - family: IBM Plex Sans Thai Looped
       fonts:
         - asset: assets/fonts/ibmplex/IBMPlexSansThaiLooped-Thin.ttf

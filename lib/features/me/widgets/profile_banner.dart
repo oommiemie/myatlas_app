@@ -386,7 +386,7 @@ class _AiAlertCarouselState extends State<_AiAlertCarousel> {
   ];
 
   // TEST: set to false to show real notifications again.
-  static final bool _testEmpty = false;
+  static final bool _testEmpty = true;
 
   List<_AiNotif> _buildNotifs() {
     if (_testEmpty) return const [];

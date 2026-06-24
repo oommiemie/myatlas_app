@@ -56,7 +56,9 @@ class MyAtlasApp extends StatelessWidget {
                   ),
                   child: Theme(
                     data: ThemeData(
-                      fontFamily: 'IBM Plex Sans Thai Looped',
+                      // Numbers → Nunito (digits subset); letters → IBM Plex.
+                      fontFamily: 'Nunito',
+                      fontFamilyFallback: const ['IBM Plex Sans Thai Looped'],
                       brightness: brightness,
                     ),
                     child: ScaffoldMessenger(

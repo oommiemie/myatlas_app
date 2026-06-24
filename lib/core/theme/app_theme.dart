@@ -30,7 +30,10 @@ class AppTheme {
   static CupertinoTextThemeData _textTheme(Color primaryLabel) {
     TextStyle style(double size, FontWeight weight, {Color? color}) =>
         TextStyle(
-          fontFamily: 'IBM Plex Sans Thai Looped',
+          // Numbers → Nunito (digits subset); letters → IBM Plex (fallback).
+          fontFamily: 'Nunito',
+          fontFamilyFallback: const ['IBM Plex Sans Thai Looped'],
+          fontVariations: [FontVariation('wght', weight.value.toDouble())],
           fontSize: size,
           fontWeight: weight,
           color: color ?? primaryLabel,

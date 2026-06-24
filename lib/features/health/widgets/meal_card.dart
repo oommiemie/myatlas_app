@@ -311,9 +311,11 @@ class _AiQuotaBar extends StatelessWidget {
             ),
             Text(
               out ? 'ครบโควต้าแล้ว' : '$remaining/$total ครั้ง',
-              style: AppTypography.caption2(out ? _disabled : _accent).copyWith(
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
+              style: numFont(
+                AppTypography.caption2(out ? _disabled : _accent).copyWith(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
           ],
@@ -357,6 +359,16 @@ String _fmt(int v) {
   return b.toString();
 }
 
+/// Numbers rendered in Nunito (digits only); other glyphs fall back to the app
+/// font. Drives the variable wght axis so the weight actually applies.
+TextStyle numFont(TextStyle base) => base.copyWith(
+      fontFamily: 'Nunito',
+      fontFamilyFallback: const ['IBM Plex Sans Thai Looped'],
+      fontVariations: [
+        FontVariation('wght', (base.fontWeight ?? FontWeight.w400).value.toDouble()),
+      ],
+    );
+
 /// Calorie progress ring (fill = consumed/target). Center shows kcal LEFT.
 class _CalorieRing extends StatelessWidget {
   const _CalorieRing({
@@ -392,18 +404,32 @@ class _CalorieRing extends StatelessWidget {
                 children: [
                   Text(
                     _fmt(consumed),
-                    style: AppTypography.callout(CupertinoColors.black).copyWith(
-                      fontSize: 21,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: -0.6,
-                      height: 1,
+                    style: numFont(
+                      AppTypography.callout(CupertinoColors.black).copyWith(
+                        fontSize: 21,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.6,
+                        height: 1,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 1),
-                  Text(
-                    '/ ${_fmt(target)} kcal',
-                    style: AppTypography.caption2(MealCard._neutral500)
-                        .copyWith(fontSize: 9),
+                  Text.rich(
+                    TextSpan(
+                      style: AppTypography.caption2(MealCard._neutral500)
+                          .copyWith(fontSize: 9),
+                      children: [
+                        const TextSpan(text: '/ '),
+                        TextSpan(
+                          text: _fmt(target),
+                          style: numFont(
+                            AppTypography.caption2(MealCard._neutral500)
+                                .copyWith(fontSize: 9),
+                          ),
+                        ),
+                        const TextSpan(text: ' kcal'),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -516,11 +542,13 @@ class _MiniStat extends StatelessWidget {
           children: [
             Text(
               value,
-              style: AppTypography.callout(CupertinoColors.black).copyWith(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                letterSpacing: -0.6,
-                height: 1,
+              style: numFont(
+                AppTypography.callout(CupertinoColors.black).copyWith(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: -0.6,
+                  height: 1,
+                ),
               ),
             ),
             const SizedBox(width: 3),

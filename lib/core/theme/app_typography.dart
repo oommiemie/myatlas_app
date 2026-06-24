@@ -5,6 +5,10 @@ class AppTypography {
 
   static const String _fontFamily = 'IBM Plex Sans Thai Looped';
 
+  // Primary = Nunito (digits-only subset) so numbers render in Nunito; every
+  // letter (Thai/Latin) falls back to IBM Plex Sans Thai Looped.
+  static const List<String> _fallback = ['IBM Plex Sans Thai Looped'];
+
   static TextStyle _base({
     required double size,
     required FontWeight weight,
@@ -13,7 +17,11 @@ class AppTypography {
     Color color = const Color(0xFF000000),
   }) {
     return TextStyle(
-      fontFamily: _fontFamily,
+      fontFamily: 'Nunito',
+      fontFamilyFallback: _fallback,
+      // Drive Nunito's variable wght axis so digits actually get the weight
+      // (fontWeight alone doesn't move a variable axis reliably).
+      fontVariations: [FontVariation('wght', weight.value.toDouble())],
       fontSize: size,
       fontWeight: weight,
       height: height,

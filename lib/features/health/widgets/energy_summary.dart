@@ -51,6 +51,16 @@ String _fmt(int v) {
   return b.toString();
 }
 
+/// Numbers rendered in Nunito (digits only); Thai falls back to the app font.
+/// Drives the variable wght axis so the weight actually applies.
+TextStyle numFont(TextStyle base) => base.copyWith(
+      fontFamily: 'Nunito',
+      fontFamilyFallback: const ['IBM Plex Sans Thai Looped'],
+      fontVariations: [
+        FontVariation('wght', (base.fontWeight ?? FontWeight.w400).value.toDouble()),
+      ],
+    );
+
 BoxDecoration _cardDeco() => BoxDecoration(
       color: CupertinoColors.white,
       borderRadius: BorderRadius.circular(24),
@@ -138,12 +148,12 @@ class _BurnedCard extends StatelessWidget {
                 children: [
                   Text(
                     '${net < 0 ? '-' : ''}${_fmt(net.abs())}',
-                    style: const TextStyle(
+                    style: numFont(const TextStyle(
                       fontSize: 24,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w900,
                       height: 1,
                       color: netColor,
-                    ),
+                    )),
                   ),
                   const SizedBox(height: 2),
                   const Text('สุทธิ (kcal)',
@@ -200,12 +210,12 @@ class _BurnedCard extends StatelessWidget {
           children: [
             Text(
               _fmt(value),
-              style: TextStyle(
+              style: numFont(TextStyle(
                 fontSize: 17,
                 fontWeight: FontWeight.w800,
                 height: 1,
                 color: color,
-              ),
+              )),
             ),
             const SizedBox(width: 3),
             const Padding(
@@ -250,8 +260,8 @@ class _BurnedCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Text(value,
-                style: const TextStyle(
-                    fontSize: 15, fontWeight: FontWeight.w700, color: _ink)),
+                style: numFont(const TextStyle(
+                    fontSize: 15, fontWeight: FontWeight.w700, color: _ink))),
             const SizedBox(width: 2),
             Padding(
               padding: const EdgeInsets.only(bottom: 1),
