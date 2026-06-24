@@ -122,7 +122,7 @@ class WorkoutClipPickerScreen extends StatelessWidget {
                           const Text(
                             'เลือกคลิปที่อยากเต้นวันนี้',
                             style: TextStyle(
-                              fontFamily: 'Google Sans',
+                              fontFamily: 'IBM Plex Sans Thai Looped',
                               fontSize: 20,
                               fontWeight: FontWeight.w800,
                               color: _ink,
@@ -132,7 +132,7 @@ class WorkoutClipPickerScreen extends StatelessWidget {
                           const Text(
                             'เต้นตามคลิป ระบบจะวัดคะแนนความแม่นยำให้',
                             style: TextStyle(
-                              fontFamily: 'Google Sans',
+                              fontFamily: 'IBM Plex Sans Thai Looped',
                               fontSize: 13,
                               color: Color(0xFF6D756E),
                             ),
@@ -176,7 +176,7 @@ class _Header extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
-                fontFamily: 'Google Sans',
+                fontFamily: 'IBM Plex Sans Thai Looped',
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
                 color: CupertinoColors.white,
@@ -286,7 +286,7 @@ class _ClipCard extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        fontFamily: 'Google Sans',
+                        fontFamily: 'IBM Plex Sans Thai Looped',
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
                         color: _ink,
@@ -304,7 +304,7 @@ class _ClipCard extends StatelessWidget {
                     Text(
                       'ระดับ: ${clip.level}',
                       style: const TextStyle(
-                        fontFamily: 'Google Sans',
+                        fontFamily: 'IBM Plex Sans Thai Looped',
                         fontSize: 12,
                         color: Color(0xFF6D756E),
                       ),
@@ -334,7 +334,7 @@ class _ClipCard extends StatelessWidget {
           Text(
             text,
             style: const TextStyle(
-              fontFamily: 'Google Sans',
+              fontFamily: 'IBM Plex Sans Thai Looped',
               fontSize: 11,
               fontWeight: FontWeight.w600,
               color: Color(0xFFFF5A2C),
@@ -415,7 +415,7 @@ class _ClipReadyScreen extends StatelessWidget {
                             clip.title,
                             textAlign: TextAlign.center,
                             style: const TextStyle(
-                              fontFamily: 'Google Sans',
+                              fontFamily: 'IBM Plex Sans Thai Looped',
                               fontSize: 22,
                               fontWeight: FontWeight.w800,
                               color: _ink,
@@ -426,7 +426,7 @@ class _ClipReadyScreen extends StatelessWidget {
                             '${clip.minutes} นาที • ${clip.kcal} kcal • ระดับ ${clip.level}',
                             textAlign: TextAlign.center,
                             style: const TextStyle(
-                              fontFamily: 'Google Sans',
+                              fontFamily: 'IBM Plex Sans Thai Looped',
                               fontSize: 14,
                               color: Color(0xFF6D756E),
                             ),
@@ -468,7 +468,7 @@ class _ClipReadyScreen extends StatelessWidget {
                                   Text(
                                     'เริ่มเต้นเลย',
                                     style: TextStyle(
-                                      fontFamily: 'Google Sans',
+                                      fontFamily: 'IBM Plex Sans Thai Looped',
                                       fontSize: 16,
                                       fontWeight: FontWeight.w700,
                                       color: CupertinoColors.white,

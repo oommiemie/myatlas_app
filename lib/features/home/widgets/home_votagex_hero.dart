@@ -101,21 +101,10 @@ class _HomeVotagexHeroState extends State<HomeVotagexHero> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         // App logo (left).
-        ShaderMask(
-          shaderCallback: (b) => const LinearGradient(
-            colors: [Color(0xFF0A296B), Color(0xFF092834)],
-          ).createShader(b),
-          child: const Text(
-            'MY ATLAS',
-            style: TextStyle(
-              fontFamily: 'Google Sans',
-              fontSize: 34,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 0.3,
-              height: 1.0,
-              color: Colors.white,
-            ),
-          ),
+        Image.asset(
+          'assets/Appname.png',
+          height: 38,
+          fit: BoxFit.contain,
         ),
       ],
     );

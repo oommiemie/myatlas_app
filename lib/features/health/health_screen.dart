@@ -25,6 +25,7 @@ import 'temperature_detail_screen.dart';
 import 'waist_detail_screen.dart';
 import 'data/health_data.dart';
 import 'widgets/active_energy_card.dart';
+import 'widgets/energy_summary.dart';
 import 'widgets/meal_card.dart';
 import 'widgets/metric_card.dart';
 import 'widgets/mini_activity_card.dart';
@@ -136,25 +137,12 @@ class _HealthScreenState extends State<HealthScreen>
                 largeTitle: const Text('สรุปสุขภาพ'),
                 backgroundColor: bg.withValues(alpha: 0.85),
                 border: null,
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    LiquidGlassButton(
-                      icon: Icons.bluetooth,
-                      onTap: _openDevicePairing,
-                      size: 36,
-                      iconSize: 18,
-                      iconColor: const Color(0xFF1D8B6B),
-                    ),
-                    const SizedBox(width: 8),
-                    LiquidGlassButton(
-                      icon: CupertinoIcons.square_grid_2x2_fill,
-                      onTap: () => showHealthMetricEditSheet(context),
-                      size: 36,
-                      iconSize: 18,
-                      iconColor: const Color(0xFF1D8B6B),
-                    ),
-                  ],
+                trailing: LiquidGlassButton(
+                  icon: Icons.bluetooth,
+                  onTap: _openDevicePairing,
+                  size: 36,
+                  iconSize: 18,
+                  iconColor: const Color(0xFF1D8B6B),
                 ),
               ),
               CupertinoSliverRefreshControl(onRefresh: _refresh),
@@ -167,9 +155,11 @@ class _HealthScreenState extends State<HealthScreen>
                 ),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate.fixed([
-                    _staggered(0, 2, _VitalSignSection(data: _data)),
+                    _staggered(0, 3, _ActivityBlock(data: _data)),
                     const SizedBox(height: 24),
-                    _staggered(1, 2, _HighlightsSection(data: _data)),
+                    _staggered(1, 3, _VitalSignSection(data: _data)),
+                    const SizedBox(height: 24),
+                    _staggered(2, 3, _HighlightsSection(data: _data)),
                   ]),
                 ),
               ),
@@ -199,8 +189,8 @@ class HealthSummarySections extends StatelessWidget {
       children: [
         _NutritionSection(data: data, showTitle: false),
         const SizedBox(height: 16),
-        // Activity (kcal / ก้าวเดิน / กิจกรรม) right below the food-analysis card.
-        _ActivityBlock(data: data),
+        // Energy in/out summary (replaces the raw activity block).
+        EnergySummarySection(data: data),
         if (afterActivity != null) ...[
           const SizedBox(height: 16),
           afterActivity!,
@@ -282,8 +272,9 @@ class _NutritionSection extends StatelessWidget {
           child: MealCard(
             tagline: meal.tagline,
             name: meal.name,
-            calories: _formatInt(meal.calories),
-            carbs: '${meal.mealsEaten}',
+            calories: meal.calories,
+            target: data.calorieTarget,
+            meals: meal.mealsEaten,
             onScan: () => openFoodLens(context),
           ),
         ),
@@ -916,6 +907,7 @@ class _HighlightsSection extends StatelessWidget {
 }
 
 /// Activity block: active energy (kcal), steps (ก้าวเดิน) and activity rings.
+/// Shown on the Health page.
 class _ActivityBlock extends StatelessWidget {
   const _ActivityBlock({required this.data});
   final HealthData data;

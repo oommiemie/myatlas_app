@@ -71,6 +71,7 @@ flutter:
   uses-material-design: true
 
   assets:
+    - assets/Appname.png
     - assets/header-bg.png
     - assets/header-bg.webp
     - assets/header-bg-sky.png
@@ -108,11 +109,22 @@ flutter:
     - assets/3d/
 
   fonts:
-    - family: Google Sans
+    - family: IBM Plex Sans Thai Looped
       fonts:
-        - asset: assets/fonts/GoogleSans-Variable.ttf
-        - asset: assets/fonts/GoogleSans-Italic-Variable.ttf
-          style: italic
+        - asset: assets/fonts/ibmplex/IBMPlexSansThaiLooped-Thin.ttf
+          weight: 100
+        - asset: assets/fonts/ibmplex/IBMPlexSansThaiLooped-ExtraLight.ttf
+          weight: 200
+        - asset: assets/fonts/ibmplex/IBMPlexSansThaiLooped-Light.ttf
+          weight: 300
+        - asset: assets/fonts/ibmplex/IBMPlexSansThaiLooped-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/ibmplex/IBMPlexSansThaiLooped-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/ibmplex/IBMPlexSansThaiLooped-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/ibmplex/IBMPlexSansThaiLooped-Bold.ttf
+          weight: 700
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

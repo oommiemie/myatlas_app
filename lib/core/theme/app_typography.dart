@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 class AppTypography {
   AppTypography._();
 
-  static const String _fontFamily = 'Google Sans';
+  static const String _fontFamily = 'IBM Plex Sans Thai Looped';
 
   static TextStyle _base({
     required double size,

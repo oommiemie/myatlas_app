@@ -96,7 +96,7 @@ class _HomeScreenState extends State<HomeScreen> {
               color: AppColors.bgPrimary,
               borderRadius: BorderRadius.vertical(top: Radius.circular(40)),
             ),
-            padding: const EdgeInsets.fromLTRB(16, 24, 16, 120),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
             child: HealthSummarySections(
               data: _healthData,
               // Workout-streak card + water-intake card, stacked below the

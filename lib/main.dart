@@ -63,7 +63,7 @@ class MyAtlasApp extends StatelessWidget {
                   ),
                   child: Theme(
                     data: ThemeData(
-                      fontFamily: 'Google Sans',
+                      fontFamily: 'IBM Plex Sans Thai Looped',
                       brightness: brightness,
                     ),
                     child: ScaffoldMessenger(

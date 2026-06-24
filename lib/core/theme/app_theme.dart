@@ -30,7 +30,7 @@ class AppTheme {
   static CupertinoTextThemeData _textTheme(Color primaryLabel) {
     TextStyle style(double size, FontWeight weight, {Color? color}) =>
         TextStyle(
-          fontFamily: 'Google Sans',
+          fontFamily: 'IBM Plex Sans Thai Looped',
           fontSize: size,
           fontWeight: weight,
           color: color ?? primaryLabel,

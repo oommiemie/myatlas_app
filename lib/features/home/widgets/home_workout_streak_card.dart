@@ -266,7 +266,7 @@ class _HomeWorkoutStreakCardState extends State<HomeWorkoutStreakCard> {
                     Text(
                       title,
                       style: const TextStyle(
-                        fontFamily: 'Google Sans',
+                        fontFamily: 'IBM Plex Sans Thai Looped',
                         fontSize: 15,
                         fontWeight: FontWeight.w800,
                         height: 1.2,
@@ -277,7 +277,7 @@ class _HomeWorkoutStreakCardState extends State<HomeWorkoutStreakCard> {
                     Text(
                       subtitle,
                       style: const TextStyle(
-                        fontFamily: 'Google Sans',
+                        fontFamily: 'IBM Plex Sans Thai Looped',
                         fontSize: 12,
                         color: Color(0xFF5B6B7A),
                       ),
@@ -380,7 +380,7 @@ class _HomeWorkoutStreakCardState extends State<HomeWorkoutStreakCard> {
                 builder: (_, v, __) => Text(
                   _formatInt(v.round()),
                   style: const TextStyle(
-                    fontFamily: 'Google Sans',
+                    fontFamily: 'IBM Plex Sans Thai Looped',
                     fontSize: 14,
                     fontWeight: FontWeight.w800,
                     height: 1.0,
@@ -392,7 +392,7 @@ class _HomeWorkoutStreakCardState extends State<HomeWorkoutStreakCard> {
               const Text(
                 'คะแนน',
                 style: TextStyle(
-                  fontFamily: 'Google Sans',
+                  fontFamily: 'IBM Plex Sans Thai Looped',
                   fontSize: 8,
                   color: Color(0xFFB58A6B),
                 ),
@@ -650,7 +650,7 @@ class _HomeWorkoutStreakCardState extends State<HomeWorkoutStreakCard> {
           Text(
             _thWeekLabels[day.weekday - 1],
             style: const TextStyle(
-              fontFamily: 'Google Sans',
+              fontFamily: 'IBM Plex Sans Thai Looped',
               fontSize: 11,
               color: Color(0xFFB58A6B),
             ),
@@ -678,7 +678,7 @@ class _HomeWorkoutStreakCardState extends State<HomeWorkoutStreakCard> {
                   Text(
                     '${day.day}',
                     style: TextStyle(
-                      fontFamily: 'Google Sans',
+                      fontFamily: 'IBM Plex Sans Thai Looped',
                       fontSize: 13,
                       fontWeight:
                           isFocus ? FontWeight.w800 : FontWeight.w600,
@@ -726,7 +726,7 @@ class _HomeWorkoutStreakCardState extends State<HomeWorkoutStreakCard> {
             Text(
               'เริ่มเต้นเลย',
               style: TextStyle(
-                fontFamily: 'Google Sans',
+                fontFamily: 'IBM Plex Sans Thai Looped',
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
                 color: Colors.white,

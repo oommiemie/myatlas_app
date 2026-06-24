@@ -5,6 +5,7 @@ import 'package:flutter/material.dart' show Icons;
 
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/liquid_glass_button.dart';
+import '../../nutrition/data/meal_store.dart';
 
 class MealCard extends StatefulWidget {
   const MealCard({
@@ -12,14 +13,16 @@ class MealCard extends StatefulWidget {
     required this.tagline,
     required this.name,
     required this.calories,
-    required this.carbs,
+    required this.target,
+    required this.meals,
     this.onScan,
   });
 
   final String tagline;
   final String name;
-  final String calories;
-  final String carbs;
+  final int calories; // consumed today
+  final int target; // daily target
+  final int meals; // meals eaten
   final VoidCallback? onScan;
 
   static const _primary600 = Color(0xFF1D8B6B);
@@ -53,6 +56,13 @@ class _MealCardState extends State<MealCard>
 
   @override
   Widget build(BuildContext context) {
+    // Latest meal (most recent by time) for the "มื้อล่าสุด" stat.
+    final entries = MealStore.instance.meals.value;
+    MealEntry? latest;
+    for (final m in entries) {
+      if (latest == null || m.time.isAfter(latest.time)) latest = m;
+    }
+    final latestKcal = latest?.calories ?? 0;
     return ClipRRect(
       borderRadius: BorderRadius.circular(24),
       child: Container(
@@ -86,7 +96,7 @@ class _MealCardState extends State<MealCard>
           clipBehavior: Clip.none,
           children: [
             Positioned(
-              left: -22,
+              left: -36,
               top: -22,
               width: 130,
               height: 130,
@@ -108,46 +118,57 @@ class _MealCardState extends State<MealCard>
                       border: Border.all(
                           color: MealCard._borderDefault, width: 0.5),
                     ),
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
                     child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
+                        // Calorie ring — center shows kcal left, fill =
+                        // consumed / target.
+                        _CalorieRing(
+                          consumed: widget.calories,
+                          target: widget.target,
+                          progress: _entryCtrl,
+                        ),
+                        const SizedBox(width: 16),
                         Expanded(
-                          child: _Nutrient(
-                            icon: CupertinoIcons.flame_fill,
-                            iconBg: const Color(0xFFFF6B3D),
-                            label: 'แคลอรี่วันนี้',
-                            value: widget.calories,
-                            unit: 'kcl',
-                          ),
-                        ),
-                        Container(
-                          width: 1,
-                          height: 32,
-                          color: MealCard._borderDefault,
-                        ),
-                        Expanded(
-                          child: _Nutrient(
-                            icon: Icons.restaurant,
-                            iconBg: MealCard._primary600,
-                            iconSize: 10,
-                            label: 'มื้ออาหารที่ทาน',
-                            value: widget.carbs,
-                            unit: 'มื้อ',
-                          ),
-                        ),
-                        Container(
-                          width: 1,
-                          height: 32,
-                          color: MealCard._borderDefault,
-                        ),
-                        Expanded(
-                          child: _Nutrient(
-                            icon: Icons.auto_awesome,
-                            iconBg: const Color(0xFF8B5CF6),
-                            iconSize: 10,
-                            label: 'AI วันนี้',
-                            value: '1/16',
-                            unit: 'ครั้ง',
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _MiniStat(
+                                      iconBg: const Color(0xFFFF6B3D),
+                                      icon: CupertinoIcons.flame_fill,
+                                      label: 'มื้อล่าสุด',
+                                      value: _fmt(latestKcal),
+                                      unit: 'kcal',
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Container(
+                                    width: 1,
+                                    height: 32,
+                                    color: MealCard._borderDefault,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: _MiniStat(
+                                      iconBg: MealCard._primary600,
+                                      icon: Icons.restaurant,
+                                      iconSize: 10,
+                                      label: 'มื้ออาหาร',
+                                      value: '${widget.meals}',
+                                      unit: 'มื้อ',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              // AI scan quota — under the stats, same column.
+                              const _AiQuotaBar(used: 1, total: 16),
+                            ],
                           ),
                         ),
                       ],
@@ -258,8 +279,198 @@ class _TopRow extends StatelessWidget {
 }
 
 
-class _Nutrient extends StatelessWidget {
-  const _Nutrient({
+/// Clear daily AI-scan quota: label + "เหลือ X/Y ครั้ง" + a battery-style bar
+/// (full = plenty of scans left). Replaces the cryptic "1/16".
+class _AiQuotaBar extends StatelessWidget {
+  const _AiQuotaBar({required this.used, required this.total});
+
+  final int used;
+  final int total;
+
+  // Teal — harmonises with the card's green palette.
+  static const _accent = Color(0xFF0D9488);
+  static const _disabled = Color(0xFFA3A3A3);
+
+  @override
+  Widget build(BuildContext context) {
+    final remaining = (total - used).clamp(0, total);
+    final frac = total == 0 ? 0.0 : (remaining / total).clamp(0.0, 1.0);
+    // No scans left → grey everything out (disabled).
+    final out = remaining == 0;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                'สแกนอาหารด้วย AI วันนี้',
+                style: AppTypography.caption2(
+                    out ? _disabled : MealCard._textSecondary),
+              ),
+            ),
+            Text(
+              out ? 'ครบโควต้าแล้ว' : '$remaining/$total ครั้ง',
+              style: AppTypography.caption2(out ? _disabled : _accent).copyWith(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(100),
+          child: SizedBox(
+            height: 6,
+            child: Stack(
+              children: [
+                Container(color: out
+                    ? const Color(0xFFE5E5E5)
+                    : const Color(0xFFD6F3EF)),
+                FractionallySizedBox(
+                  widthFactor: frac,
+                  child: const DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Color(0xFF2DD4BF), Color(0xFF0D9488)],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+String _fmt(int v) {
+  final s = v.toString();
+  final b = StringBuffer();
+  for (var i = 0; i < s.length; i++) {
+    if (i > 0 && (s.length - i) % 3 == 0) b.write(',');
+    b.write(s[i]);
+  }
+  return b.toString();
+}
+
+/// Calorie progress ring (fill = consumed/target). Center shows kcal LEFT.
+class _CalorieRing extends StatelessWidget {
+  const _CalorieRing({
+    required this.consumed,
+    required this.target,
+    required this.progress,
+  });
+
+  final int consumed;
+  final int target;
+  final Animation<double> progress;
+
+  static const _size = 96.0;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: _size,
+      height: _size,
+      child: AnimatedBuilder(
+        animation: progress,
+        builder: (_, __) {
+          final t = Curves.easeOutCubic.transform(progress.value.clamp(0, 1));
+          return Stack(
+            alignment: Alignment.center,
+            children: [
+              CustomPaint(
+                size: const Size.square(_size),
+                painter: _MacroDonutPainter(t),
+              ),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    _fmt(consumed),
+                    style: AppTypography.callout(CupertinoColors.black).copyWith(
+                      fontSize: 21,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: -0.6,
+                      height: 1,
+                    ),
+                  ),
+                  const SizedBox(height: 1),
+                  Text(
+                    '/ ${_fmt(target)} kcal',
+                    style: AppTypography.caption2(MealCard._neutral500)
+                        .copyWith(fontSize: 9),
+                  ),
+                ],
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+}
+
+/// Macro-split donut (carbs/protein/fat) — same graph as the energy intake
+/// card. [t] animates the segments growing in.
+class _MacroDonutPainter extends CustomPainter {
+  _MacroDonutPainter(this.t);
+  final double t;
+
+  // 5 main nutrients (from "สารอาหารหลัก"): carbs / protein / fat / sugar / fiber.
+  // 5 main nutrients (from "สารอาหารหลัก"): carbs / protein / fat / sugar / fiber.
+  static const _fracs = [0.55, 0.20, 0.12, 0.08, 0.05];
+  static const _colors = [
+    Color(0xFF22C55E), // คาร์โบไฮเดรต
+    Color(0xFF3B82F6), // โปรตีน
+    Color(0xFFF59E0B), // ไขมัน
+    Color(0xFFA855F7), // น้ำตาล
+    Color(0xFFEF4444), // ใยอาหาร
+  ];
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = size.center(Offset.zero);
+    final radius = size.width / 2 - 5;
+    final rect = Rect.fromCircle(center: center, radius: radius);
+
+    final track = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 9
+      ..strokeCap = StrokeCap.round
+      ..color = const Color(0xFFE9EFEC);
+    canvas.drawCircle(center, radius, track);
+
+    const twoPi = 6.2831853;
+    const gap = 0.10;
+    var start = -1.5708 + gap / 2;
+    for (var i = 0; i < _fracs.length; i++) {
+      final full = _fracs[i] * twoPi;
+      final sweep = (full - gap) * t.clamp(0.0, 1.0);
+      if (sweep > 0) {
+        final paint = Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 9
+          ..strokeCap = StrokeCap.round
+          ..color = _colors[i];
+        canvas.drawArc(rect, start, sweep, false, paint);
+      }
+      start += full;
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _MacroDonutPainter old) => old.t != t;
+}
+
+/// Compact left-aligned stat: small icon + label, then value + unit.
+class _MiniStat extends StatelessWidget {
+  const _MiniStat({
     required this.icon,
     required this.iconBg,
     required this.label,
@@ -278,6 +489,7 @@ class _Nutrient extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
         Row(
@@ -286,21 +498,18 @@ class _Nutrient extends StatelessWidget {
             Container(
               width: 14,
               height: 14,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: iconBg,
-              ),
+              decoration: BoxDecoration(shape: BoxShape.circle, color: iconBg),
               alignment: Alignment.center,
               child: Icon(icon, size: iconSize, color: CupertinoColors.white),
             ),
-            const SizedBox(width: 4),
+            const SizedBox(width: 5),
             Text(
               label,
               style: AppTypography.caption2(MealCard._textSecondary),
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 5),
         Row(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.end,
@@ -308,13 +517,13 @@ class _Nutrient extends StatelessWidget {
             Text(
               value,
               style: AppTypography.callout(CupertinoColors.black).copyWith(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
                 letterSpacing: -0.6,
                 height: 1,
               ),
             ),
-            const SizedBox(width: 2),
+            const SizedBox(width: 3),
             Padding(
               padding: const EdgeInsets.only(bottom: 1),
               child: Text(

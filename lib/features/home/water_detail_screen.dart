@@ -45,7 +45,7 @@ class WaterDetailScreen extends StatefulWidget {
         child: Text(
           text,
           style: const TextStyle(
-            fontFamily: 'Google Sans',
+            fontFamily: 'IBM Plex Sans Thai Looped',
             fontSize: 16,
             fontWeight: FontWeight.w700,
             color: _ink,
@@ -102,7 +102,7 @@ class _WaterDetailScreenState extends State<WaterDetailScreen> {
                   const Text(
                     'ตั้งค่าการดื่มน้ำ',
                     style: TextStyle(
-                      fontFamily: 'Google Sans',
+                      fontFamily: 'IBM Plex Sans Thai Looped',
                       fontSize: 18,
                       fontWeight: FontWeight.w800,
                       color: WaterDetailScreen._ink,
@@ -112,7 +112,7 @@ class _WaterDetailScreenState extends State<WaterDetailScreen> {
                   const Text(
                     'เป้าหมายต่อวัน',
                     style: TextStyle(
-                      fontFamily: 'Google Sans',
+                      fontFamily: 'IBM Plex Sans Thai Looped',
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: Color(0xFF5B6B7A),
@@ -132,7 +132,7 @@ class _WaterDetailScreenState extends State<WaterDetailScreen> {
                           child: Text(
                             goalLabel(),
                             style: const TextStyle(
-                              fontFamily: 'Google Sans',
+                              fontFamily: 'IBM Plex Sans Thai Looped',
                               fontSize: 20,
                               fontWeight: FontWeight.w800,
                               color: WaterDetailScreen._water,
@@ -152,7 +152,7 @@ class _WaterDetailScreenState extends State<WaterDetailScreen> {
                   const Text(
                     'ปริมาณต่อแก้ว',
                     style: TextStyle(
-                      fontFamily: 'Google Sans',
+                      fontFamily: 'IBM Plex Sans Thai Looped',
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: Color(0xFF5B6B7A),
@@ -168,7 +168,7 @@ class _WaterDetailScreenState extends State<WaterDetailScreen> {
                           selected: perGlass == ml,
                           onSelected: (_) => setSheet(() => perGlass = ml),
                           labelStyle: TextStyle(
-                            fontFamily: 'Google Sans',
+                            fontFamily: 'IBM Plex Sans Thai Looped',
                             fontWeight: FontWeight.w600,
                             color: perGlass == ml
                                 ? CupertinoColors.white
@@ -204,7 +204,7 @@ class _WaterDetailScreenState extends State<WaterDetailScreen> {
                         child: const Text(
                           'บันทึก',
                           style: TextStyle(
-                            fontFamily: 'Google Sans',
+                            fontFamily: 'IBM Plex Sans Thai Looped',
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
                             color: CupertinoColors.white,
@@ -344,7 +344,7 @@ class _Header extends StatelessWidget {
             child: Text(
               title,
               style: const TextStyle(
-                fontFamily: 'Google Sans',
+                fontFamily: 'IBM Plex Sans Thai Looped',
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
                 color: CupertinoColors.white,
@@ -597,7 +597,7 @@ class _WaterChartCardState extends State<_WaterChartCard>
                     Text(
                       s.headerTitle,
                       style: const TextStyle(
-                        fontFamily: 'Google Sans',
+                        fontFamily: 'IBM Plex Sans Thai Looped',
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
                         color: _ink,
@@ -607,7 +607,7 @@ class _WaterChartCardState extends State<_WaterChartCard>
                     Text(
                       headerLabel,
                       style: const TextStyle(
-                        fontFamily: 'Google Sans',
+                        fontFamily: 'IBM Plex Sans Thai Looped',
                         fontSize: 12,
                         color: _muted,
                       ),
@@ -619,7 +619,7 @@ class _WaterChartCardState extends State<_WaterChartCard>
                         Text(
                           WaterDetailScreen.formatMl(headerValue),
                           style: const TextStyle(
-                            fontFamily: 'Google Sans',
+                            fontFamily: 'IBM Plex Sans Thai Looped',
                             fontSize: 24,
                             fontWeight: FontWeight.w800,
                             height: 1,
@@ -631,7 +631,7 @@ class _WaterChartCardState extends State<_WaterChartCard>
                           child: Text(
                             headerUnit,
                             style: const TextStyle(
-                              fontFamily: 'Google Sans',
+                              fontFamily: 'IBM Plex Sans Thai Looped',
                               fontSize: 11,
                               color: _muted,
                             ),
@@ -643,7 +643,7 @@ class _WaterChartCardState extends State<_WaterChartCard>
                     Text(
                       s.range,
                       style: const TextStyle(
-                        fontFamily: 'Google Sans',
+                        fontFamily: 'IBM Plex Sans Thai Looped',
                         fontSize: 11,
                         color: _muted,
                       ),
@@ -658,7 +658,7 @@ class _WaterChartCardState extends State<_WaterChartCard>
                     const Text(
                       'เป้าหมาย',
                       style: TextStyle(
-                        fontFamily: 'Google Sans',
+                        fontFamily: 'IBM Plex Sans Thai Looped',
                         fontSize: 11,
                         color: _muted,
                       ),
@@ -667,7 +667,7 @@ class _WaterChartCardState extends State<_WaterChartCard>
                     Text(
                       '${WaterDetailScreen.formatMl(widget.goalMl)} มล./วัน',
                       style: const TextStyle(
-                        fontFamily: 'Google Sans',
+                        fontFamily: 'IBM Plex Sans Thai Looped',
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                         color: _water,
@@ -776,7 +776,7 @@ class _PeriodTabs extends StatelessWidget {
                               duration: const Duration(milliseconds: 280),
                               curve: Curves.easeOutCubic,
                               style: TextStyle(
-                                fontFamily: 'Google Sans',
+                                fontFamily: 'IBM Plex Sans Thai Looped',
                                 fontSize: 15,
                                 color: i == selected
                                     ? const Color(0xFF1E88E5)
@@ -861,7 +861,7 @@ class _BarsPainter extends CustomPainter {
       tp.text = TextSpan(
         text: labels[i],
         style: TextStyle(
-          fontFamily: 'Google Sans',
+          fontFamily: 'IBM Plex Sans Thai Looped',
           fontSize: 11,
           fontWeight: isSel ? FontWeight.w700 : FontWeight.w500,
           color: isSel ? _water : const Color(0xFF8A97A3),
@@ -907,7 +907,7 @@ class _TodayCard extends StatelessWidget {
           const Text(
             'สรุปวันนี้',
             style: TextStyle(
-              fontFamily: 'Google Sans',
+              fontFamily: 'IBM Plex Sans Thai Looped',
               fontSize: 16,
               fontWeight: FontWeight.w700,
               color: _ink,
@@ -1013,7 +1013,7 @@ class _Stat extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
-                  fontFamily: 'Google Sans',
+                  fontFamily: 'IBM Plex Sans Thai Looped',
                   fontSize: 11,
                   color: Color(0xFF6D756E),
                 ),
@@ -1028,7 +1028,7 @@ class _Stat extends StatelessWidget {
             Text(
               value,
               style: const TextStyle(
-                fontFamily: 'Google Sans',
+                fontFamily: 'IBM Plex Sans Thai Looped',
                 fontSize: 18,
                 fontWeight: FontWeight.w800,
                 height: 1,
@@ -1041,7 +1041,7 @@ class _Stat extends StatelessWidget {
               child: Text(
                 unit,
                 style: const TextStyle(
-                  fontFamily: 'Google Sans',
+                  fontFamily: 'IBM Plex Sans Thai Looped',
                   fontSize: 10,
                   color: Color(0xFF8A97A3),
                 ),
@@ -1073,7 +1073,7 @@ class _IntakeLog extends StatelessWidget {
         child: const Text(
           'ยังไม่มีการบันทึกวันนี้',
           style: TextStyle(
-            fontFamily: 'Google Sans',
+            fontFamily: 'IBM Plex Sans Thai Looped',
             fontSize: 13,
             color: Color(0xFF8A97A3),
           ),
@@ -1123,7 +1123,7 @@ class _IntakeLog extends StatelessWidget {
             child: Text(
               'ดื่มน้ำ',
               style: TextStyle(
-                fontFamily: 'Google Sans',
+                fontFamily: 'IBM Plex Sans Thai Looped',
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
                 color: Color(0xFF1A1A2E),
@@ -1133,7 +1133,7 @@ class _IntakeLog extends StatelessWidget {
           Text(
             time,
             style: const TextStyle(
-              fontFamily: 'Google Sans',
+              fontFamily: 'IBM Plex Sans Thai Looped',
               fontSize: 12,
               color: Color(0xFF8A97A3),
             ),
@@ -1142,7 +1142,7 @@ class _IntakeLog extends StatelessWidget {
           Text(
             '+$mlPerGlass มล.',
             style: const TextStyle(
-              fontFamily: 'Google Sans',
+              fontFamily: 'IBM Plex Sans Thai Looped',
               fontSize: 13,
               fontWeight: FontWeight.w700,
               color: Color(0xFF1E88E5),
@@ -1201,7 +1201,7 @@ class _GoalCard extends StatelessWidget {
         Text(
           label,
           style: const TextStyle(
-            fontFamily: 'Google Sans',
+            fontFamily: 'IBM Plex Sans Thai Looped',
             fontSize: 12,
             color: Color(0xFF6D756E),
           ),
@@ -1210,7 +1210,7 @@ class _GoalCard extends StatelessWidget {
         Text(
           value,
           style: const TextStyle(
-            fontFamily: 'Google Sans',
+            fontFamily: 'IBM Plex Sans Thai Looped',
             fontSize: 17,
             fontWeight: FontWeight.w800,
             color: Color(0xFF1E88E5),

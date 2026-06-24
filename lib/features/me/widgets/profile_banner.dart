@@ -385,7 +385,12 @@ class _AiAlertCarouselState extends State<_AiAlertCarousel> {
     'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.',
   ];
 
+  // TEST: set to false to show real notifications again.
+  static final bool _testEmpty = true;
+
   List<_AiNotif> _buildNotifs() {
+    if (_testEmpty) return const [];
+
     // Pull the soonest hospital appointment for the appointment reminder.
     final soon = hospitalAppointments.byBucket[AppointmentBucket.soon];
     final appt = (soon != null && soon.isNotEmpty) ? soon.first : null;
@@ -461,6 +466,8 @@ class _AiAlertCarouselState extends State<_AiAlertCarousel> {
   @override
   Widget build(BuildContext context) {
     final notifs = _buildNotifs();
+    // No notifications → show nothing.
+    if (notifs.isEmpty) return const SizedBox.shrink();
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(12, 11, 14, 11),
@@ -548,7 +555,7 @@ class _AiAlertCarouselState extends State<_AiAlertCarousel> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                    fontFamily: 'Google Sans',
+                    fontFamily: 'IBM Plex Sans Thai Looped',
                     fontSize: 12.5,
                     fontWeight: FontWeight.w800,
                     color: CupertinoColors.white,
@@ -561,7 +568,7 @@ class _AiAlertCarouselState extends State<_AiAlertCarousel> {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                    fontFamily: 'Google Sans',
+                    fontFamily: 'IBM Plex Sans Thai Looped',
                     fontSize: 11.5,
                     color: CupertinoColors.white,
                     height: 1.4,
