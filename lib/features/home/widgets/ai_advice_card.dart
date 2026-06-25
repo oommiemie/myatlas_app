@@ -111,6 +111,10 @@ class _Page {
     required this.grad,
     required this.ink,
     this.isAi = false,
+    this.action,
+    this.onAction,
+    this.actionDone = false,
+    this.accent = const Color(0xFF12A892),
   });
   final String label;
   final String title;
@@ -119,6 +123,10 @@ class _Page {
   final List<Color> grad; // [deep, bright] backdrop tones
   final Color ink; // dark, hue-tinted text colour
   final bool isAi; // AI advice (sparkle) vs reminder (bell)
+  final String? action; // CTA shown under the left text; null → none
+  final VoidCallback? onAction; // null → not tappable (e.g. already done)
+  final bool actionDone; // completed style (check)
+  final Color accent; // button colour (page-tone, vivid)
 }
 
 // Two-tone backdrops (deep → bright) that harmonise with each card while
@@ -141,6 +149,15 @@ const Map<TimePeriod, Color> _kInkForPeriod = {
   TimePeriod.bedtime: Color(0xFF0B3550),
 };
 const Color _kApptInk = Color(0xFF0D453E);
+
+// Vivid accent (button) per topic — same hue as the page, bright not dark.
+const Map<TimePeriod, Color> _kAccentForPeriod = {
+  TimePeriod.morning: Color(0xFF2E8BE6),
+  TimePeriod.day: Color(0xFFE5860D),
+  TimePeriod.evening: Color(0xFF7A5BD0),
+  TimePeriod.bedtime: Color(0xFF1E78B0),
+};
+const Color _kApptAccent = Color(0xFF12A892);
 
 // AI advice (med usage) and AI health-summary palettes.
 const List<Color> _kAiUsageGrad = [Color(0xFFDAD6F3), Color(0xFFEFEDFB)];
@@ -253,19 +270,19 @@ class _AiAdviceCardState extends State<AiAdviceCard> {
 
     // 3) Medication reminders by time slot (reminder, not AI).
     for (final s in _kMedSlots) {
+      final taken = _taken.contains(s.id);
       pages.add(_Page(
         label: 'แจ้งเตือนการทานยา',
         title: '${_kMealName[s.period]} · ${s.time}',
         body: 'ถึงเวลาทานยา ${s.name}\n'
-            'ครั้งละ 1 เม็ด · ${s.meal}\n'
-            'กดปุ่มเพื่อบันทึกเมื่อทานแล้ว',
+            'ครั้งละ 1 เม็ด · ${s.meal}',
         grad: _kGradForPeriod[s.period]!,
         ink: _kInkForPeriod[s.period]!,
-        right: _MedReminderCard(
-          slot: s,
-          taken: _taken.contains(s.id),
-          onRecord: () => _recordMed(s),
-        ),
+        action: taken ? 'บันทึกแล้ว' : 'บันทึกการทานยา',
+        onAction: taken ? null : () => _recordMed(s),
+        actionDone: taken,
+        accent: _kAccentForPeriod[s.period]!,
+        right: _MedReminderCard(slot: s),
       ));
     }
 
@@ -278,6 +295,16 @@ class _AiAdviceCardState extends State<AiAdviceCard> {
         body: '${hosp.title} · ${hosp.subLeft}\n${_when(hosp)}\n${hosp.subRight}',
         grad: _kApptGrad,
         ink: _kApptInk,
+        action: 'ทำแบบประเมิน',
+        accent: _kApptAccent,
+        onAction: () {
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(const SnackBar(
+              content: Text('ทำแบบประเมิน'),
+              behavior: SnackBarBehavior.floating,
+            ));
+        },
         right: _RecommendationCard(
           data: ActivityRecommendation(
             title: '${hosp.date.day} ${_thMonth[hosp.date.month - 1]}',
@@ -415,28 +442,32 @@ class _AiAdviceCardState extends State<AiAdviceCard> {
           ],
         ),
         const SizedBox(height: 12),
-        Expanded(
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 260),
-            layoutBuilder: _topLeftLayout,
-            child: Align(
-              alignment: Alignment.topLeft,
-              child: Text(
-                page.body,
-                key: ValueKey('body$_index'),
-                maxLines: 5,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 13.5,
-                  height: 1.6,
-                  color: page.ink.withValues(alpha: 0.86),
-                  fontWeight: FontWeight.w600,
-                  fontVariations: const [FontVariation('wght', 600)],
-                ),
-              ),
+        Flexible(
+          // Instant swap (no AnimatedSwitcher) so the body height doesn't
+          // briefly grow during transitions and shove the button around.
+          child: Text(
+            page.body,
+            maxLines: 5,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 13.5,
+              height: 1.6,
+              color: page.ink.withValues(alpha: 0.86),
+              fontWeight: FontWeight.w600,
+              fontVariations: const [FontVariation('wght', 600)],
             ),
           ),
         ),
+        if (page.action != null) ...[
+          const SizedBox(height: 14),
+          _ActionButton(
+            key: ValueKey('act$_index'),
+            label: page.action!,
+            onTap: page.onAction,
+            done: page.actionDone,
+            color: page.accent,
+          ),
+        ],
       ],
     );
   }
@@ -478,6 +509,97 @@ class _AiAdviceCardState extends State<AiAdviceCard> {
           ),
         );
       },
+    );
+  }
+}
+
+/// Left CTA button ("ทำแบบประเมิน" / "บันทึกการทานยา") — gentle slide+fade in
+/// once when its page appears.
+class _ActionButton extends StatefulWidget {
+  const _ActionButton({
+    super.key,
+    required this.label,
+    required this.onTap,
+    required this.done,
+    required this.color,
+  });
+  final String label;
+  final VoidCallback? onTap;
+  final bool done;
+  final Color color;
+
+  @override
+  State<_ActionButton> createState() => _ActionButtonState();
+}
+
+class _ActionButtonState extends State<_ActionButton>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _c = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 420),
+  )..forward();
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final label = widget.label;
+    final onTap = widget.onTap;
+    final done = widget.done;
+    final color = widget.color;
+    return AnimatedBuilder(
+      animation: _c,
+      builder: (_, child) {
+        final t = Curves.easeOutCubic.transform(_c.value);
+        return Opacity(
+          opacity: t,
+          child: Transform.translate(offset: Offset(0, (1 - t) * 10), child: child),
+        );
+      },
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: GestureDetector(
+          onTap: onTap,
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(14, 7, 14, 7),
+            decoration: BoxDecoration(
+              // Pending → vivid page-tone CTA; done → soft tinted chip.
+              color: done ? color.withValues(alpha: 0.16) : color,
+              borderRadius: BorderRadius.circular(100),
+              boxShadow: done
+                  ? null
+                  : [
+                      BoxShadow(
+                        color: color.withValues(alpha: 0.4),
+                        blurRadius: 8,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (done) ...[
+                  Icon(Icons.check_rounded, size: 15, color: color),
+                  const SizedBox(width: 5),
+                ],
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w800,
+                    color: done ? color : Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -761,14 +883,8 @@ class _AiBotCard extends StatelessWidget {
 // ── Medication reminder card (per time slot) ─────────────────────────────────
 
 class _MedReminderCard extends StatelessWidget {
-  const _MedReminderCard({
-    required this.slot,
-    required this.taken,
-    required this.onRecord,
-  });
+  const _MedReminderCard({required this.slot});
   final _MedSlot slot;
-  final bool taken;
-  final VoidCallback onRecord;
 
   @override
   Widget build(BuildContext context) {
@@ -794,35 +910,31 @@ class _MedReminderCard extends StatelessWidget {
               ],
             ),
           ),
-          // White summary panel — flush to the card edges, med name only.
+          // Med name as a pill (same style as the time/meal badges), bottom-left.
           Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(12, 12, 10, 12),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      slot.name,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        fontVariations: [FontVariation('wght', 700)],
-                        color: Color(0xFF1A1A1A),
-                      ),
-                    ),
+            left: 8,
+            right: 8,
+            bottom: 8,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  slot.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    fontVariations: [FontVariation('wght', 800)],
+                    color: Color(0xFF3A3A3A),
                   ),
-                  const SizedBox(width: 8),
-                  _RecordButton(taken: taken, onTap: onRecord),
-                ],
+                ),
               ),
             ),
           ),
@@ -890,38 +1002,6 @@ class _MedReminderCard extends StatelessWidget {
       );
 }
 
-class _RecordButton extends StatelessWidget {
-  const _RecordButton({required this.taken, required this.onTap});
-  final bool taken;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: taken ? null : onTap,
-      behavior: HitTestBehavior.opaque,
-      child: SizedBox(
-        width: 28,
-        height: 28,
-        child: Center(
-          // Same icons as the medicine screen (pending sun / done check).
-          child: taken
-              ? SvgPicture.asset('assets/svg/icon_done_check.svg',
-                  width: 24, height: 24)
-              : SvgPicture.asset(
-                  'assets/svg/icon_pending_sun.svg',
-                  width: 20,
-                  height: 20,
-                  colorFilter: const ColorFilter.mode(
-                    Color(0xFFA5ACA6),
-                    BlendMode.srcIn,
-                  ),
-                ),
-        ),
-      ),
-    );
-  }
-}
 
 
 // ── Image recommendation card (appointment / activities) ─────────────────────
@@ -983,42 +1063,6 @@ class _RecommendationCard extends StatelessWidget {
                   color: Colors.black,
                 ),
               ),
-            ),
-          ),
-          Positioned(
-            left: 14,
-            right: 12,
-            bottom: 12,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  data.title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w900,
-                    color: Colors.white,
-                    height: 1.1,
-                    fontVariations: [FontVariation('wght', 900)],
-                    shadows: [Shadow(color: Color(0x80000000), blurRadius: 6)],
-                  ),
-                ),
-                if (data.subtitle != null)
-                  Text(
-                    data.subtitle!,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white,
-                      height: 1.2,
-                      fontVariations: [FontVariation('wght', 800)],
-                      shadows: [Shadow(color: Color(0x80000000), blurRadius: 6)],
-                    ),
-                  ),
-              ],
             ),
           ),
         ],
