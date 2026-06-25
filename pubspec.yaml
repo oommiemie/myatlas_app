@@ -74,6 +74,10 @@ flutter:
     - assets/Appname.png
     - assets/taichi.png
     - assets/appt_scene.png
+    - assets/bgappointment.png
+    - assets/bgvisitappointment.png
+    - assets/AiBOT.png
+    - assets/AiBOT2.png
     - assets/header-bg.png
     - assets/header-bg.webp
     - assets/header-bg-sky.png

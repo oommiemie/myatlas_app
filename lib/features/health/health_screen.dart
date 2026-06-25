@@ -195,9 +195,8 @@ class HealthSummarySections extends StatelessWidget {
           const SizedBox(height: 16),
           afterActivity!,
         ],
-        // Health summary card — same section/spacing (16) as the cards above.
-        const SizedBox(height: 16),
-        _HighlightsSection(data: data),
+        // (Health summary card removed from Home — now covered by the AI
+        // health-summary card in the advice carousel.)
       ],
     );
   }

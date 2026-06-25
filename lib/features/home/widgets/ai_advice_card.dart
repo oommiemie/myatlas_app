@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -107,6 +110,7 @@ class _Page {
     required this.right,
     required this.grad,
     required this.ink,
+    this.isAi = false,
   });
   final String label;
   final String title;
@@ -114,6 +118,7 @@ class _Page {
   final Widget right;
   final List<Color> grad; // [deep, bright] backdrop tones
   final Color ink; // dark, hue-tinted text colour
+  final bool isAi; // AI advice (sparkle) vs reminder (bell)
 }
 
 // Two-tone backdrops (deep → bright) that harmonise with each card while
@@ -137,6 +142,19 @@ const Map<TimePeriod, Color> _kInkForPeriod = {
 };
 const Color _kApptInk = Color(0xFF0D453E);
 
+// AI advice (med usage) and AI health-summary palettes.
+const List<Color> _kAiUsageGrad = [Color(0xFFDAD6F3), Color(0xFFEFEDFB)];
+const Color _kAiUsageInk = Color(0xFF2E2A63);
+const List<Color> _kHealthGrad = [Color(0xFFCDEDDC), Color(0xFFEBF8F1)];
+const Color _kHealthInk = Color(0xFF114B35);
+
+const Map<TimePeriod, String> _kMealName = {
+  TimePeriod.morning: 'มื้อเช้า',
+  TimePeriod.day: 'มื้อกลางวัน',
+  TimePeriod.evening: 'มื้อเย็น',
+  TimePeriod.bedtime: 'ก่อนนอน',
+};
+
 /// "คำแนะนำจาก AI" — swiping the right carousel updates the left content.
 /// Medication cards are split by time slot and can be marked as taken.
 class AiAdviceCard extends StatefulWidget {
@@ -147,12 +165,40 @@ class AiAdviceCard extends StatefulWidget {
 }
 
 class _AiAdviceCardState extends State<AiAdviceCard> {
-  final PageController _ctrl = PageController(viewportFraction: 0.9);
-  int _index = 0;
   final Set<String> _taken = {};
+  Timer? _auto;
+
+  // Number of distinct pages (stable; content loops via modulo).
+  int get _pageCount {
+    var n = _kMedSlots.length + 2; // med slots + 2 AI pages
+    if (_firstSoon(hospitalAppointments) != null) n++;
+    if (_firstSoon(homeVisitAppointments) != null) n++;
+    return n;
+  }
+
+  // Start far in so the user can also swipe backwards; multiple of count → 1st.
+  late final int _initialPage = _pageCount * 1000;
+  late final PageController _ctrl =
+      PageController(viewportFraction: 0.96, initialPage: _initialPage);
+  late int _index = _initialPage;
+
+  @override
+  void initState() {
+    super.initState();
+    _auto = Timer.periodic(const Duration(seconds: 4), (_) {
+      if (!mounted || !_ctrl.hasClients) return;
+      // Always move forward → seamless wrap to the first page.
+      _ctrl.animateToPage(
+        _index + 1,
+        duration: const Duration(milliseconds: 700),
+        curve: Curves.easeInOut,
+      );
+    });
+  }
 
   @override
   void dispose() {
+    _auto?.cancel();
     _ctrl.dispose();
     super.dispose();
   }
@@ -170,55 +216,104 @@ class _AiAdviceCardState extends State<AiAdviceCard> {
       );
   }
 
+  String _when(AppointmentItem a) =>
+      '${a.date.day} ${_thMonth[a.date.month - 1]} · ${a.time} น.';
+
+  AppointmentItem? _firstSoon(AppointmentBundle b) {
+    final s = b.byBucket[AppointmentBucket.soon];
+    return (s != null && s.isNotEmpty) ? s.first : null;
+  }
+
   List<_Page> _buildPages() {
-    final pages = <_Page>[
-      for (final s in _kMedSlots)
-        _Page(
-          label: 'ผลวิเคราะห์',
-          title: 'คำแนะนำการใช้ยา',
-          body: s.advice,
-          grad: _kGradForPeriod[s.period]!,
-          ink: _kInkForPeriod[s.period]!,
-          right: _MedReminderCard(
-            slot: s,
-            taken: _taken.contains(s.id),
-            onRecord: () => _recordMed(s),
+    final pages = <_Page>[];
+
+    // 1) AI — general medication-use advice.
+    pages.add(_Page(
+      isAi: true,
+      label: 'คำแนะนำจาก AI',
+      title: 'วิธีใช้ยาให้ถูกต้อง',
+      body: 'ผู้ป่วยเบาหวานที่ฉีดอินซูลิน ควรฉีดใต้ผิวหนังบริเวณหน้าท้อง '
+          'สลับตำแหน่งทุกครั้ง เก็บยาในตู้เย็น และตรวจระดับน้ำตาลก่อนฉีดทุกมื้อ',
+      grad: _kAiUsageGrad,
+      ink: _kAiUsageInk,
+      right: const _AiBotCard(grad: _kAiUsageGrad),
+    ));
+
+    // 2) AI — health summary from the Health page data.
+    pages.add(_Page(
+      isAi: true,
+      label: 'สรุปสุขภาพจาก AI',
+      title: 'ภาพรวมสุขภาพของคุณ',
+      body: 'จากข้อมูลสุขภาพล่าสุด น้ำหนักและ BMI อยู่ในเกณฑ์ดี ความดันปกติ '
+          'แต่การนอนยังน้อยกว่าเป้าหมาย แนะนำพักผ่อนให้พอและออกกำลังสม่ำเสมอ',
+      grad: _kHealthGrad,
+      ink: _kHealthInk,
+      right: const _AiBotCard(grad: _kHealthGrad),
+    ));
+
+    // 3) Medication reminders by time slot (reminder, not AI).
+    for (final s in _kMedSlots) {
+      pages.add(_Page(
+        label: 'แจ้งเตือนการทานยา',
+        title: '${_kMealName[s.period]} · ${s.time}',
+        body: 'ถึงเวลาทานยา ${s.name}\n'
+            'ครั้งละ 1 เม็ด · ${s.meal}\n'
+            'กดปุ่มเพื่อบันทึกเมื่อทานแล้ว',
+        grad: _kGradForPeriod[s.period]!,
+        ink: _kInkForPeriod[s.period]!,
+        right: _MedReminderCard(
+          slot: s,
+          taken: _taken.contains(s.id),
+          onRecord: () => _recordMed(s),
+        ),
+      ));
+    }
+
+    // 2) Appointment reminders — hospital + home visit (reminder, not AI).
+    final hosp = _firstSoon(hospitalAppointments);
+    if (hosp != null) {
+      pages.add(_Page(
+        label: 'แจ้งเตือนนัดหมาย',
+        title: 'นัดหมายโรงพยาบาล',
+        body: '${hosp.title} · ${hosp.subLeft}\n${_when(hosp)}\n${hosp.subRight}',
+        grad: _kApptGrad,
+        ink: _kApptInk,
+        right: _RecommendationCard(
+          data: ActivityRecommendation(
+            title: '${hosp.date.day} ${_thMonth[hosp.date.month - 1]}',
+            subtitle: '${hosp.time} น.',
+            badge: 'โรงพยาบาล',
+            image: 'assets/bgappointment.png',
           ),
         ),
-    ];
-
-    // Nearest hospital appointment — fixed text, not AI.
-    final soon = hospitalAppointments.byBucket[AppointmentBucket.soon];
-    final appt = (soon != null && soon.isNotEmpty) ? soon.first : null;
-    final apptWhen = appt == null
-        ? ''
-        : '${appt.date.day} ${_thMonth[appt.date.month - 1]} · ${appt.time} น.';
-    pages.add(_Page(
-      label: 'นัดหมายที่ใกล้ถึง',
-      title: 'นัดหมายถัดไป',
-      grad: _kApptGrad,
-      ink: _kApptInk,
-      body: appt == null
-          ? 'ไม่มีนัดหมายที่กำลังจะถึง'
-          : '${appt.title} · ${appt.subLeft}\n$apptWhen\n${appt.subRight}',
-      right: _RecommendationCard(
-        data: ActivityRecommendation(
-          title: appt == null
-              ? 'นัดหมาย'
-              : '${appt.date.day} ${_thMonth[appt.date.month - 1]}',
-          subtitle: appt == null ? null : '${appt.time} น.',
-          badge: 'นัดหมาย',
-          image: 'assets/appt_scene.png',
+      ));
+    }
+    final home = _firstSoon(homeVisitAppointments);
+    if (home != null) {
+      pages.add(_Page(
+        label: 'แจ้งเตือนนัดหมาย',
+        title: 'นัดหมายเยี่ยมบ้าน',
+        body: '${home.title}\n${_when(home)}\n${home.subRight} · ${home.subLeft}',
+        grad: _kApptGrad,
+        ink: _kApptInk,
+        right: _RecommendationCard(
+          data: ActivityRecommendation(
+            title: '${home.date.day} ${_thMonth[home.date.month - 1]}',
+            subtitle: '${home.time} น.',
+            badge: 'เยี่ยมบ้าน',
+            image: 'assets/bgvisitappointment.png',
+          ),
         ),
-      ),
-    ));
+      ));
+    }
+
     return pages;
   }
 
   @override
   Widget build(BuildContext context) {
     final pages = _buildPages();
-    final page = pages[_index.clamp(0, pages.length - 1)];
+    final page = pages[_index % pages.length];
     final deep = page.grad[0];
     final bright = page.grad[1];
     return AnimatedContainer(
@@ -268,15 +363,17 @@ class _AiAdviceCardState extends State<AiAdviceCard> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Match the carousel card's top inset so the heading lines up.
+        const SizedBox(height: 6),
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            SvgPicture.string(
-              _kSparkleSvg,
-              width: 24,
-              height: 24,
-              colorFilter: ColorFilter.mode(page.ink, BlendMode.srcIn),
-            ),
+            // AI pages → animated sparkle (replays per page via the key);
+            // reminder pages → bell.
+            page.isAi
+                ? _SparkleIcon(key: ValueKey('sparkle$_index'))
+                : Icon(Icons.notifications_rounded,
+                    size: 23, color: page.ink),
             const SizedBox(width: 8),
             Expanded(
               child: AnimatedSwitcher(
@@ -351,26 +448,205 @@ class _AiAdviceCardState extends State<AiAdviceCard> {
       padEnds: false,
       physics: const BouncingScrollPhysics(),
       onPageChanged: (i) => setState(() => _index = i),
-      itemCount: pages.length,
-      // Inner padding leaves room for the card shadow (PageView clips its
-      // viewport, so the shadow must render inside the page bounds).
-      itemBuilder: (_, i) => Padding(
-        padding: const EdgeInsets.fromLTRB(3, 6, 12, 8),
-        child: DecoratedBox(
-          // Soft shadow so the card stands clear of the backdrop.
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.10),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
-              ),
-            ],
+      // Infinite: content loops via modulo so the last page flows to the first.
+      itemCount: null,
+      itemBuilder: (_, i) {
+        final p = pages[i % pages.length];
+        // AI pages: same footprint as other cards; the bot overhangs from
+        // inside _AiBotCard (which carries its own shadow).
+        if (p.isAi) {
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(3, 6, 12, 8),
+            child: p.right,
+          );
+        }
+        // Inner padding leaves room for the card shadow (PageView clips its
+        // viewport, so the shadow must render inside the page bounds).
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(3, 6, 12, 8),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.10),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: p.right,
           ),
-          child: pages[i].right,
+        );
+      },
+    );
+  }
+}
+
+/// Sparkle icon with a gentle continuous pulse + twinkle (AI pages).
+class _SparkleIcon extends StatefulWidget {
+  const _SparkleIcon({super.key});
+
+  @override
+  State<_SparkleIcon> createState() => _SparkleIconState();
+}
+
+class _SparkleIconState extends State<_SparkleIcon>
+    with SingleTickerProviderStateMixin {
+  // Plays once (no loop) when this AI page appears.
+  late final AnimationController _c = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1050),
+  )..forward();
+
+  static const _aura = Color(0xFF2BC8E6); // cyan glow (not purple)
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  Widget _particle(int i, double dist, double opacity) {
+    final a = -math.pi / 2 + i * (math.pi / 3); // 6 dirs
+    final size = 2.0 + 2.5 * opacity;
+    return Transform.translate(
+      offset: Offset(math.cos(a) * dist, math.sin(a) * dist),
+      child: Opacity(
+        opacity: opacity,
+        child: Container(
+          width: size,
+          height: size,
+          decoration: const BoxDecoration(
+            shape: BoxShape.circle,
+            color: Color(0xFF45E3F5),
+          ),
         ),
       ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 24,
+      height: 24,
+      child: AnimatedBuilder(
+        animation: _c,
+        builder: (_, child) {
+          final v = _c.value;
+          // Particles burst outward and fade.
+          final pt = Curves.easeOut.transform(v);
+          final dist = 18 * pt;
+          final pOp = (1 - pt).clamp(0.0, 1.0) * 0.95;
+          // Soft cyan flash behind, quick in/out.
+          final flash = (1 - (v / 0.45).clamp(0.0, 1.0)) * 0.5;
+          // Sparkle springs in + a small overshoot, then a gentle twinkle.
+          final pop = Curves.elasticOut.transform(v.clamp(0.0, 1.0));
+          return Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.center,
+            children: [
+              Opacity(
+                opacity: flash,
+                child: Transform.scale(
+                  scale: 1 + 1.2 * Curves.easeOut.transform(v),
+                  child: Container(
+                    width: 24,
+                    height: 24,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: RadialGradient(
+                        colors: [_aura, Color(0x002BC8E6)],
+                        stops: [0.3, 1.0],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              if (pOp > 0.01)
+                for (int i = 0; i < 6; i++) _particle(i, dist, pOp),
+              Transform.scale(scale: (0.2 + 0.8 * pop).clamp(0.0, 1.2), child: child),
+            ],
+          );
+        },
+        // Gradient sparkle (cyan → blue) to match the aura.
+        child: ShaderMask(
+          shaderCallback: (r) => const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF45E3F5), Color(0xFF2B7DE6)],
+          ).createShader(r),
+          blendMode: BlendMode.srcIn,
+          child: SvgPicture.string(_kSparkleSvg, width: 24, height: 24),
+        ),
+      ),
+    );
+  }
+}
+
+/// AI-analysis card: same card style as other topics, but the AiBOT bursts out
+/// of the card's left/top edge (head + arm + hand overhang; body stays inside).
+class _AiBotCard extends StatelessWidget {
+  const _AiBotCard({required this.grad});
+  final List<Color> grad; // [deep, bright] — card colour follows the backdrop
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, c) {
+        final w = c.maxWidth;
+        final h = c.maxHeight;
+        return Stack(
+          clipBehavior: Clip.none,
+          children: [
+            // Card — inset on the left so the bot's pointing hand overhangs it.
+            Positioned(
+              left: w * 0.16,
+              top: 0,
+              right: 0,
+              bottom: 0,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.10),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [grad[1], grad[0]],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            // AiBOT — overhangs the card top-left a touch (Figma proportions),
+            // right/bottom flush to the card.
+            Positioned(
+              left: -0.068 * w,
+              top: -0.04 * h,
+              width: 1.068 * w,
+              height: 1.044 * h,
+              child: const Image(
+                image: AssetImage('assets/AiBOT2.png'),
+                fit: BoxFit.contain,
+                alignment: Alignment.bottomRight,
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

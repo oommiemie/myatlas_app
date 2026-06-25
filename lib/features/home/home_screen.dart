@@ -95,7 +95,7 @@ class _HomeScreenState extends State<HomeScreen> {
             clipBehavior: Clip.antiAlias,
             decoration: const BoxDecoration(
               color: AppColors.bgPrimary,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(40)),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
             ),
             child: Column(
               children: [
