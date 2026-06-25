@@ -3,7 +3,7 @@ const MANIFEST = 'flutter-app-manifest';
 const TEMP = 'flutter-temp-cache';
 const CACHE_NAME = 'flutter-app-cache';
 
-const RESOURCES = {"flutter_bootstrap.js": "f5b19e95bbef29fef5c49080ea5d5d56",
+const RESOURCES = {"flutter_bootstrap.js": "11067e7406f349e518b7ca2c5b21a6bf",
 "version.json": "797e31383cd3b8236a7a4d92c64ee20a",
 "index.html": "5493ea5761d45adae933990402364b90",
 "/": "5493ea5761d45adae933990402364b90",
@@ -133,7 +133,7 @@ const RESOURCES = {"flutter_bootstrap.js": "f5b19e95bbef29fef5c49080ea5d5d56",
 "assets/assets/AiBOT.png": "4ea8d07dcaba3c32a01a5fca3217236b",
 "assets/assets/AiBOT2.png": "a8a99d4f31718f19c259c10ea3cbb37e",
 "assets/assets/sky2.webp": "e82d5fa08745a0e55c892919d5b8068b",
-"assets/assets/Appname.png": "52507f4dcd0972a508c1984aa603c6ff",
+"assets/assets/Appname.png": "84e95c86212235244481946a1fb5f709",
 "assets/assets/bgsky.png": "24be88e66668879b530a4c0fa1844e38",
 "assets/assets/apple.png": "095d8a25bfea5781d05d433d7bc654df",
 "assets/assets/sky1.webp": "0e1a382b434ace523d701825958a38f4",
