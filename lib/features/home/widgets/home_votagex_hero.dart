@@ -103,7 +103,7 @@ class _HomeVotagexHeroState extends State<HomeVotagexHero> {
         // App logo (left).
         Image.asset(
           'assets/Appname.png',
-          height: 38,
+          height: 48,
           fit: BoxFit.contain,
         ),
       ],
