@@ -114587,7 +114587,7 @@ A.azv.prototype={}
 A.Ij.prototype={
 N(){return new A.agg()}}
 A.agg.prototype={
-n(a){var s=null,r=A.b6(a,s,t.l).w,q=t.p,p=A.w(A.a([A.c3("assets/Appname.png",B.n,s,B.a7,!1,38,s)],q),B.i,B.c,B.f,0,s),o=this.a.r,n=o==null,m=n?s:o.c,l=!n||s
+n(a){var s=null,r=A.b6(a,s,t.l).w,q=t.p,p=A.w(A.a([A.c3("assets/Appname.png",B.n,s,B.a7,!1,48,s)],q),B.i,B.c,B.f,0,s),o=this.a.r,n=o==null,m=n?s:o.c,l=!n||s
 n=n?s:o.d
 return new A.q(new A.D(16,r.r.b+16,16,64),A.x(A.a([p,B.dX,new A.BO(!0,m,l===!0,n,s)],q),B.t,s,B.c,B.F),s)}}
 A.Ik.prototype={
