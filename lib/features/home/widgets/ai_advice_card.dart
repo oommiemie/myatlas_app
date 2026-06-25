@@ -372,8 +372,7 @@ class _AiAdviceCardState extends State<AiAdviceCard> {
             // reminder pages → bell.
             page.isAi
                 ? _SparkleIcon(key: ValueKey('sparkle$_index'))
-                : Icon(Icons.notifications_rounded,
-                    size: 23, color: page.ink),
+                : _BellIcon(key: ValueKey('bell$_index')),
             const SizedBox(width: 8),
             Expanded(
               child: AnimatedSwitcher(
@@ -479,6 +478,114 @@ class _AiAdviceCardState extends State<AiAdviceCard> {
           ),
         );
       },
+    );
+  }
+}
+
+/// Bell icon that shakes once (damped swing) when a reminder page appears.
+class _BellIcon extends StatefulWidget {
+  const _BellIcon({super.key});
+
+  @override
+  State<_BellIcon> createState() => _BellIconState();
+}
+
+class _BellIconState extends State<_BellIcon>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _c = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1050),
+  )..forward();
+
+  static const _gold = Color(0xFFFFC93C);
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  Widget _particle(int i, double dist, double opacity) {
+    final a = -math.pi / 2 + i * (math.pi / 3);
+    final size = 2.0 + 2.5 * opacity;
+    return Transform.translate(
+      offset: Offset(math.cos(a) * dist, math.sin(a) * dist),
+      child: Opacity(
+        opacity: opacity,
+        child: Container(
+          width: size,
+          height: size,
+          decoration: const BoxDecoration(
+            shape: BoxShape.circle,
+            color: Color(0xFFFFD24D),
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 24,
+      height: 24,
+      child: AnimatedBuilder(
+        animation: _c,
+        builder: (_, child) {
+          final v = _c.value;
+          final pt = Curves.easeOut.transform(v);
+          final dist = 18 * pt;
+          final pOp = (1 - pt).clamp(0.0, 1.0) * 0.95;
+          final flash = (1 - (v / 0.45).clamp(0.0, 1.0)) * 0.5;
+          final pop = Curves.elasticOut.transform(v.clamp(0.0, 1.0));
+          // Damped swing — bell shakes then settles.
+          final swing = math.sin(v * math.pi * 6) * 0.35 * (1 - v);
+          return Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.center,
+            children: [
+              Opacity(
+                opacity: flash,
+                child: Transform.scale(
+                  scale: 1 + 1.2 * Curves.easeOut.transform(v),
+                  child: Container(
+                    width: 24,
+                    height: 24,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: RadialGradient(
+                        colors: [_gold, Color(0x00FFC93C)],
+                        stops: [0.3, 1.0],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              if (pOp > 0.01)
+                for (int i = 0; i < 6; i++) _particle(i, dist, pOp),
+              Transform.rotate(
+                angle: swing,
+                alignment: Alignment.topCenter,
+                child: Transform.scale(
+                  scale: (0.2 + 0.8 * pop).clamp(0.0, 1.2),
+                  child: child,
+                ),
+              ),
+            ],
+          );
+        },
+        // Metallic gold gradient for a realistic bell.
+        child: ShaderMask(
+          shaderCallback: (r) => const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFFF6B11E), Color(0xFFE2890C), Color(0xFFB5650A)],
+          ).createShader(r),
+          blendMode: BlendMode.srcIn,
+          child: const Icon(Icons.notifications_active_rounded,
+              size: 24, color: Colors.white),
+        ),
+      ),
     );
   }
 }
