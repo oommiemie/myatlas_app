@@ -3,11 +3,11 @@ const MANIFEST = 'flutter-app-manifest';
 const TEMP = 'flutter-temp-cache';
 const CACHE_NAME = 'flutter-app-cache';
 
-const RESOURCES = {"flutter_bootstrap.js": "a0a0dfb9acb547a95ead6bab53caf9e7",
+const RESOURCES = {"flutter_bootstrap.js": "02eb411694d96c34b826f061206d9833",
 "version.json": "797e31383cd3b8236a7a4d92c64ee20a",
 "index.html": "5493ea5761d45adae933990402364b90",
 "/": "5493ea5761d45adae933990402364b90",
-"main.dart.js": "3a0f13973ea8e4491182725b53135a7a",
+"main.dart.js": "40dbe1f89c86e6722875f4a8250a92e2",
 "flutter.js": "888483df48293866f9f41d3d9274a779",
 "favicon.png": "5dcef449791fa27946b3d35ad8803796",
 "icons/Icon-192.png": "ac9a721a12bbc803b44f645561ecb1e1",
@@ -27,7 +27,7 @@ const RESOURCES = {"flutter_bootstrap.js": "a0a0dfb9acb547a95ead6bab53caf9e7",
 "assets/packages/flutter_inappwebview/assets/t_rex_runner/t-rex.html": "16911fcc170c8af1c5457940bd0bf055",
 "assets/shaders/ink_sparkle.frag": "ecc85a2e95f5e9f53123dcaf8cb9b6ce",
 "assets/AssetManifest.bin": "913b9e270c737dad7d448a5b68b49023",
-"assets/fonts/MaterialIcons-Regular.otf": "c512d0de7036d3e358799d6abc10e33b",
+"assets/fonts/MaterialIcons-Regular.otf": "f44406be5d032ed54ee47f9db4431b5c",
 "assets/assets/svg/deco_bedtime_dots.svg": "cded0c3f322e0f3d5763ac6783a6e280",
 "assets/assets/svg/reminder_decoration_bedtime.svg": "e5454c98b2191a43afa0fe1862025fcd",
 "assets/assets/svg/reminder_decoration.svg": "149d8ef8678ee42ad3d6635406784c55",
