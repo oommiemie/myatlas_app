@@ -30,21 +30,18 @@ class MyAtlasApp extends StatelessWidget {
         builder: (_, textScale, __) =>
             ValueListenableBuilder<Locale>(
           valueListenable: settings.locale,
-          builder: (_, locale, __) {
-            final platformBrightness = MediaQueryData.fromView(
-              WidgetsBinding.instance.platformDispatcher.views.first,
-            ).platformBrightness;
-            final brightness = switch (themeMode) {
-              AppThemeMode.light => Brightness.light,
-              AppThemeMode.dark => Brightness.dark,
-              AppThemeMode.system => platformBrightness,
-            };
+          builder: (_, locale, __) =>
+              ValueListenableBuilder<AppFont>(
+            valueListenable: settings.font,
+            builder: (_, font, __) {
+            // Dark mode disabled — the app always runs in light mode
+            // regardless of the saved theme setting or system brightness.
+            const brightness = Brightness.light;
+            final fontSpec = settings.fontSpec;
             return CupertinoApp(
               title: 'MyAtlas',
               debugShowCheckedModeBanner: false,
-              theme: brightness == Brightness.dark
-                  ? AppTheme.light().copyWith(brightness: Brightness.dark)
-                  : AppTheme.light(),
+              theme: AppTheme.light(),
               locale: locale,
               supportedLocales: const [
                 Locale('th', 'TH'),
@@ -63,7 +60,9 @@ class MyAtlasApp extends StatelessWidget {
                   ),
                   child: Theme(
                     data: ThemeData(
-                      fontFamily: 'Google Sans',
+                      // Follows the user's font selection.
+                      fontFamily: fontSpec.family,
+                      fontFamilyFallback: fontSpec.fallback,
                       brightness: brightness,
                     ),
                     child: ScaffoldMessenger(
@@ -81,7 +80,8 @@ class MyAtlasApp extends StatelessWidget {
               },
               home: const LoginScreen(),
             );
-          },
+            },
+          ),
         ),
       ),
     );

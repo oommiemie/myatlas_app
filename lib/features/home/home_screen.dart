@@ -5,6 +5,7 @@ import '../../core/theme/app_colors.dart';
 import '../family/family_devices.dart';
 import '../health/data/health_data.dart';
 import '../health/health_screen.dart' show HealthSummarySections;
+import 'widgets/ai_advice_card.dart';
 import 'widgets/header_clouds.dart';
 import 'widgets/home_votagex_hero.dart';
 import 'widgets/home_water_intake_card.dart';
@@ -91,13 +92,34 @@ class _HomeScreenState extends State<HomeScreen> {
           // Content sheet — stacks over the header with rounded top corners.
           Container(
             transform: Matrix4.translationValues(0, -48, 0),
-            clipBehavior: Clip.none,
+            clipBehavior: Clip.antiAlias,
             decoration: const BoxDecoration(
               color: AppColors.bgPrimary,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(40)),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
             ),
-            padding: const EdgeInsets.fromLTRB(16, 24, 16, 120),
-            child: HealthSummarySections(
+            child: Column(
+              children: [
+                // AI advice — sits BEHIND the food-analysis section.
+                const AiAdviceCard(),
+                // Food-analysis section onward — its own rounded container that
+                // overlaps upward so the AI card peeks out behind it.
+                Transform.translate(
+                  offset: const Offset(0, -10),
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      color: AppColors.bgPrimary,
+                      borderRadius:
+                          BorderRadius.vertical(top: Radius.circular(28)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Color(0x16000000),
+                          blurRadius: 14,
+                          offset: Offset(0, -4),
+                        ),
+                      ],
+                    ),
+                    padding: const EdgeInsets.fromLTRB(16, 18, 16, 120),
+                    child: HealthSummarySections(
               data: _healthData,
               // Workout-streak card + water-intake card, stacked below the
               // activity block.
@@ -130,6 +152,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   const HomeWaterIntakeCard(initialGlasses: 3),
                 ],
               ),
+            ),
+                    ),
+                  ),
+              ],
             ),
           ),
               // Empty state: never used yet — the start invitation card.

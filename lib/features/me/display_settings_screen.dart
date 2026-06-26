@@ -73,6 +73,27 @@ class _DisplaySettingsScreenState extends State<DisplaySettingsScreen>
   String get _languageLabel =>
       _settings.locale.value.languageCode == 'en' ? 'English' : 'ไทย';
 
+  String get _fontLabel => _settings.fontSpec.label;
+
+  Future<void> _pickFont() async {
+    final labels =
+        AppFont.values.map((f) => kAppFontSpecs[f]!.label).toList();
+    final choice = await showAppOptionSheet(
+      context: context,
+      title: tr(context, 'แบบอักษร', 'Font'),
+      selected: _fontLabel,
+      options: labels,
+    );
+    if (choice != null && choice != _fontLabel) {
+      final picked = AppFont.values.firstWhere(
+        (f) => kAppFontSpecs[f]!.label == choice,
+        orElse: () => AppFont.ibmNunito,
+      );
+      _settings.setFont(picked);
+      setState(() {});
+    }
+  }
+
   Future<void> _pickLanguage() async {
     final choice = await showAppOptionSheet(
       context: context,
@@ -129,48 +150,9 @@ class _DisplaySettingsScreenState extends State<DisplaySettingsScreen>
                 bottom: 40,
               ),
               children: [
+                // Dark mode disabled — selector removed; app stays light.
                 _stagger(
                   0,
-                  3,
-                  ValueListenableBuilder<AppThemeMode>(
-                    valueListenable: _settings.themeMode,
-                    builder: (_, theme, __) => _Section(
-                      title: tr(context, 'โหมดมืด', 'Dark mode'),
-                      child: Column(
-                        children: [
-                          _ThemeOption(
-                            icon: CupertinoIcons.moon_fill,
-                            iconColor: const Color(0xFF2563EB),
-                            label: tr(context, 'สว่าง', 'Light'),
-                            selected: theme == AppThemeMode.light,
-                            onTap: () =>
-                                _settings.setThemeMode(AppThemeMode.light),
-                          ),
-                          const _Divider(),
-                          _ThemeOption(
-                            icon: CupertinoIcons.moon_stars_fill,
-                            iconColor: const Color(0xFF475569),
-                            label: tr(context, 'มืด', 'Dark'),
-                            selected: theme == AppThemeMode.dark,
-                            onTap: () =>
-                                _settings.setThemeMode(AppThemeMode.dark),
-                          ),
-                          const _Divider(),
-                          _ThemeOption(
-                            icon: CupertinoIcons.circle_lefthalf_fill,
-                            iconColor: const Color(0xFFD97706),
-                            label: tr(context, 'ตามอุปกรณ์', 'System'),
-                            selected: theme == AppThemeMode.system,
-                            onTap: () =>
-                                _settings.setThemeMode(AppThemeMode.system),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                _stagger(
-                  1,
                   3,
                   _Section(
                     title: tr(context, 'เปลี่ยนภาษา', 'Language'),
@@ -212,6 +194,67 @@ class _DisplaySettingsScreenState extends State<DisplaySettingsScreen>
                             ),
                             Text(
                               _languageLabel,
+                              style: const TextStyle(
+                                color: Color(0xFF6D756E),
+                                fontSize: 16,
+                                letterSpacing: 0.275,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            const Icon(
+                              CupertinoIcons.chevron_forward,
+                              size: 12,
+                              color: Color(0xFF6D756E),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                _stagger(
+                  1,
+                  3,
+                  _Section(
+                    title: tr(context, 'แบบอักษร', 'Font'),
+                    child: PressEffect(
+                      onTap: _pickFont,
+                      haptic: HapticKind.selection,
+                      scale: 0.99,
+                      dim: 0.96,
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        color: CupertinoColors.white,
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 24,
+                              height: 24,
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Color(0xFF7A5BD0),
+                              ),
+                              alignment: Alignment.center,
+                              child: const Icon(
+                                CupertinoIcons.textformat,
+                                color: CupertinoColors.white,
+                                size: 13,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                tr(context, 'แบบอักษร', 'Font'),
+                                style: const TextStyle(
+                                  color: Color(0xFF1A1A1A),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                  letterSpacing: 0.275,
+                                ),
+                              ),
+                            ),
+                            Text(
+                              _fontLabel,
                               style: const TextStyle(
                                 color: Color(0xFF6D756E),
                                 fontSize: 16,
@@ -407,107 +450,6 @@ class _Section extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _Divider extends StatelessWidget {
-  const _Divider();
-
-  @override
-  Widget build(BuildContext context) => Container(
-        height: 1,
-        color: const Color(0xFFE9EFEA),
-      );
-}
-
-class _ThemeOption extends StatelessWidget {
-  const _ThemeOption({
-    required this.icon,
-    required this.iconColor,
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-  final IconData icon;
-  final Color iconColor;
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return PressEffect(
-      onTap: onTap,
-      haptic: HapticKind.selection,
-      scale: 0.99,
-      dim: 0.96,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        color: CupertinoColors.white,
-        child: Row(
-          children: [
-            Container(
-              width: 24,
-              height: 24,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: iconColor,
-              ),
-              alignment: Alignment.center,
-              child: Icon(icon, color: CupertinoColors.white, size: 12),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                label,
-                style: const TextStyle(
-                  color: Color(0xFF1A1A1A),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  letterSpacing: 0.275,
-                ),
-              ),
-            ),
-            _RadioMark(selected: selected),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _RadioMark extends StatelessWidget {
-  const _RadioMark({required this.selected});
-  final bool selected;
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 180),
-      width: 20,
-      height: 20,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: selected ? const Color(0xFF1D8B6B) : CupertinoColors.white,
-        border: Border.all(
-          color: selected
-              ? const Color(0xFF1D8B6B)
-              : const Color(0xFF1A1A1A).withValues(alpha: 0.2),
-          width: 1.4,
-        ),
-      ),
-      alignment: Alignment.center,
-      child: selected
-          ? Container(
-              width: 7,
-              height: 7,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                color: CupertinoColors.white,
-              ),
-            )
-          : null,
     );
   }
 }

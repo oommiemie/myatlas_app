@@ -62,7 +62,7 @@ class _ProfileBannerState extends State<ProfileBanner>
     final c = widget.compact;
     final light = c; // compact (Home) = white/grey theme; Me page = green
     return ClipRRect(
-      borderRadius: BorderRadius.circular(c ? 28 : 32),
+      borderRadius: BorderRadius.circular(c ? 34 : 32),
       child: Stack(
         children: [
           Positioned.fill(child: _MeshGradient(light: light)),
@@ -91,25 +91,9 @@ class _ProfileBannerState extends State<ProfileBanner>
               ),
             ),
           ),
-          // subtle inner border
-          Positioned.fill(
-            child: IgnorePointer(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(32),
-                  border: Border.all(
-                    color: light
-                        ? CupertinoColors.black.withValues(alpha: 0.06)
-                        : CupertinoColors.white.withValues(alpha: 0.25),
-                    width: 0.5,
-                  ),
-                ),
-              ),
-            ),
-          ),
           Padding(
             padding: c
-                ? const EdgeInsets.fromLTRB(16, 14, 16, 12)
+                ? const EdgeInsets.fromLTRB(16, 14, 16, 14)
                 : const EdgeInsets.fromLTRB(18, 20, 18, 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -174,7 +158,7 @@ class _ProfileBannerState extends State<ProfileBanner>
                                 ),
                               ],
                             ),
-                            SizedBox(height: c ? 4 : 6),
+                            SizedBox(height: c ? 9 : 6),
                             Row(
                               children: [
                                 Container(
@@ -206,14 +190,18 @@ class _ProfileBannerState extends State<ProfileBanner>
                                               ),
                                             ),
                                             const SizedBox(width: 5),
-                                            Text(
-                                              widget.watchBattery != null
-                                                  ? '${widget.watchName} · ${widget.watchBattery}%'
-                                                  : widget.watchName!,
-                                              style: const TextStyle(
-                                                color: Color(0xFF3E453F),
-                                                fontSize: 10,
-                                                fontWeight: FontWeight.w500,
+                                            Text.rich(
+                                              TextSpan(
+                                                style: const TextStyle(
+                                                  color: Color(0xFF3E453F),
+                                                  fontSize: 10,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                                children: _emphasizeDigits(
+                                                  widget.watchConnected
+                                                      ? widget.watchName!
+                                                      : 'ไม่มีการเชื่อมต่อ',
+                                                ),
                                               ),
                                             ),
                                           ],
@@ -248,6 +236,15 @@ class _ProfileBannerState extends State<ProfileBanner>
                         ),
                       ),
                     ),
+                    // Home card: watch on the right, with a connection badge.
+                    if (c)
+                      Padding(
+                        padding: const EdgeInsets.only(left: 6, top: 2),
+                        child: _WatchStatus(
+                          connected: widget.watchConnected,
+                          battery: widget.watchBattery,
+                        ),
+                      ),
                     if (!c)
                       PressEffect(
                         onTap: () => Navigator.of(context).push(
@@ -276,17 +273,14 @@ class _ProfileBannerState extends State<ProfileBanner>
                             size: 14,
                           ),
                         ),
-                      )
-                    else
-                      const _FamilyCluster(),
+                      ),
+                    // (Family cluster removed from the right of the card.)
                   ],
                 ),
-                SizedBox(height: c ? 10 : 16),
-                // Home card shows an AI medicine reminder; the Me page keeps the
-                // age / sex / blood-group stat row.
-                if (c)
-                  const _AiAlertCarousel()
-                else
+                // Me page keeps the age / sex / blood-group stat row; the Home
+                // card ends after the avatar row (so top/bottom padding match).
+                if (!c) ...[
+                  const SizedBox(height: 16),
                   ClipRRect(
                     borderRadius: BorderRadius.circular(20),
                     child: BackdropFilter(
@@ -344,6 +338,7 @@ class _ProfileBannerState extends State<ProfileBanner>
                       ),
                     ),
                   ),
+                ],
               ],
             ),
           ),
@@ -385,7 +380,12 @@ class _AiAlertCarouselState extends State<_AiAlertCarousel> {
     'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.',
   ];
 
+  // TEST: set to false to show real notifications again.
+  static final bool _testEmpty = true;
+
   List<_AiNotif> _buildNotifs() {
+    if (_testEmpty) return const [];
+
     // Pull the soonest hospital appointment for the appointment reminder.
     final soon = hospitalAppointments.byBucket[AppointmentBucket.soon];
     final appt = (soon != null && soon.isNotEmpty) ? soon.first : null;
@@ -461,6 +461,8 @@ class _AiAlertCarouselState extends State<_AiAlertCarousel> {
   @override
   Widget build(BuildContext context) {
     final notifs = _buildNotifs();
+    // No notifications → show nothing.
+    if (notifs.isEmpty) return const SizedBox.shrink();
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(12, 11, 14, 11),
@@ -548,7 +550,7 @@ class _AiAlertCarouselState extends State<_AiAlertCarousel> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                    fontFamily: 'Google Sans',
+                    fontFamily: 'IBM Plex Sans Thai Looped',
                     fontSize: 12.5,
                     fontWeight: FontWeight.w800,
                     color: CupertinoColors.white,
@@ -561,7 +563,7 @@ class _AiAlertCarouselState extends State<_AiAlertCarousel> {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                    fontFamily: 'Google Sans',
+                    fontFamily: 'IBM Plex Sans Thai Looped',
                     fontSize: 11.5,
                     color: CupertinoColors.white,
                     height: 1.4,
@@ -833,6 +835,7 @@ class _StatDivider extends StatelessWidget {
 
 /// 2×2 cluster of rounded family tiles, each on its own coloured background,
 /// + a "+N" count badge — like the reference. Slight shadows for depth.
+// ignore: unused_element
 class _FamilyCluster extends StatelessWidget {
   const _FamilyCluster();
 
@@ -945,4 +948,293 @@ class _FamilyCluster extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Family members row (Figma 1015:17557) — "เพิ่ม" button + member avatars
+/// with dashed rounded borders and a name label above each.
+class FamilyRow extends StatelessWidget {
+  const FamilyRow({super.key});
+
+  static const _members = <List<String>>[
+    ['แม่', 'assets/images/family/fam_mae.png'],
+    ['ยาย', 'assets/images/family/fam_yai.png'],
+    ['เจน', 'assets/images/family/fam_jane.png'],
+  ];
+
+  static const _dash = Color(0xFFAEB6B0); // grey frames on the light card
+  static const double _size = 44;
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          _box(
+            child: const Center(
+              child: Icon(CupertinoIcons.add, color: _dash, size: 20),
+            ),
+          ),
+          for (final m in _members) ...[
+            const SizedBox(width: 12),
+            _box(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.asset(
+                  m[1],
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  height: double.infinity,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _box({required Widget child}) {
+    return SizedBox(
+      width: _size,
+      height: _size,
+      child: CustomPaint(
+        foregroundPainter: _DashedRRectPainter(radius: 14, color: _dash),
+        // Equal padding on every side so the photo sits inset in the frame.
+        child: Padding(
+          padding: const EdgeInsets.all(4),
+          child: child,
+        ),
+      ),
+    );
+  }
+}
+
+/// Apple Watch shown on the Home profile card with a connection badge:
+/// green check when connected, red cross when not.
+class _WatchStatus extends StatelessWidget {
+  const _WatchStatus({required this.connected, this.battery});
+  final bool connected;
+  final int? battery;
+
+  @override
+  Widget build(BuildContext context) {
+    // Box matches the watch image's aspect (235x400) so the screen overlay
+    // lines up with no letter-boxing.
+    return SizedBox(
+      width: 34,
+      height: 58,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          const Positioned.fill(
+            child: Image(
+              image: AssetImage('assets/watch.png'),
+              fit: BoxFit.contain,
+            ),
+          ),
+          // Status fills the watch screen. Biased a hair left so it reads
+          // centred against the digital crown's visual weight on the right.
+          Positioned(
+            left: 4.0,
+            top: 14.0,
+            width: 24,
+            height: 30,
+            child: Container(
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: connected
+                    ? const Color(0xFF17C964)
+                    : const Color(0xFFFF383C),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: connected
+                  ? FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        battery != null ? '$battery%' : '✓',
+                        style: const TextStyle(
+                          color: CupertinoColors.white,
+                          fontSize: 8.5,
+                          fontWeight: FontWeight.w900,
+                          height: 1,
+                          letterSpacing: -0.2,
+                        ),
+                      ),
+                    )
+                  : const Icon(
+                      CupertinoIcons.xmark,
+                      size: 13,
+                      weight: 900,
+                      color: CupertinoColors.white,
+                    ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Locked "family" feature shown on the Home header: the member avatars sit
+/// blurred behind a frosted overlay, with an invitation + "buy package" CTA.
+/// (Business model — adding family members requires a paid package.)
+class FamilyUpsellCard extends StatelessWidget {
+  const FamilyUpsellCard({super.key, this.onBuy});
+  final VoidCallback? onBuy;
+
+  static const _base = Color(0xFFEFF2F1); // light, matches the profile card
+  static const _green = Color(0xFF1D8B6B);
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      // Square top corners — the top tucks under the profile card.
+      borderRadius: const BorderRadius.vertical(bottom: Radius.circular(24)),
+      child: Stack(
+        children: [
+          // Teaser avatars (don't drive the card height).
+          Positioned.fill(
+            child: Container(
+              color: _base,
+              alignment: Alignment.bottomLeft,
+              padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+              child: const FamilyRow(),
+            ),
+          ),
+          // Light frost — blurs just enough that the add-family UI is still
+          // visible behind (same gentle treatment as the dance card).
+          Positioned.fill(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 2.5, sigmaY: 2.5),
+              child: Container(color: const Color(0x40EFF2F1)),
+            ),
+          ),
+          // Top-down scrim: near-solid where the text sits, fading down so the
+          // blurred avatars still peek through at the bottom.
+          const Positioned.fill(
+            child: IgnorePointer(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Color(0xF7EFF2F1), Color(0x40EFF2F1)],
+                    stops: [0.0, 1.0],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          // Invitation + buy-package CTA on top of the frost.
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 34, 12, 16),
+            child: Row(
+              children: [
+                PressEffect(
+                  onTap: onBuy ?? () {},
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 9,
+                    ),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF2CB48E), _green],
+                      ),
+                      borderRadius: BorderRadius.circular(100),
+                      boxShadow: [
+                        BoxShadow(
+                          color: _green.withValues(alpha: 0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: const Text(
+                      'ซื้อแพ็กเกจ',
+                      style: TextStyle(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w800,
+                        color: CupertinoColors.white,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'เพิ่มสมาชิกครอบครัว',
+                        style: TextStyle(
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF1A1A2E),
+                        ),
+                      ),
+                      SizedBox(height: 2),
+                      Text(
+                        'อัปเกรดแพ็กเกจเพื่อดูแลคนที่คุณรัก',
+                        style: TextStyle(fontSize: 11, color: Color(0xFF6D756E)),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Splits a label into spans, rendering the numeric runs (e.g. "10", "85%")
+/// in a heavier weight so they stand out in the watch tag.
+List<InlineSpan> _emphasizeDigits(String s) {
+  final spans = <InlineSpan>[];
+  final re = RegExp(r'\d+%?');
+  var last = 0;
+  for (final m in re.allMatches(s)) {
+    if (m.start > last) spans.add(TextSpan(text: s.substring(last, m.start)));
+    spans.add(TextSpan(
+      text: m.group(0),
+      style: const TextStyle(fontWeight: FontWeight.w800),
+    ));
+    last = m.end;
+  }
+  if (last < s.length) spans.add(TextSpan(text: s.substring(last)));
+  return spans;
+}
+
+class _DashedRRectPainter extends CustomPainter {
+  _DashedRRectPainter({required this.radius, required this.color});
+  final double radius;
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.4
+      ..color = color;
+    final rrect =
+        RRect.fromRectAndRadius(Offset.zero & size, Radius.circular(radius));
+    final path = Path()..addRRect(rrect);
+    const dash = 4.0, gap = 3.5;
+    for (final metric in path.computeMetrics()) {
+      var dist = 0.0;
+      while (dist < metric.length) {
+        canvas.drawPath(metric.extractPath(dist, dist + dash), paint);
+        dist += dash + gap;
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _DashedRRectPainter old) =>
+      old.radius != radius || old.color != color;
 }

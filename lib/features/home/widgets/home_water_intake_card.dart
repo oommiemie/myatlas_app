@@ -129,7 +129,7 @@ class _HomeWaterIntakeCardState extends State<HomeWaterIntakeCard> {
                   'ดื่มน้ำวันนี้',
                   // Match the "กิจกรรม" header (size 12, w400, grey).
                   style: TextStyle(
-                    fontFamily: 'Google Sans',
+                    fontFamily: 'IBM Plex Sans Thai Looped',
                     fontSize: 12,
                     fontWeight: FontWeight.w400,
                     letterSpacing: 0.275,
@@ -177,7 +177,7 @@ class _HomeWaterIntakeCardState extends State<HomeWaterIntakeCard> {
                         Text(
                           _formatMl(_consumedMl),
                           style: const TextStyle(
-                            fontFamily: 'Google Sans',
+                            fontFamily: 'IBM Plex Sans Thai Looped',
                             fontSize: 26,
                             fontWeight: FontWeight.w800,
                             height: 1.0,
@@ -188,7 +188,7 @@ class _HomeWaterIntakeCardState extends State<HomeWaterIntakeCard> {
                         Text(
                           '/${_formatMl(_goalMl)} มล.',
                           style: const TextStyle(
-                            fontFamily: 'Google Sans',
+                            fontFamily: 'IBM Plex Sans Thai Looped',
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
                             color: Color(0xFF8A97A3),
@@ -234,7 +234,7 @@ class _HomeWaterIntakeCardState extends State<HomeWaterIntakeCard> {
                         Text(
                           'ดื่ม ($_mlPerGlass มล.)',
                           style: const TextStyle(
-                            fontFamily: 'Google Sans',
+                            fontFamily: 'IBM Plex Sans Thai Looped',
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
                             color: Colors.white,
@@ -269,7 +269,7 @@ class _HomeWaterIntakeCardState extends State<HomeWaterIntakeCard> {
             'แตะ "ดื่ม" เพื่อบันทึก · แก้วละ $_mlPerGlass มล. · เป้าหมาย $_litres ลิตร',
             textAlign: TextAlign.center,
             style: const TextStyle(
-              fontFamily: 'Google Sans',
+              fontFamily: 'IBM Plex Sans Thai Looped',
               fontSize: 11,
               color: Color(0xFF8A97A3),
             ),

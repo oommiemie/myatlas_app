@@ -75,7 +75,7 @@ class _TitleBlock extends StatelessWidget {
         Text(
           'My Atlas',
           style: TextStyle(
-            fontFamily: 'Google Sans',
+            fontFamily: 'IBM Plex Sans Thai Looped',
             fontSize: 36,
             fontWeight: FontWeight.w700,
             color: AppColors.textInverse,
@@ -87,7 +87,7 @@ class _TitleBlock extends StatelessWidget {
           'ข้อมูลสุขภาพของคุณ ทั้งหมดในที่เดียว ติดตามสัญญาณชีพ '
           'รับการแจ้งเตือนเรื่องยา และนับแคลอรี่',
           style: TextStyle(
-            fontFamily: 'Google Sans',
+            fontFamily: 'IBM Plex Sans Thai Looped',
             fontSize: 14,
             height: 24 / 14,
             color: Colors.white.withValues(alpha: 0.7),
@@ -166,7 +166,7 @@ class _OrDivider extends StatelessWidget {
           child: Text(
             'หรือ เข้าสู่ระบบโดย',
             style: TextStyle(
-              fontFamily: 'Google Sans',
+              fontFamily: 'IBM Plex Sans Thai Looped',
               fontSize: 12,
               color: Colors.white,
             ),
@@ -269,7 +269,7 @@ class _RegisterFooter extends StatelessWidget {
         textAlign: TextAlign.center,
         text: const TextSpan(
           style: TextStyle(
-            fontFamily: 'Google Sans',
+            fontFamily: 'IBM Plex Sans Thai Looped',
             fontSize: 12,
             color: Colors.white,
           ),

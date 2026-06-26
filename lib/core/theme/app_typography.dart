@@ -1,9 +1,15 @@
 import 'package:flutter/cupertino.dart';
 
+import '../services/app_settings_service.dart';
+
 class AppTypography {
   AppTypography._();
 
-  static const String _fontFamily = 'Google Sans';
+  static const String _fontFamily = 'IBM Plex Sans Thai Looped';
+
+  // Resolved from the user's font selection. Default = Nunito digits subset
+  // (numbers) + IBM Plex (letters); other fonts render everything themselves.
+  static AppFontSpec get _spec => AppSettingsService.instance.fontSpec;
 
   static TextStyle _base({
     required double size,
@@ -13,7 +19,11 @@ class AppTypography {
     Color color = const Color(0xFF000000),
   }) {
     return TextStyle(
-      fontFamily: _fontFamily,
+      fontFamily: _spec.family,
+      fontFamilyFallback: _spec.fallback,
+      // Drive Nunito's variable wght axis so digits actually get the weight
+      // (fontWeight alone doesn't move a variable axis reliably).
+      fontVariations: [FontVariation('wght', weight.value.toDouble())],
       fontSize: size,
       fontWeight: weight,
       height: height,

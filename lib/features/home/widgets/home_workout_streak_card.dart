@@ -3,7 +3,13 @@ import 'dart:ui' show ImageFilter;
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 
+import '../../../core/services/app_settings_service.dart';
 import '../workout_clip_picker_screen.dart';
+
+// Resolve the user-selected font so this card follows the Display setting.
+AppFontSpec get _spec => AppSettingsService.instance.fontSpec;
+String get _famFamily => _spec.family;
+List<String> get _famFallback => _spec.fallback;
 
 /// Workout-streak calendar card.
 ///
@@ -265,8 +271,8 @@ class _HomeWorkoutStreakCardState extends State<HomeWorkoutStreakCard> {
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(
-                        fontFamily: 'Google Sans',
+                      style: TextStyle(
+                        fontFamily: _famFamily, fontFamilyFallback: _famFallback,
                         fontSize: 15,
                         fontWeight: FontWeight.w800,
                         height: 1.2,
@@ -276,8 +282,8 @@ class _HomeWorkoutStreakCardState extends State<HomeWorkoutStreakCard> {
                     const SizedBox(height: 2),
                     Text(
                       subtitle,
-                      style: const TextStyle(
-                        fontFamily: 'Google Sans',
+                      style: TextStyle(
+                        fontFamily: _famFamily, fontFamilyFallback: _famFallback,
                         fontSize: 12,
                         color: Color(0xFF5B6B7A),
                       ),
@@ -379,8 +385,8 @@ class _HomeWorkoutStreakCardState extends State<HomeWorkoutStreakCard> {
                 curve: Curves.easeOut,
                 builder: (_, v, __) => Text(
                   _formatInt(v.round()),
-                  style: const TextStyle(
-                    fontFamily: 'Google Sans',
+                  style: TextStyle(
+                    fontFamily: _famFamily, fontFamilyFallback: _famFallback,
                     fontSize: 14,
                     fontWeight: FontWeight.w800,
                     height: 1.0,
@@ -389,10 +395,10 @@ class _HomeWorkoutStreakCardState extends State<HomeWorkoutStreakCard> {
                 ),
               ),
               const SizedBox(height: 1),
-              const Text(
+              Text(
                 'คะแนน',
                 style: TextStyle(
-                  fontFamily: 'Google Sans',
+                  fontFamily: _famFamily, fontFamilyFallback: _famFallback,
                   fontSize: 8,
                   color: Color(0xFFB58A6B),
                 ),
@@ -649,8 +655,8 @@ class _HomeWorkoutStreakCardState extends State<HomeWorkoutStreakCard> {
           // Weekday label
           Text(
             _thWeekLabels[day.weekday - 1],
-            style: const TextStyle(
-              fontFamily: 'Google Sans',
+            style: TextStyle(
+              fontFamily: _famFamily, fontFamilyFallback: _famFallback,
               fontSize: 11,
               color: Color(0xFFB58A6B),
             ),
@@ -678,7 +684,7 @@ class _HomeWorkoutStreakCardState extends State<HomeWorkoutStreakCard> {
                   Text(
                     '${day.day}',
                     style: TextStyle(
-                      fontFamily: 'Google Sans',
+                      fontFamily: _famFamily, fontFamilyFallback: _famFallback,
                       fontSize: 13,
                       fontWeight:
                           isFocus ? FontWeight.w800 : FontWeight.w600,
@@ -718,15 +724,15 @@ class _HomeWorkoutStreakCardState extends State<HomeWorkoutStreakCard> {
             ),
           ],
         ),
-        child: const Row(
+        child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.sports_gymnastics, size: 18, color: Colors.white),
-            SizedBox(width: 6),
+            const Icon(Icons.sports_gymnastics, size: 18, color: Colors.white),
+            const SizedBox(width: 6),
             Text(
               'เริ่มเต้นเลย',
               style: TextStyle(
-                fontFamily: 'Google Sans',
+                fontFamily: _famFamily, fontFamilyFallback: _famFallback,
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
                 color: Colors.white,

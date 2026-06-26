@@ -71,6 +71,15 @@ flutter:
   uses-material-design: true
 
   assets:
+    - assets/Appname.png
+    - assets/taichi.png
+    - assets/appt_scene.png
+    - assets/bgappointment.png
+    - assets/bgvisitappointment.png
+    - assets/bgpacket.png
+    - assets/watch.png
+    - assets/AiBOT.png
+    - assets/AiBOT2.png
     - assets/header-bg.png
     - assets/header-bg.webp
     - assets/header-bg-sky.png
@@ -108,11 +117,61 @@ flutter:
     - assets/3d/
 
   fonts:
+    # Digits-only subset of Nunito — used as the primary family so that
+    # numbers render in Nunito while all letters fall back to IBM Plex.
+    - family: Nunito
+      fonts:
+        - asset: assets/fonts/nunito/NunitoNum.ttf
+    - family: IBM Plex Sans Thai Looped
+      fonts:
+        - asset: assets/fonts/ibmplex/IBMPlexSansThaiLooped-Thin.ttf
+          weight: 100
+        - asset: assets/fonts/ibmplex/IBMPlexSansThaiLooped-ExtraLight.ttf
+          weight: 200
+        - asset: assets/fonts/ibmplex/IBMPlexSansThaiLooped-Light.ttf
+          weight: 300
+        - asset: assets/fonts/ibmplex/IBMPlexSansThaiLooped-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/ibmplex/IBMPlexSansThaiLooped-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/ibmplex/IBMPlexSansThaiLooped-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/ibmplex/IBMPlexSansThaiLooped-Bold.ttf
+          weight: 700
+    - family: Sukhumvit Set
+      fonts:
+        - asset: assets/fonts/sukhumvit/SukhumvitSet-Thin.ttf
+          weight: 100
+        - asset: assets/fonts/sukhumvit/SukhumvitSet-Light.ttf
+          weight: 300
+        - asset: assets/fonts/sukhumvit/SukhumvitSet-Text.ttf
+          weight: 400
+        - asset: assets/fonts/sukhumvit/SukhumvitSet-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/sukhumvit/SukhumvitSet-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/sukhumvit/SukhumvitSet-Bold.ttf
+          weight: 700
     - family: Google Sans
       fonts:
         - asset: assets/fonts/GoogleSans-Variable.ttf
         - asset: assets/fonts/GoogleSans-Italic-Variable.ttf
           style: italic
+    - family: Noto Sans Thai
+      fonts:
+        - asset: assets/fonts/notosansthai/NotoSansThai-Variable.ttf
+    - family: Sarabun
+      fonts:
+        - asset: assets/fonts/sarabun/Sarabun-Light.ttf
+          weight: 300
+        - asset: assets/fonts/sarabun/Sarabun-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/sarabun/Sarabun-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/sarabun/Sarabun-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/sarabun/Sarabun-Bold.ttf
+          weight: 700
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

@@ -160,7 +160,7 @@ class _SideBadge extends StatelessWidget {
                   child: Text(
                     'ใบสั่งยา',
                     style: TextStyle(
-                      fontFamily: 'Google Sans',
+                      fontFamily: 'IBM Plex Sans Thai Looped',
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
                       color: AppColors.textPrimary,
