@@ -136,7 +136,8 @@ class _BurnedCard extends StatelessWidget {
               Align(
                 alignment: Alignment.bottomLeft,
                 child:
-                    _endStat('กินเข้า', inKcal, _inColor, CrossAxisAlignment.start),
+                    _endStat('พลังงานที่ทาน', inKcal, _inColor,
+                        CrossAxisAlignment.start),
               ),
               Align(
                 alignment: Alignment.bottomRight,

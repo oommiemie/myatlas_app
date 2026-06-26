@@ -76,6 +76,8 @@ flutter:
     - assets/appt_scene.png
     - assets/bgappointment.png
     - assets/bgvisitappointment.png
+    - assets/bgpacket.png
+    - assets/watch.png
     - assets/AiBOT.png
     - assets/AiBOT2.png
     - assets/header-bg.png

@@ -30,6 +30,38 @@ const String _kSparkleSvg =
     '11.154L16.1278 9.504C15.7569 9.36071 15.4201 9.14139 15.139 8.86015C14.858 '
     '8.57891 14.6389 8.24198 14.4958 7.871L12.8458 3.581Z" fill="white"/></svg>';
 
+// Family "care heart" icon (Figma node 1120:44122) — the heart path filled
+// solid (not outline) so the gradient shader applies as a solid shape.
+const String _kFamilyHeartSvg =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" '
+    'viewBox="0 0 18 18"><path d="M14.625 9.42877L8.99998 14.9998L3.37498 '
+    '9.42877C3.00396 9.06773 2.71171 8.63378 2.51664 8.15424C2.32157 7.67471 '
+    '2.2279 7.15998 2.24153 6.64247C2.25517 6.12495 2.3758 5.61587 2.59585 '
+    '5.14727C2.8159 4.67867 3.13058 4.26071 3.5201 3.9197C3.90961 3.5787 '
+    '4.36551 3.32203 4.85909 3.16588C5.35267 3.00972 5.87324 2.95745 6.38801 '
+    '3.01237C6.90278 3.06728 7.40061 3.22818 7.85014 3.48495C8.29967 3.74171 '
+    '8.69117 4.08877 8.99998 4.50427C9.31013 4.09178 9.70208 3.74776 10.1513 '
+    '3.49372C10.6005 3.23968 11.0974 3.0811 11.6107 3.02791C12.124 2.97471 '
+    '12.6428 3.02804 13.1346 3.18456C13.6263 3.34108 14.0805 3.59742 14.4686 '
+    '3.93754C14.8568 4.27766 15.1706 4.69423 15.3903 5.16119C15.61 5.62814 '
+    '15.731 6.13543 15.7457 6.6513C15.7604 7.16717 15.6684 7.68051 15.4756 '
+    '8.1592C15.2827 8.6379 14.9932 9.07163 14.625 9.43327Z" fill="white"/></svg>';
+
+// White "cradling hand" detail lines drawn on top of the solid heart so the
+// glyph reads as a filled icon (not a thin outline).
+const String _kFamilyHeartDetailSvg =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" '
+    'viewBox="0 0 18 18" fill="none"><path d="M8.99989 4.5L6.53014 '
+    '6.96975C6.38953 7.1104 6.31055 7.30113 6.31055 7.5C6.31055 7.69887 '
+    '6.38953 7.8896 6.53014 8.03025L6.93739 8.4375C7.45489 8.955 8.29489 8.955 '
+    '8.81239 8.4375L9.56239 7.6875C10.0099 7.23995 10.617 6.98852 11.2499 '
+    '6.98852C11.8828 6.98852 12.4898 7.23995 12.9374 7.6875L14.6249 9.375" '
+    'stroke="white" stroke-width="1.3" stroke-linecap="round" '
+    'stroke-linejoin="round"/><path d="M9.375 11.625L10.875 13.125" '
+    'stroke="white" stroke-width="1.3" stroke-linecap="round" '
+    'stroke-linejoin="round"/><path d="M11.25 9.75L12.75 11.25" stroke="white" '
+    'stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
 const List<String> _thMonth = [
   'ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.',
   'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.',
@@ -112,6 +144,7 @@ class _Page {
     required this.grad,
     required this.ink,
     this.isAi = false,
+    this.isFamily = false,
     this.action,
     this.onAction,
     this.actionDone = false,
@@ -124,6 +157,7 @@ class _Page {
   final List<Color> grad; // [deep, bright] backdrop tones
   final Color ink; // dark, hue-tinted text colour
   final bool isAi; // AI advice (sparkle) vs reminder (bell)
+  final bool isFamily; // family card → care-heart icon
   final String? action; // CTA shown under the left text; null → none
   final VoidCallback? onAction; // null → not tappable (e.g. already done)
   final bool actionDone; // completed style (check)
@@ -159,6 +193,11 @@ const Map<TimePeriod, Color> _kAccentForPeriod = {
   TimePeriod.bedtime: Color(0xFF1E78B0),
 };
 const Color _kApptAccent = Color(0xFF12A892);
+
+// Family (add members) palette — soft rose, warm "care" tone.
+const List<Color> _kFamilyGrad = [Color(0xFFF6D6DD), Color(0xFFFCEDF1)];
+const Color _kFamilyInk = Color(0xFF5E2738);
+const Color _kFamilyAccent = Color(0xFFE5618A);
 
 // AI advice (med usage) and AI health-summary palettes.
 const List<Color> _kAiUsageGrad = [Color(0xFFDAD6F3), Color(0xFFEFEDFB)];
@@ -269,7 +308,28 @@ class _AiAdviceCardState extends State<AiAdviceCard> {
       right: const _AiBotCard(grad: _kHealthGrad),
     ));
 
-    // 3) Medication reminders by time slot (reminder, not AI).
+    // 3) Family — add members (locked behind a package).
+    pages.add(_Page(
+      label: 'ครอบครัว',
+      isFamily: true,
+      title: 'ดูแลคนที่คุณรักกับเรา',
+      body: 'ติดตามสุขภาพ ตำแหน่ง แจ้งเตือนการล้ม และโทรหากันได้ทุกเมื่อ',
+      grad: _kFamilyGrad,
+      ink: _kFamilyInk,
+      action: 'Family Package',
+      accent: _kFamilyAccent,
+      onAction: () {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(const SnackBar(
+            content: Text('Family Package'),
+            behavior: SnackBarBehavior.floating,
+          ));
+      },
+      right: const _FamilyReminderCard(),
+    ));
+
+    // 4) Medication reminders by time slot (reminder, not AI).
     for (final s in _kMedSlots) {
       final taken = _taken.contains(s.id);
       pages.add(_Page(
@@ -396,11 +456,13 @@ class _AiAdviceCardState extends State<AiAdviceCard> {
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // AI pages → animated sparkle (replays per page via the key);
-            // reminder pages → bell.
+            // AI pages → sparkle; family → care-heart; reminders → bell.
+            // (All replay their one-shot animation per page via the key.)
             page.isAi
                 ? _SparkleIcon(key: ValueKey('sparkle$_index'))
-                : _BellIcon(key: ValueKey('bell$_index')),
+                : page.isFamily
+                    ? _FamilyIcon(key: ValueKey('fam$_index'))
+                    : _BellIcon(key: ValueKey('bell$_index')),
             const SizedBox(width: 8),
             Expanded(
               child: AnimatedSwitcher(
@@ -713,6 +775,116 @@ class _BellIconState extends State<_BellIcon>
           blendMode: BlendMode.srcIn,
           child: const Icon(Icons.notifications_active_rounded,
               size: 24, color: Colors.white),
+        ),
+      ),
+    );
+  }
+}
+
+/// Care-heart icon for the family card — solid rose heart that pops in with a
+/// heartbeat + particle burst (same one-shot style as the sparkle/bell).
+class _FamilyIcon extends StatefulWidget {
+  const _FamilyIcon({super.key});
+
+  @override
+  State<_FamilyIcon> createState() => _FamilyIconState();
+}
+
+class _FamilyIconState extends State<_FamilyIcon>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _c = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1050),
+  )..forward();
+
+  static const _rose = Color(0xFFF26A93);
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  Widget _particle(int i, double dist, double opacity) {
+    final a = -math.pi / 2 + i * (math.pi / 3);
+    final size = 2.0 + 2.5 * opacity;
+    return Transform.translate(
+      offset: Offset(math.cos(a) * dist, math.sin(a) * dist),
+      child: Opacity(
+        opacity: opacity,
+        child: Container(
+          width: size,
+          height: size,
+          decoration: const BoxDecoration(
+            shape: BoxShape.circle,
+            color: Color(0xFFF98FB0),
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 24,
+      height: 24,
+      child: AnimatedBuilder(
+        animation: _c,
+        builder: (_, child) {
+          final v = _c.value;
+          final pt = Curves.easeOut.transform(v);
+          final dist = 18 * pt;
+          final pOp = (1 - pt).clamp(0.0, 1.0) * 0.95;
+          final flash = (1 - (v / 0.45).clamp(0.0, 1.0)) * 0.5;
+          final pop = Curves.elasticOut.transform(v.clamp(0.0, 1.0));
+          // Damped heartbeat wobble layered over the spring-in.
+          final beat = 0.12 * math.sin(v * math.pi * 5) * (1 - v);
+          return Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.center,
+            children: [
+              Opacity(
+                opacity: flash,
+                child: Transform.scale(
+                  scale: 1 + 1.2 * Curves.easeOut.transform(v),
+                  child: Container(
+                    width: 24,
+                    height: 24,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: RadialGradient(
+                        colors: [_rose, Color(0x00F26A93)],
+                        stops: [0.3, 1.0],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              if (pOp > 0.01)
+                for (int i = 0; i < 6; i++) _particle(i, dist, pOp),
+              Transform.scale(
+                scale: ((0.2 + 0.8 * pop) * (1 + beat)).clamp(0.0, 1.3),
+                child: child,
+              ),
+            ],
+          );
+        },
+        // Solid rose-gradient heart with white cradling-hand detail on top.
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            ShaderMask(
+              shaderCallback: (r) => const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFFF98FB0), Color(0xFFE5618A), Color(0xFFC74570)],
+              ).createShader(r),
+              blendMode: BlendMode.srcIn,
+              child: SvgPicture.string(_kFamilyHeartSvg, width: 24, height: 24),
+            ),
+            SvgPicture.string(_kFamilyHeartDetailSvg, width: 24, height: 24),
+          ],
         ),
       ),
     );
@@ -1065,6 +1237,66 @@ class _RecommendationCard extends StatelessWidget {
               child: Text(
                 data.badge,
                 style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Right-side visual for the family card — the package promo illustration,
+/// matching the other reminder cards' look.
+class _FamilyReminderCard extends StatelessWidget {
+  const _FamilyReminderCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          const ColoredBox(color: Color(0xFFF7DCE3)),
+          Image.asset(
+            'assets/bgpacket.png',
+            fit: BoxFit.cover,
+            alignment: Alignment.topCenter,
+          ),
+          // Bottom gradient to seat the badge.
+          const Align(
+            alignment: Alignment.bottomCenter,
+            child: FractionallySizedBox(
+              heightFactor: 0.5,
+              widthFactor: 1,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Color(0x00E5618A), Color(0xCCE5618A)],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            top: 8,
+            left: 8,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.92),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Text(
+                'ครอบครัว',
+                style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
                   color: Colors.black,
