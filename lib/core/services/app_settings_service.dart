@@ -4,7 +4,7 @@ enum AppThemeMode { light, dark, system }
 
 /// Selectable app typefaces. The primary family renders letters (and digits
 /// for non-default fonts); the fallbacks cover any missing glyphs (Thai, etc.).
-enum AppFont { ibmNunito, sukhumvit, googleSans, sarabun }
+enum AppFont { ibmNunito, sukhumvit, googleSans, sarabun, notoSansThai }
 
 class AppFontSpec {
   const AppFontSpec(this.label, this.family, this.fallback);
@@ -23,6 +23,8 @@ const Map<AppFont, AppFontSpec> kAppFontSpecs = {
       'Google Sans', 'Google Sans', ['Google Sans', 'IBM Plex Sans Thai Looped']),
   AppFont.sarabun:
       AppFontSpec('Sarabun', 'Sarabun', ['Sarabun', 'IBM Plex Sans Thai Looped']),
+  AppFont.notoSansThai: AppFontSpec('Noto Sans Thai', 'Noto Sans Thai',
+      ['Noto Sans Thai', 'IBM Plex Sans Thai Looped']),
 };
 
 /// Simple singleton holding app-wide display settings.

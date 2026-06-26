@@ -157,6 +157,9 @@ flutter:
         - asset: assets/fonts/GoogleSans-Variable.ttf
         - asset: assets/fonts/GoogleSans-Italic-Variable.ttf
           style: italic
+    - family: Noto Sans Thai
+      fonts:
+        - asset: assets/fonts/notosansthai/NotoSansThai-Variable.ttf
     - family: Sarabun
       fonts:
         - asset: assets/fonts/sarabun/Sarabun-Light.ttf
