@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../core/widgets/app_toast.dart';
 import '../../appointment/data/mock_data.dart';
 import '../../medicine/theme/time_period.dart';
 import '../../medicine/widgets/decorative_elements.dart';
@@ -202,6 +203,11 @@ class _AiAdviceCardState extends State<AiAdviceCard> {
   @override
   void initState() {
     super.initState();
+    _startAuto();
+  }
+
+  void _startAuto() {
+    _auto?.cancel();
     _auto = Timer.periodic(const Duration(seconds: 4), (_) {
       if (!mounted || !_ctrl.hasClients) return;
       // Always move forward → seamless wrap to the first page.
@@ -213,6 +219,8 @@ class _AiAdviceCardState extends State<AiAdviceCard> {
     });
   }
 
+  void _stopAuto() => _auto?.cancel();
+
   @override
   void dispose() {
     _auto?.cancel();
@@ -223,14 +231,7 @@ class _AiAdviceCardState extends State<AiAdviceCard> {
   void _recordMed(_MedSlot slot) {
     if (_taken.contains(slot.id)) return;
     setState(() => _taken.add(slot.id));
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        const SnackBar(
-          content: Text('บันทึกการทานยาแล้ว'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+    AppToast.success(context, 'บันทึกการทานยาแล้ว');
   }
 
   String _when(AppointmentItem a) =>
@@ -473,10 +474,15 @@ class _AiAdviceCardState extends State<AiAdviceCard> {
   }
 
   Widget _carousel(List<_Page> pages) {
-    return PageView.builder(
-      controller: _ctrl,
-      padEnds: false,
-      physics: const BouncingScrollPhysics(),
+    // Pause auto-scroll while a finger is on the carousel; resume on release.
+    return Listener(
+      onPointerDown: (_) => _stopAuto(),
+      onPointerUp: (_) => _startAuto(),
+      onPointerCancel: (_) => _startAuto(),
+      child: PageView.builder(
+        controller: _ctrl,
+        padEnds: false,
+        physics: const BouncingScrollPhysics(),
       onPageChanged: (i) => setState(() => _index = i),
       // Infinite: content loops via modulo so the last page flows to the first.
       itemCount: null,
@@ -509,6 +515,7 @@ class _AiAdviceCardState extends State<AiAdviceCard> {
           ),
         );
       },
+      ),
     );
   }
 }
