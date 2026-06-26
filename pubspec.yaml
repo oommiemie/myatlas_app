@@ -138,6 +138,37 @@ flutter:
           weight: 600
         - asset: assets/fonts/ibmplex/IBMPlexSansThaiLooped-Bold.ttf
           weight: 700
+    - family: Sukhumvit Set
+      fonts:
+        - asset: assets/fonts/sukhumvit/SukhumvitSet-Thin.ttf
+          weight: 100
+        - asset: assets/fonts/sukhumvit/SukhumvitSet-Light.ttf
+          weight: 300
+        - asset: assets/fonts/sukhumvit/SukhumvitSet-Text.ttf
+          weight: 400
+        - asset: assets/fonts/sukhumvit/SukhumvitSet-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/sukhumvit/SukhumvitSet-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/sukhumvit/SukhumvitSet-Bold.ttf
+          weight: 700
+    - family: Google Sans
+      fonts:
+        - asset: assets/fonts/GoogleSans-Variable.ttf
+        - asset: assets/fonts/GoogleSans-Italic-Variable.ttf
+          style: italic
+    - family: Sarabun
+      fonts:
+        - asset: assets/fonts/sarabun/Sarabun-Light.ttf
+          weight: 300
+        - asset: assets/fonts/sarabun/Sarabun-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/sarabun/Sarabun-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/sarabun/Sarabun-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/sarabun/Sarabun-Bold.ttf
+          weight: 700
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

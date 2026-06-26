@@ -73,6 +73,27 @@ class _DisplaySettingsScreenState extends State<DisplaySettingsScreen>
   String get _languageLabel =>
       _settings.locale.value.languageCode == 'en' ? 'English' : 'ไทย';
 
+  String get _fontLabel => _settings.fontSpec.label;
+
+  Future<void> _pickFont() async {
+    final labels =
+        AppFont.values.map((f) => kAppFontSpecs[f]!.label).toList();
+    final choice = await showAppOptionSheet(
+      context: context,
+      title: tr(context, 'แบบอักษร', 'Font'),
+      selected: _fontLabel,
+      options: labels,
+    );
+    if (choice != null && choice != _fontLabel) {
+      final picked = AppFont.values.firstWhere(
+        (f) => kAppFontSpecs[f]!.label == choice,
+        orElse: () => AppFont.ibmNunito,
+      );
+      _settings.setFont(picked);
+      setState(() {});
+    }
+  }
+
   Future<void> _pickLanguage() async {
     final choice = await showAppOptionSheet(
       context: context,
@@ -132,7 +153,7 @@ class _DisplaySettingsScreenState extends State<DisplaySettingsScreen>
                 // Dark mode disabled — selector removed; app stays light.
                 _stagger(
                   0,
-                  2,
+                  3,
                   _Section(
                     title: tr(context, 'เปลี่ยนภาษา', 'Language'),
                     child: PressEffect(
@@ -193,7 +214,68 @@ class _DisplaySettingsScreenState extends State<DisplaySettingsScreen>
                 ),
                 _stagger(
                   1,
+                  3,
+                  _Section(
+                    title: tr(context, 'แบบอักษร', 'Font'),
+                    child: PressEffect(
+                      onTap: _pickFont,
+                      haptic: HapticKind.selection,
+                      scale: 0.99,
+                      dim: 0.96,
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        color: CupertinoColors.white,
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 24,
+                              height: 24,
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Color(0xFF7A5BD0),
+                              ),
+                              alignment: Alignment.center,
+                              child: const Icon(
+                                CupertinoIcons.textformat,
+                                color: CupertinoColors.white,
+                                size: 13,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                tr(context, 'แบบอักษร', 'Font'),
+                                style: const TextStyle(
+                                  color: Color(0xFF1A1A1A),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                  letterSpacing: 0.275,
+                                ),
+                              ),
+                            ),
+                            Text(
+                              _fontLabel,
+                              style: const TextStyle(
+                                color: Color(0xFF6D756E),
+                                fontSize: 16,
+                                letterSpacing: 0.275,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            const Icon(
+                              CupertinoIcons.chevron_forward,
+                              size: 12,
+                              color: Color(0xFF6D756E),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                _stagger(
                   2,
+                  3,
                   ValueListenableBuilder<double>(
                     valueListenable: _settings.textScale,
                     builder: (_, __, ___) {

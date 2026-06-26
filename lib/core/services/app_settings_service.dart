@@ -2,6 +2,29 @@ import 'package:flutter/cupertino.dart';
 
 enum AppThemeMode { light, dark, system }
 
+/// Selectable app typefaces. The primary family renders letters (and digits
+/// for non-default fonts); the fallbacks cover any missing glyphs (Thai, etc.).
+enum AppFont { ibmNunito, sukhumvit, googleSans, sarabun }
+
+class AppFontSpec {
+  const AppFontSpec(this.label, this.family, this.fallback);
+  final String label;
+  final String family;
+  final List<String> fallback;
+}
+
+const Map<AppFont, AppFontSpec> kAppFontSpecs = {
+  // Default: Nunito digits subset + IBM Plex for letters.
+  AppFont.ibmNunito:
+      AppFontSpec('IBM Plex + Nunito', 'Nunito', ['IBM Plex Sans Thai Looped']),
+  AppFont.sukhumvit: AppFontSpec(
+      'Sukhumvit', 'Sukhumvit Set', ['Sukhumvit Set', 'IBM Plex Sans Thai Looped']),
+  AppFont.googleSans: AppFontSpec(
+      'Google Sans', 'Google Sans', ['Google Sans', 'IBM Plex Sans Thai Looped']),
+  AppFont.sarabun:
+      AppFontSpec('Sarabun', 'Sarabun', ['Sarabun', 'IBM Plex Sans Thai Looped']),
+};
+
 /// Simple singleton holding app-wide display settings.
 /// Pages read from and write to these notifiers; the root app rebuilds
 /// whenever they change.
@@ -19,6 +42,11 @@ class AppSettingsService {
   /// The UI locale. Supported: th, en.
   final ValueNotifier<Locale> locale =
       ValueNotifier<Locale>(const Locale('th', 'TH'));
+
+  /// Selected app typeface. Defaults to IBM Plex (letters) + Nunito (digits).
+  final ValueNotifier<AppFont> font = ValueNotifier<AppFont>(AppFont.ibmNunito);
+  void setFont(AppFont f) => font.value = f;
+  AppFontSpec get fontSpec => kAppFontSpecs[font.value]!;
 
   static const List<double> textScaleSteps = <double>[0.85, 0.92, 1.0, 1.12, 1.30];
 

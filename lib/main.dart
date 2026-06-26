@@ -30,10 +30,14 @@ class MyAtlasApp extends StatelessWidget {
         builder: (_, textScale, __) =>
             ValueListenableBuilder<Locale>(
           valueListenable: settings.locale,
-          builder: (_, locale, __) {
+          builder: (_, locale, __) =>
+              ValueListenableBuilder<AppFont>(
+            valueListenable: settings.font,
+            builder: (_, font, __) {
             // Dark mode disabled — the app always runs in light mode
             // regardless of the saved theme setting or system brightness.
             const brightness = Brightness.light;
+            final fontSpec = settings.fontSpec;
             return CupertinoApp(
               title: 'MyAtlas',
               debugShowCheckedModeBanner: false,
@@ -56,9 +60,9 @@ class MyAtlasApp extends StatelessWidget {
                   ),
                   child: Theme(
                     data: ThemeData(
-                      // Numbers → Nunito (digits subset); letters → IBM Plex.
-                      fontFamily: 'Nunito',
-                      fontFamilyFallback: const ['IBM Plex Sans Thai Looped'],
+                      // Follows the user's font selection.
+                      fontFamily: fontSpec.family,
+                      fontFamilyFallback: fontSpec.fallback,
                       brightness: brightness,
                     ),
                     child: ScaffoldMessenger(
@@ -76,7 +80,8 @@ class MyAtlasApp extends StatelessWidget {
               },
               home: const LoginScreen(),
             );
-          },
+            },
+          ),
         ),
       ),
     );

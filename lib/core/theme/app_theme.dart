@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 
+import '../services/app_settings_service.dart';
 import 'app_colors.dart';
 
 class AppTheme {
@@ -28,11 +29,12 @@ class AppTheme {
   }
 
   static CupertinoTextThemeData _textTheme(Color primaryLabel) {
+    final spec = AppSettingsService.instance.fontSpec;
     TextStyle style(double size, FontWeight weight, {Color? color}) =>
         TextStyle(
-          // Numbers → Nunito (digits subset); letters → IBM Plex (fallback).
-          fontFamily: 'Nunito',
-          fontFamilyFallback: const ['IBM Plex Sans Thai Looped'],
+          // Follows the user's font selection (default: Nunito digits + IBM).
+          fontFamily: spec.family,
+          fontFamilyFallback: spec.fallback,
           fontVariations: [FontVariation('wght', weight.value.toDouble())],
           fontSize: size,
           fontWeight: weight,
