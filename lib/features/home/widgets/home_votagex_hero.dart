@@ -88,25 +88,9 @@ class _HomeVotagexHeroState extends State<HomeVotagexHero> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          _buildTopRow(),
-          const SizedBox(height: 20),
           _buildTodayBlock(),
         ],
       ),
-    );
-  }
-
-  Widget _buildTopRow() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        // App logo (left).
-        Image.asset(
-          'assets/Appname.png',
-          height: 48,
-          fit: BoxFit.contain,
-        ),
-      ],
     );
   }
 

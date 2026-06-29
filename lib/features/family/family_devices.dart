@@ -154,6 +154,39 @@ class _ManageDevicesSheetState extends State<_ManageDevicesSheet> {
     });
   }
 
+  Future<void> _disconnect(DeviceKind kind) async {
+    HapticFeedback.heavyImpact();
+    final ok = await showCupertinoDialog<bool>(
+      context: context,
+      builder: (ctx) => CupertinoAlertDialog(
+        title: const Text('หยุดติดตามข้อมูลสุขภาพ?'),
+        content: Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Text(
+            'ระบบจะไม่สามารถบันทึกข้อมูลสุขภาพจาก ${kind.label} '
+            'ได้หลังจากนี้ คุณยังคงต้องการยกเลิกการเชื่อมต่ออุปกรณ์ใช่หรือไม่',
+          ),
+        ),
+        actions: [
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('ไม่, เชื่อมต่อไว้ตามเดิม'),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('ใช่, หยุดการเชื่อมต่อ'),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+    HapticFeedback.mediumImpact();
+    setState(() => _selected.remove(kind));
+    AppToast.success(context, 'หยุดการเชื่อมต่อ ${kind.label} แล้ว');
+  }
+
   void _save() {
     HapticFeedback.mediumImpact();
     widget.onChanged({..._selected});
@@ -200,6 +233,7 @@ class _ManageDevicesSheetState extends State<_ManageDevicesSheet> {
           kind: k,
           connected: _selected.contains(k),
           onTap: () => _toggle(k),
+          onDisconnect: () => _disconnect(k),
         );
       },
     );
@@ -317,17 +351,23 @@ class DeviceTile extends StatelessWidget {
     required this.kind,
     required this.connected,
     required this.onTap,
+    this.onDisconnect,
   });
   final DeviceKind kind;
   final bool connected;
   final VoidCallback onTap;
 
+  /// Disconnect handler — shown as an explicit button when [connected].
+  final VoidCallback? onDisconnect;
+
   @override
   Widget build(BuildContext context) {
     return PressEffect(
-      onTap: onTap,
+      // When connected, the whole-tile tap is inert — disconnect is an
+      // explicit button so it can't be triggered by accident.
+      onTap: connected ? () {} : onTap,
       haptic: HapticKind.none,
-      scale: 0.98,
+      scale: connected ? 1.0 : 0.98,
       borderRadius: BorderRadius.circular(20),
       child: Container(
         padding: const EdgeInsets.all(16),
@@ -380,6 +420,51 @@ class DeviceTile extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             _CapabilityChips(kind: kind, connected: connected),
+            if (connected && onDisconnect != null) ...[
+              const SizedBox(height: 12),
+              _DisconnectButton(onTap: onDisconnect!),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Full-width "disconnect" action shown inside a connected device tile.
+class _DisconnectButton extends StatelessWidget {
+  const _DisconnectButton({required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    const danger = Color(0xFFBC1B06);
+    return PressEffect(
+      onTap: onTap,
+      haptic: HapticKind.none,
+      scale: 0.98,
+      borderRadius: BorderRadius.circular(100),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          color: danger.withValues(alpha: 0.06),
+          borderRadius: BorderRadius.circular(100),
+          border: Border.all(color: danger.withValues(alpha: 0.25)),
+        ),
+        child: const Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(CupertinoIcons.xmark_circle, color: danger, size: 15),
+            SizedBox(width: 6),
+            Text(
+              'ตัดการเชื่อมต่อ',
+              style: TextStyle(
+                color: danger,
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
           ],
         ),
       ),
