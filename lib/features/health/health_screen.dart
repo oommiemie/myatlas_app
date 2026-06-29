@@ -25,7 +25,6 @@ import 'temperature_detail_screen.dart';
 import 'waist_detail_screen.dart';
 import 'data/health_data.dart';
 import 'widgets/active_energy_card.dart';
-import 'widgets/energy_summary.dart';
 import 'widgets/meal_card.dart';
 import 'widgets/metric_card.dart';
 import 'widgets/mini_activity_card.dart';
@@ -188,9 +187,6 @@ class HealthSummarySections extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _NutritionSection(data: data, showTitle: false),
-        const SizedBox(height: 16),
-        // Energy in/out summary (replaces the raw activity block).
-        EnergySummarySection(data: data),
         if (afterActivity != null) ...[
           const SizedBox(height: 16),
           afterActivity!,

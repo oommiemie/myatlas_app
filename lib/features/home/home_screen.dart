@@ -2,11 +2,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Icons, Scaffold;
 
 import '../../core/theme/app_colors.dart';
+import '../family/care_giver_screen.dart';
 import '../family/family_devices.dart';
 import '../health/data/health_data.dart';
 import '../health/health_screen.dart' show HealthSummarySections;
+import '../health/sleep_detail_screen.dart';
 import 'widgets/ai_advice_card.dart';
 import 'widgets/header_clouds.dart';
+import 'widgets/home_sleep_card.dart';
+import 'widgets/home_summary_dashboard.dart';
 import 'widgets/home_votagex_hero.dart';
 import 'widgets/home_water_intake_card.dart';
 import 'widgets/home_workout_streak_card.dart';
@@ -125,6 +129,29 @@ class _HomeScreenState extends State<HomeScreen> {
               // activity block.
               afterActivity: Column(
                 children: [
+                  // Family + smart-watch pair (from the Paiboon fork), sitting
+                  // right below the food-scan section.
+                  HomeSummaryDashboard(
+                    watchFamilyRowOnly: true,
+                    onFamilyTap: () => Navigator.of(context).push(
+                      CupertinoPageRoute(
+                        builder: (_) => const CareGiverScreen(),
+                      ),
+                    ),
+                    onWatchTap: () => showManageDevicesSheet(
+                      context,
+                      selected: _userDevices,
+                      onChanged: (next) =>
+                          setState(() => _userDevices
+                            ..clear()
+                            ..addAll(next)),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  // Water-intake tracker — settable goal, ml per glass, tap to
+                  // stamp glasses.
+                  const HomeWaterIntakeCard(initialGlasses: 3),
+                  const SizedBox(height: 16),
                   // Interactive demo: today not done yet (start button is
                   // tappable → opens the clip picker), with past workout days,
                   // a missed day, and upcoming days — tapping around the week
@@ -147,9 +174,15 @@ class _HomeScreenState extends State<HomeScreen> {
                     },
                   ),
                   const SizedBox(height: 16),
-                  // Water-intake tracker — settable goal, ml per glass, tap to
-                  // stamp glasses.
-                  const HomeWaterIntakeCard(initialGlasses: 3),
+                  // Sleep summary — score, stage breakdown, sleep debt, bedtime
+                  // consistency. Tapping opens the full sleep detail screen.
+                  HomeSleepCard(
+                    onTap: () => Navigator.of(context).push(
+                      CupertinoPageRoute(
+                        builder: (_) => const SleepDetailScreen(),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
