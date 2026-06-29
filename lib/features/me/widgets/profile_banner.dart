@@ -237,7 +237,8 @@ class _ProfileBannerState extends State<ProfileBanner>
                       ),
                     ),
                     // Home card: watch on the right, with a connection badge.
-                    if (c)
+                    // Hidden when no watchName is supplied.
+                    if (c && widget.watchName != null)
                       Padding(
                         padding: const EdgeInsets.only(left: 6, top: 2),
                         child: _WatchStatus(

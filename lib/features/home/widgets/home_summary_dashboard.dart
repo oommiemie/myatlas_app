@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -29,6 +30,8 @@ class HomeSummaryDashboard extends StatelessWidget {
     this.weightKg = 67,
     this.heightCm = 175,
     this.bmi = 20.1,
+    this.scansUsed = 1,
+    this.scansTotal = 16,
     this.watchName = 'Smart Watch BM 2',
     this.watchBattery = 30,
     this.watchConnected = true,
@@ -53,6 +56,8 @@ class HomeSummaryDashboard extends StatelessWidget {
   final int weightKg;
   final int heightCm;
   final double bmi;
+  final int scansUsed;
+  final int scansTotal;
   final String watchName;
   final int watchBattery;
   final bool watchConnected;
@@ -97,9 +102,7 @@ class HomeSummaryDashboard extends StatelessWidget {
         ),
       );
     }
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
-      child: SizedBox(
+    return SizedBox(
         height: 217,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -117,7 +120,6 @@ class HomeSummaryDashboard extends StatelessWidget {
             ),
           ],
         ),
-      ),
     );
   }
 
@@ -142,11 +144,11 @@ class HomeSummaryDashboard extends StatelessWidget {
           children: [
             // Salad artwork bleeding out the top-left corner.
             Positioned(
-              left: -22,
-              top: -30,
+              right: -22,
+              top: 8,
               child: Transform.rotate(
                 angle: 22.11 * math.pi / 180,
-                child: Image.asset('assets/images/salad_top.png',
+                child: Image.asset('assets/images/salad.png',
                     width: 96, height: 96, fit: BoxFit.contain),
               ),
             ),
@@ -156,13 +158,13 @@ class HomeSummaryDashboard extends StatelessWidget {
                 children: [
                   // Header: title + scan button.
                   Padding(
-                    padding: const EdgeInsets.only(left: 24, right: 16),
+                    padding: const EdgeInsets.only(left: 8, right: 16),
                     child: Row(
                       children: [
                         const Expanded(
                           child: Text(
-                            'วิเคราะห์\nอาหาร 1/16',
-                            textAlign: TextAlign.right,
+                            'โภชนาการมื้อนี้',
+                            textAlign: TextAlign.left,
                             style: TextStyle(
                               fontFamily: 'Google Sans',
                               fontSize: 16,
@@ -176,20 +178,44 @@ class HomeSummaryDashboard extends StatelessWidget {
                         GestureDetector(
                           onTap: onScanTap,
                           behavior: HitTestBehavior.opaque,
-                          child: Container(
-                            width: 44,
-                            height: 44,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(100),
+                            child: BackdropFilter(
+                            filter: ui.ImageFilter.blur(
+                                sigmaX: 14, sigmaY: 14),
+                            child: Container(
+                            height: 36,
                             alignment: Alignment.center,
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 10),
                             decoration: BoxDecoration(
-                              shape: BoxShape.circle,
+                              borderRadius: BorderRadius.circular(100),
                               color: Colors.white.withValues(alpha: 0.2),
                               border: Border.all(
                                   color: Colors.white.withValues(alpha: 0.25)),
                             ),
-                            child: SvgPicture.string(
-                              _kScanFoodSvg,
-                              width: 24,
-                              height: 24,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                SvgPicture.string(
+                                  _kScanFoodSvg,
+                                  width: 20,
+                                  height: 20,
+                                ),
+                                const SizedBox(width: 5),
+                                Text(
+                                  '$scansUsed/$scansTotal',
+                                  style: const TextStyle(
+                                    fontFamily: 'Google Sans',
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    height: 1,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                             ),
                           ),
                         ),

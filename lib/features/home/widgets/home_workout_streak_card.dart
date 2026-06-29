@@ -160,23 +160,24 @@ class _HomeWorkoutStreakCardState extends State<HomeWorkoutStreakCard> {
 
     final String title;
     if (empty) {
-      title = 'เริ่มเต้นกันเลย!';
+      title = 'เริ่มออกกำลังกายกันเลย!';
     } else if (isToday) {
       if (!doneToday) {
-        title = 'ขยับร่างกายสักหน่อยไหม วันนี้?';
+        title = 'มาออกกำลังกายของวันนี้กันเถอะ';
       } else if (streak >= 3) {
-        title = 'เต้นต่อเนื่อง $streak วันแล้ว';
+        title = 'ออกกำลังกายต่อเนื่องมา $streak วันแล้ว';
       } else {
-        title = 'เยี่ยมมาก! วันนี้ทำสำเร็จแล้ว';
+        title = 'วันนี้คุณชนะใจตัวเองได้สำเร็จ';
       }
     } else if (isFuture) {
-      title = 'รอวันนี้มาถึง แล้วมาเต้นกัน!';
+      title = 'พักเติมพลังแล้วมาลุยกันใหม่!';
     } else if (selDone) {
       // Past workout day — different title when it's part of a streak.
       if (_isStreakDay(_selected)) {
-        title = 'เต้นต่อเนื่อง ${_consecutiveRun(_selected)} วันรวด ไฟแรงมาก!';
+        title =
+            'ออกกำลังกายต่อเนื่องมา ${_consecutiveRun(_selected)} วันแล้ว';
       } else {
-        title = 'วันนี้เต้นสำเร็จ เก่งมาก!';
+        title = 'วันนี้คุณชนะใจตัวเองได้สำเร็จ';
       }
     } else {
       // Past day with no workout — missed.

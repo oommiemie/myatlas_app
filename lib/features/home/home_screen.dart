@@ -5,8 +5,11 @@ import '../../core/theme/app_colors.dart';
 import '../family/care_giver_screen.dart';
 import '../family/family_devices.dart';
 import '../health/data/health_data.dart';
-import '../health/health_screen.dart' show HealthSummarySections;
+import '../health/health_screen.dart'
+    show HealthSummarySections, HomeActivityPair;
 import '../health/sleep_detail_screen.dart';
+import '../nutrition/food_lens/food_lens_flow.dart';
+import '../nutrition/nutrition_detail_screen.dart';
 import 'widgets/ai_advice_card.dart';
 import 'widgets/header_clouds.dart';
 import 'widgets/home_sleep_card.dart';
@@ -125,14 +128,21 @@ class _HomeScreenState extends State<HomeScreen> {
                     padding: const EdgeInsets.fromLTRB(16, 18, 16, 120),
                     child: HealthSummarySections(
               data: _healthData,
-              // Workout-streak card + water-intake card, stacked below the
-              // activity block.
+              // Home uses the dashboard grid's compact meal card instead of the
+              // full-width food-analysis section.
+              showNutrition: false,
               afterActivity: Column(
                 children: [
-                  // Family + smart-watch pair (from the Paiboon fork), sitting
-                  // right below the food-scan section.
+                  // Dashboard grid (pulled from the Paiboon fork): meal-analysis
+                  // card on the left, smart-watch + family stacked on the right.
                   HomeSummaryDashboard(
-                    watchFamilyRowOnly: true,
+                    onTap: () => Navigator.of(context).push(
+                      CupertinoPageRoute(
+                        builder: (_) =>
+                            NutritionDetailScreen(data: _healthData),
+                      ),
+                    ),
+                    onScanTap: () => openFoodLens(context),
                     onFamilyTap: () => Navigator.of(context).push(
                       CupertinoPageRoute(
                         builder: (_) => const CareGiverScreen(),
@@ -147,6 +157,10 @@ class _HomeScreenState extends State<HomeScreen> {
                             ..addAll(next)),
                     ),
                   ),
+                  const SizedBox(height: 16),
+                  // Steps + activity-rings pair (ก้าวเดิน / กิจกรรม), row 2 of
+                  // the grid.
+                  HomeActivityPair(data: _healthData),
                   const SizedBox(height: 16),
                   // Water-intake tracker — settable goal, ml per glass, tap to
                   // stamp glasses.
