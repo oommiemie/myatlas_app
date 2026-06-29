@@ -207,10 +207,6 @@ class _HomeScreenState extends State<HomeScreen>
                   // the grid.
                   HomeActivityPair(data: _healthData),
                   const SizedBox(height: 16),
-                  // Water-intake tracker — settable goal, ml per glass, tap to
-                  // stamp glasses.
-                  const HomeWaterIntakeCard(initialGlasses: 3),
-                  const SizedBox(height: 16),
                   // Interactive demo: today not done yet (start button is
                   // tappable → opens the clip picker), with past workout days,
                   // a missed day, and upcoming days — tapping around the week
@@ -232,6 +228,10 @@ class _HomeScreenState extends State<HomeScreen>
                       DateTime(now2.year, now2.month, now2.day - 6): (910, 81),
                     },
                   ),
+                  const SizedBox(height: 16),
+                  // Water-intake tracker — settable goal, ml per glass, tap to
+                  // stamp glasses.
+                  const HomeWaterIntakeCard(initialGlasses: 3),
                   const SizedBox(height: 16),
                   // Sleep summary — score, stage breakdown, sleep debt, bedtime
                   // consistency. Tapping opens the full sleep detail screen.
