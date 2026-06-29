@@ -163,7 +163,7 @@ class HomeSummaryDashboard extends StatelessWidget {
                       children: [
                         const Expanded(
                           child: Text(
-                            'โภชนาการมื้อนี้',
+                            'แคลลอรี่',
                             textAlign: TextAlign.left,
                             style: TextStyle(
                               fontFamily: 'Google Sans',
