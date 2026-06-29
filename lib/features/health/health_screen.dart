@@ -174,19 +174,28 @@ class _HealthScreenState extends State<HealthScreen>
 /// page scaffold or navigation bar — so it can be embedded in other screens
 /// (e.g. the Home page).
 class HealthSummarySections extends StatelessWidget {
-  const HealthSummarySections({super.key, required this.data, this.afterActivity});
+  const HealthSummarySections({
+    super.key,
+    required this.data,
+    this.afterActivity,
+    this.showNutrition = true,
+  });
   final HealthData data;
 
   /// Optional widget slotted in right under the activity block (used by Home to
   /// place the workout-streak card there).
   final Widget? afterActivity;
 
+  /// When false, the full-width food-analysis section is hidden (Home uses the
+  /// compact meal card inside the dashboard grid instead).
+  final bool showNutrition;
+
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _NutritionSection(data: data, showTitle: false),
+        if (showNutrition) _NutritionSection(data: data, showTitle: false),
         if (afterActivity != null) ...[
           const SizedBox(height: 16),
           afterActivity!,
@@ -935,6 +944,28 @@ class _ActivityBlock extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Steps (ก้าวเดิน) + activity-rings (กิจกรรม) pair, side by side. Public so the
+/// Home dashboard can reuse just this row (pulled from the Paiboon fork) above
+/// the workout-streak card.
+class HomeActivityPair extends StatelessWidget {
+  const HomeActivityPair({super.key, required this.data});
+  final HealthData data;
+
+  @override
+  Widget build(BuildContext context) {
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(child: _StepsCard(data: data)),
+          const SizedBox(width: 12),
+          Expanded(child: _ActivityMini(data: data)),
+        ],
+      ),
     );
   }
 }

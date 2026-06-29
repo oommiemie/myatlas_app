@@ -64,6 +64,23 @@ class _HomeWaterIntakeCardState extends State<HomeWaterIntakeCard> {
     if (_drunk > 0) setState(() => _drunk--);
   }
 
+  // Open the shared drink-settings sheet straight from the card (footer tap),
+  // without going through the detail screen / chevron.
+  void _openWaterSettings() {
+    showWaterSettingsSheet(
+      context: context,
+      goalMl: _goalMl,
+      mlPerGlass: _mlPerGlass,
+      onSaved: (goal, perGlass) {
+        setState(() {
+          _goalMl = goal;
+          _mlPerGlass = perGlass;
+          if (_drunk > _glassCount) _drunk = _glassCount;
+        });
+      },
+    );
+  }
+
   void _openDetail() {
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -85,7 +102,27 @@ class _HomeWaterIntakeCardState extends State<HomeWaterIntakeCard> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return Container(
+      // Outer stacked-card shell: holds the white water card + the settings
+      // button section beneath it as one grouped card. Blue shows only below
+      // the white card (settings area) — flush on top/left/right.
+      padding: const EdgeInsets.only(bottom: 6),
+      decoration: BoxDecoration(
+        // Pale blue (same as the remove-glass button) — calm, not a CTA.
+        color: const Color(0xFFEFF6FA),
+        border: Border.all(color: const Color(0xFFD9E8F0)),
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+        GestureDetector(
       onTap: _openDetail,
       behavior: HitTestBehavior.opaque,
       child: Container(
@@ -276,6 +313,19 @@ class _HomeWaterIntakeCardState extends State<HomeWaterIntakeCard> {
           ),
         ],
       ),
+      ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: Row(
+            children: [
+              Expanded(
+                child: _WaterSettingsButton(onTap: _openWaterSettings),
+              ),
+            ],
+          ),
+        ),
+      ],
       ),
     );
   }
@@ -589,4 +639,42 @@ class _GaugePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _GaugePainter old) => old.progress != progress;
+}
+
+/// Full-width blue "ตั้งค่าการดื่มน้ำ" button shown below the water card —
+/// opens the drink-settings sheet. Separate from the card's chevron (detail).
+class _WaterSettingsButton extends StatelessWidget {
+  const _WaterSettingsButton({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        width: double.infinity,
+        height: 44,
+        alignment: Alignment.center,
+        color: Colors.transparent,
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.tune, color: Color(0xFF1E88E5), size: 18),
+            SizedBox(width: 8),
+            Text(
+              'ตั้งค่าการดื่มน้ำ',
+              style: TextStyle(
+                fontFamily: 'IBM Plex Sans Thai Looped',
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF1E88E5),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

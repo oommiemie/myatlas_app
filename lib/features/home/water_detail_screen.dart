@@ -1,7 +1,13 @@
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show Icons, showModalBottomSheet, ChoiceChip;
+import 'package:flutter/material.dart'
+    show
+        Icons,
+        showModalBottomSheet,
+        ChoiceChip,
+        MaterialTapTargetSize,
+        VisualDensity;
 
 enum _Period { day, week, month, year }
 
@@ -72,176 +78,17 @@ class _WaterDetailScreenState extends State<WaterDetailScreen> {
   late int _mlPerGlass = widget.mlPerGlass;
 
   void _openSettings() {
-    var goal = _goalMl;
-    var perGlass = _mlPerGlass;
-    showModalBottomSheet<void>(
+    showWaterSettingsSheet(
       context: context,
-      backgroundColor: CupertinoColors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (sheetCtx) {
-        return StatefulBuilder(
-          builder: (sheetCtx, setSheet) {
-            String goalLabel() {
-              final l = goal / 1000;
-              return '${l == l.roundToDouble() ? l.toStringAsFixed(0) : l.toStringAsFixed(1)} ลิตร';
-            }
-
-            return Padding(
-              padding: EdgeInsets.fromLTRB(
-                20,
-                18,
-                20,
-                20 + MediaQuery.viewInsetsOf(sheetCtx).bottom,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'ตั้งค่าการดื่มน้ำ',
-                    style: TextStyle(
-                      fontFamily: 'IBM Plex Sans Thai Looped',
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
-                      color: WaterDetailScreen._ink,
-                    ),
-                  ),
-                  const SizedBox(height: 18),
-                  const Text(
-                    'เป้าหมายต่อวัน',
-                    style: TextStyle(
-                      fontFamily: 'IBM Plex Sans Thai Looped',
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF5B6B7A),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      _stepperButton(
-                        icon: Icons.remove,
-                        onTap: goal > 500
-                            ? () => setSheet(() => goal -= 250)
-                            : null,
-                      ),
-                      Expanded(
-                        child: Center(
-                          child: Text(
-                            goalLabel(),
-                            style: const TextStyle(
-                              fontFamily: 'IBM Plex Sans Thai Looped',
-                              fontSize: 20,
-                              fontWeight: FontWeight.w800,
-                              color: WaterDetailScreen._water,
-                            ),
-                          ),
-                        ),
-                      ),
-                      _stepperButton(
-                        icon: Icons.add,
-                        onTap: goal < 5000
-                            ? () => setSheet(() => goal += 250)
-                            : null,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 18),
-                  const Text(
-                    'ปริมาณต่อแก้ว',
-                    style: TextStyle(
-                      fontFamily: 'IBM Plex Sans Thai Looped',
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF5B6B7A),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    children: [
-                      for (final ml in WaterDetailScreen._glassOptions)
-                        ChoiceChip(
-                          label: Text('$ml มล.'),
-                          selected: perGlass == ml,
-                          onSelected: (_) => setSheet(() => perGlass = ml),
-                          labelStyle: TextStyle(
-                            fontFamily: 'IBM Plex Sans Thai Looped',
-                            fontWeight: FontWeight.w600,
-                            color: perGlass == ml
-                                ? CupertinoColors.white
-                                : WaterDetailScreen._ink,
-                          ),
-                          selectedColor: WaterDetailScreen._water,
-                          backgroundColor: const Color(0xFFEFF6FA),
-                          showCheckmark: false,
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 22),
-                  SizedBox(
-                    width: double.infinity,
-                    child: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _goalMl = goal;
-                          _mlPerGlass = perGlass;
-                        });
-                        widget.onSettingsChanged?.call(goal, perGlass);
-                        Navigator.of(sheetCtx).pop();
-                      },
-                      child: Container(
-                        height: 50,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(100),
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFF4FC3F7), WaterDetailScreen._water],
-                          ),
-                        ),
-                        child: const Text(
-                          'บันทึก',
-                          style: TextStyle(
-                            fontFamily: 'IBM Plex Sans Thai Looped',
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: CupertinoColors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
+      goalMl: _goalMl,
+      mlPerGlass: _mlPerGlass,
+      onSaved: (goal, perGlass) {
+        setState(() {
+          _goalMl = goal;
+          _mlPerGlass = perGlass;
+        });
+        widget.onSettingsChanged?.call(goal, perGlass);
       },
-    );
-  }
-
-  Widget _stepperButton({required IconData icon, VoidCallback? onTap}) {
-    final enabled = onTap != null;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 40,
-        height: 40,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: enabled ? const Color(0xFFEFF6FA) : const Color(0xFFF4F4F4),
-        ),
-        child: Icon(
-          icon,
-          size: 20,
-          color: enabled
-              ? WaterDetailScreen._water
-              : const Color(0xFFC4C4C4),
-        ),
-      ),
     );
   }
 
@@ -1219,4 +1066,188 @@ class _GoalCard extends StatelessWidget {
       ],
     );
   }
+}
+
+/// Shared "ตั้งค่าการดื่มน้ำ" bottom sheet — daily goal stepper + glass-size
+/// chips. Used by both the water detail screen and the home water card so the
+/// settings UI stays in one place.
+Future<void> showWaterSettingsSheet({
+  required BuildContext context,
+  required int goalMl,
+  required int mlPerGlass,
+  required void Function(int goalMl, int mlPerGlass) onSaved,
+}) {
+  var goal = goalMl;
+  var perGlass = mlPerGlass;
+  return showModalBottomSheet<void>(
+    context: context,
+    backgroundColor: CupertinoColors.white,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+    ),
+    builder: (sheetCtx) {
+      return StatefulBuilder(
+        builder: (sheetCtx, setSheet) {
+          String goalLabel() {
+            final l = goal / 1000;
+            return '${l == l.roundToDouble() ? l.toStringAsFixed(0) : l.toStringAsFixed(1)} ลิตร';
+          }
+
+          return Padding(
+            padding: EdgeInsets.fromLTRB(
+              20,
+              18,
+              20,
+              20 + MediaQuery.viewInsetsOf(sheetCtx).bottom,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'ตั้งค่าการดื่มน้ำ',
+                  style: TextStyle(
+                    fontFamily: 'IBM Plex Sans Thai Looped',
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: WaterDetailScreen._ink,
+                  ),
+                ),
+                const SizedBox(height: 18),
+                const Text(
+                  'เป้าหมายต่อวัน',
+                  style: TextStyle(
+                    fontFamily: 'IBM Plex Sans Thai Looped',
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF5B6B7A),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    _waterStepperButton(
+                      icon: Icons.remove,
+                      onTap: goal > 500
+                          ? () => setSheet(() => goal -= 250)
+                          : null,
+                    ),
+                    Expanded(
+                      child: Center(
+                        child: Text(
+                          goalLabel(),
+                          style: const TextStyle(
+                            fontFamily: 'IBM Plex Sans Thai Looped',
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                            color: WaterDetailScreen._water,
+                          ),
+                        ),
+                      ),
+                    ),
+                    _waterStepperButton(
+                      icon: Icons.add,
+                      onTap: goal < 5000
+                          ? () => setSheet(() => goal += 250)
+                          : null,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 18),
+                const Text(
+                  'ปริมาณต่อแก้ว',
+                  style: TextStyle(
+                    fontFamily: 'IBM Plex Sans Thai Looped',
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF5B6B7A),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final ml in WaterDetailScreen._glassOptions)
+                      ChoiceChip(
+                        label: Text('$ml มล.'),
+                        selected: perGlass == ml,
+                        onSelected: (_) => setSheet(() => perGlass = ml),
+                        labelStyle: TextStyle(
+                          fontFamily: 'IBM Plex Sans Thai Looped',
+                          fontWeight: FontWeight.w600,
+                          color: perGlass == ml
+                              ? CupertinoColors.white
+                              : WaterDetailScreen._ink,
+                        ),
+                        // Balanced vertical padding (Thai looped font sits a
+                        // touch high by default).
+                        labelPadding: const EdgeInsets.symmetric(horizontal: 4),
+                        padding:
+                            const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+                        visualDensity: VisualDensity.compact,
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        selectedColor: WaterDetailScreen._water,
+                        backgroundColor: const Color(0xFFEFF6FA),
+                        showCheckmark: false,
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 22),
+                SizedBox(
+                  width: double.infinity,
+                  child: GestureDetector(
+                    onTap: () {
+                      onSaved(goal, perGlass);
+                      Navigator.of(sheetCtx).pop();
+                    },
+                    child: Container(
+                      height: 50,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(100),
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF4FC3F7), WaterDetailScreen._water],
+                        ),
+                      ),
+                      child: const Text(
+                        'บันทึก',
+                        style: TextStyle(
+                          fontFamily: 'IBM Plex Sans Thai Looped',
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: CupertinoColors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    },
+  );
+}
+
+Widget _waterStepperButton({required IconData icon, VoidCallback? onTap}) {
+  final enabled = onTap != null;
+  return GestureDetector(
+    onTap: onTap,
+    child: Container(
+      width: 40,
+      height: 40,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: enabled ? const Color(0xFFEFF6FA) : const Color(0xFFF4F4F4),
+      ),
+      child: Icon(
+        icon,
+        size: 20,
+        color: enabled ? WaterDetailScreen._water : const Color(0xFFC4C4C4),
+      ),
+    ),
+  );
 }
