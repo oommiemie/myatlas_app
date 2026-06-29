@@ -97,12 +97,7 @@ class _HomeVotagexHeroState extends State<HomeVotagexHero> {
   // Personal-info banner (from the Me page) shown in the header — compact, with
   // the connected-watch status shown in the chip.
   Widget _buildTodayBlock() {
-    final d = widget.statusDevice;
-    return ProfileBanner(
-      compact: true,
-      watchName: d?.name,
-      watchConnected: d?.connected ?? false,
-      watchBattery: d?.battery,
-    );
+    // Watch image + name intentionally hidden from the header (null watchName).
+    return const ProfileBanner(compact: true);
   }
 }
