@@ -25,7 +25,8 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen>
+    with SingleTickerProviderStateMixin {
   final HealthRepository _repo = HealthRepository(seed: 7);
   late final HealthData _healthData = _repo.load();
 
@@ -33,6 +34,43 @@ class _HomeScreenState extends State<HomeScreen> {
     DeviceKind.smartwatch,
     DeviceKind.cgm,
   };
+
+  // Page-load entrance — staggered fade-up, matching the other screens.
+  // Initialized inline (and started) so it survives hot reload, which doesn't
+  // re-run initState.
+  late final AnimationController _enter = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 900),
+  )..forward();
+
+  @override
+  void dispose() {
+    _enter.dispose();
+    super.dispose();
+  }
+
+  Widget _stagger(int index, int total, Widget child) {
+    final start = (index / total) * 0.5;
+    final end = (start + 0.55).clamp(0.0, 1.0);
+    final anim = CurvedAnimation(
+      parent: _enter,
+      curve: Interval(start, end, curve: Curves.easeOutCubic),
+    );
+    return AnimatedBuilder(
+      animation: anim,
+      builder: (_, c) {
+        final t = anim.value;
+        return Opacity(
+          opacity: t,
+          child: Transform.translate(
+            offset: Offset(0, (1 - t) * 18),
+            child: c,
+          ),
+        );
+      },
+      child: child,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -91,10 +129,14 @@ class _HomeScreenState extends State<HomeScreen> {
           ListView(
             padding: EdgeInsets.zero,
             children: [
-              _HeroSection(
-                statusDevice: watch,
-                workoutDays: workoutDays,
-                workoutResults: workoutResults,
+              _stagger(
+                0,
+                3,
+                _HeroSection(
+                  statusDevice: watch,
+                  workoutDays: workoutDays,
+                  workoutResults: workoutResults,
+                ),
               ),
           // Content sheet — stacks over the header with rounded top corners.
           Container(
@@ -107,10 +149,13 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Column(
               children: [
                 // AI advice — sits BEHIND the food-analysis section.
-                const AiAdviceCard(),
+                _stagger(1, 3, const AiAdviceCard()),
                 // Food-analysis section onward — its own rounded container that
                 // overlaps upward so the AI card peeks out behind it.
-                Transform.translate(
+                _stagger(
+                  2,
+                  3,
+                  Transform.translate(
                   offset: const Offset(0, -10),
                   child: Container(
                     decoration: const BoxDecoration(
@@ -202,6 +247,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
                     ),
                   ),
+                ),
               ],
             ),
           ),
