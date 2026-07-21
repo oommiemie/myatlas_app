@@ -100,19 +100,51 @@ class _ProfileBannerState extends State<ProfileBanner>
               mainAxisSize: MainAxisSize.min,
               children: [
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    _WellnessAvatar(
-                      progress: _ringCtrl,
-                      // Compact avatar matches the family cluster height (66)
-                      // so the left & right sections share the same bottom edge.
-                      size: c ? 66 : 84,
-                      light: light,
+                    Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        _WellnessAvatar(
+                          progress: _ringCtrl,
+                          // Compact avatar matches the family cluster height
+                          // (66) so left & right share the same bottom edge.
+                          size: c ? 66 : 84,
+                          light: light,
+                        ),
+                        // Home card: BMS "made by" badge on the avatar's edge.
+                        if (c)
+                          Positioned(
+                            right: -2,
+                            bottom: 2,
+                            child: Container(
+                              width: 22,
+                              height: 22,
+                              padding: const EdgeInsets.all(2.5),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: CupertinoColors.white,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: CupertinoColors.black
+                                        .withValues(alpha: 0.15),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 1),
+                                  ),
+                                ],
+                              ),
+                              child: Image.asset(
+                                'assets/logobms.png',
+                                fit: BoxFit.contain,
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                     SizedBox(width: c ? 12 : 16),
                     Expanded(
                       child: Padding(
-                        padding: const EdgeInsets.only(top: 4),
+                        padding: EdgeInsets.zero,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
@@ -158,17 +190,21 @@ class _ProfileBannerState extends State<ProfileBanner>
                                 ),
                               ],
                             ),
-                            SizedBox(height: c ? 9 : 6),
+                            SizedBox(
+                              height: (c && widget.watchName != null)
+                                  ? (c ? 9 : 6)
+                                  : 0,
+                            ),
                             Row(
                               children: [
                                 Container(
-                                  padding: !(c && widget.watchName == null)
+                                  padding: (c && widget.watchName != null)
                                       ? EdgeInsets.symmetric(
                                           horizontal: c ? 7 : 8,
                                           vertical: c ? 2 : 3,
                                         )
                                       : EdgeInsets.zero,
-                                  decoration: !(c && widget.watchName == null)
+                                  decoration: (c && widget.watchName != null)
                                       ? BoxDecoration(
                                           color: light
                                               ? CupertinoColors.black
@@ -211,52 +247,7 @@ class _ProfileBannerState extends State<ProfileBanner>
                                             ),
                                           ],
                                         )
-                                      : c
-                                          // Home card → BMS "made by" credit.
-                                          ? Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                Image.asset(
-                                                  'assets/logobms.png',
-                                                  height: 13,
-                                                  fit: BoxFit.contain,
-                                                ),
-                                                const SizedBox(width: 5),
-                                                const Text(
-                                                  'Bangkok Medical Software',
-                                                  style: TextStyle(
-                                                    color: Color(0xFF3E453F),
-                                                    fontSize: 10,
-                                                    fontWeight: FontWeight.w500,
-                                                  ),
-                                                ),
-                                              ],
-                                            )
-                                          // Me (green) card → location chip.
-                                          : Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                Icon(
-                                                  CupertinoIcons.location_solid,
-                                                  size: 10,
-                                                  color: light
-                                                      ? const Color(0xFF6D756E)
-                                                      : CupertinoColors.white,
-                                                ),
-                                                const SizedBox(width: 3),
-                                                Text(
-                                                  'กรุงเทพฯ',
-                                                  style: TextStyle(
-                                                    color: light
-                                                        ? const Color(
-                                                            0xFF3E453F)
-                                                        : CupertinoColors.white,
-                                                    fontSize: c ? 10 : 11,
-                                                    fontWeight: FontWeight.w500,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
+                                      : const SizedBox.shrink(),
                                 ),
                               ],
                             ),
