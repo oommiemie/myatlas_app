@@ -162,18 +162,23 @@ class _ProfileBannerState extends State<ProfileBanner>
                             Row(
                               children: [
                                 Container(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: c ? 7 : 8,
-                                    vertical: c ? 2 : 3,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: light
-                                        ? CupertinoColors.black
-                                            .withValues(alpha: 0.05)
-                                        : CupertinoColors.white
-                                            .withValues(alpha: 0.18),
-                                    borderRadius: BorderRadius.circular(100),
-                                  ),
+                                  padding: !(c && widget.watchName == null)
+                                      ? EdgeInsets.symmetric(
+                                          horizontal: c ? 7 : 8,
+                                          vertical: c ? 2 : 3,
+                                        )
+                                      : EdgeInsets.zero,
+                                  decoration: !(c && widget.watchName == null)
+                                      ? BoxDecoration(
+                                          color: light
+                                              ? CupertinoColors.black
+                                                  .withValues(alpha: 0.05)
+                                              : CupertinoColors.white
+                                                  .withValues(alpha: 0.18),
+                                          borderRadius:
+                                              BorderRadius.circular(100),
+                                        )
+                                      : null,
                                   child: (c && widget.watchName != null)
                                       ? Row(
                                           mainAxisSize: MainAxisSize.min,
@@ -206,29 +211,52 @@ class _ProfileBannerState extends State<ProfileBanner>
                                             ),
                                           ],
                                         )
-                                      : Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Icon(
-                                              CupertinoIcons.location_solid,
-                                              size: 10,
-                                              color: light
-                                                  ? const Color(0xFF6D756E)
-                                                  : CupertinoColors.white,
+                                      : c
+                                          // Home card → BMS "made by" credit.
+                                          ? Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Image.asset(
+                                                  'assets/logobms.png',
+                                                  height: 13,
+                                                  fit: BoxFit.contain,
+                                                ),
+                                                const SizedBox(width: 5),
+                                                const Text(
+                                                  'Bangkok Medical Software',
+                                                  style: TextStyle(
+                                                    color: Color(0xFF3E453F),
+                                                    fontSize: 10,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
+                                              ],
+                                            )
+                                          // Me (green) card → location chip.
+                                          : Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Icon(
+                                                  CupertinoIcons.location_solid,
+                                                  size: 10,
+                                                  color: light
+                                                      ? const Color(0xFF6D756E)
+                                                      : CupertinoColors.white,
+                                                ),
+                                                const SizedBox(width: 3),
+                                                Text(
+                                                  'กรุงเทพฯ',
+                                                  style: TextStyle(
+                                                    color: light
+                                                        ? const Color(
+                                                            0xFF3E453F)
+                                                        : CupertinoColors.white,
+                                                    fontSize: c ? 10 : 11,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
+                                              ],
                                             ),
-                                            const SizedBox(width: 3),
-                                            Text(
-                                              'กรุงเทพฯ',
-                                              style: TextStyle(
-                                                color: light
-                                                    ? const Color(0xFF3E453F)
-                                                    : CupertinoColors.white,
-                                                fontSize: c ? 10 : 11,
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
                                 ),
                               ],
                             ),
