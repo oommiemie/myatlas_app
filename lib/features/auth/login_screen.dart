@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
@@ -52,6 +53,8 @@ class LoginScreen extends StatelessWidget {
                     _SocialRow(onTap: () => _enterApp(context)),
                     const SizedBox(height: 24),
                     _RegisterFooter(onTap: () => _enterApp(context)),
+                    const SizedBox(height: 16),
+                    const _BmsBadge(),
                     const SizedBox(height: 8),
                   ],
                 ),
@@ -397,6 +400,56 @@ class _FeatureCircleState extends State<_FeatureCircle>
           ),
         );
       },
+    );
+  }
+}
+
+class _BmsBadge extends StatelessWidget {
+  const _BmsBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(100),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+          child: Container(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.14),
+              borderRadius: BorderRadius.circular(100),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.22),
+                width: 0.5,
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.asset(
+                  'assets/logoMyAtlascare.png',
+                  height: 28,
+                  fit: BoxFit.contain,
+                ),
+                const SizedBox(width: 12),
+                Container(
+                  width: 1,
+                  height: 20,
+                  color: Colors.white.withValues(alpha: 0.35),
+                ),
+                const SizedBox(width: 12),
+                Image.asset(
+                  'assets/logobms.png',
+                  height: 24,
+                  fit: BoxFit.contain,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
