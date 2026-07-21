@@ -72,6 +72,8 @@ flutter:
 
   assets:
     - assets/Appname.png
+    - assets/logobms.png
+    - assets/logoMyAtlascare.png
     - assets/taichi.png
     - assets/appt_scene.png
     - assets/bgappointment.png
