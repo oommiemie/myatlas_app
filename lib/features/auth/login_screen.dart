@@ -52,9 +52,34 @@ class LoginScreen extends StatelessWidget {
                     const SizedBox(height: 24),
                     _SocialRow(onTap: () => _enterApp(context)),
                     const SizedBox(height: 24),
-                    _RegisterFooter(onTap: () => _enterApp(context)),
-                    const SizedBox(height: 16),
-                    const _BmsBadge(),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const _BmsBadge(),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Bangkok Medical Software',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.9),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.2,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'เวอร์ชัน 1.0.0',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.6),
+                            fontSize: 11,
+                            letterSpacing: 0.3,
+                          ),
+                        ),
+                      ],
+                    ),
                     const SizedBox(height: 8),
                   ],
                 ),
@@ -259,6 +284,7 @@ class _SocialButton extends StatelessWidget {
   }
 }
 
+// ignore: unused_element
 class _RegisterFooter extends StatelessWidget {
   final VoidCallback onTap;
   const _RegisterFooter({required this.onTap});
@@ -410,44 +436,24 @@ class _BmsBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(100),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-          child: Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.14),
-              borderRadius: BorderRadius.circular(100),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.22),
-                width: 0.5,
-              ),
+      child: Container(
+        width: 34,
+        height: 34,
+        padding: const EdgeInsets.all(3),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.15),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Image.asset(
-                  'assets/logoMyAtlascare.png',
-                  height: 28,
-                  fit: BoxFit.contain,
-                ),
-                const SizedBox(width: 12),
-                Container(
-                  width: 1,
-                  height: 20,
-                  color: Colors.white.withValues(alpha: 0.35),
-                ),
-                const SizedBox(width: 12),
-                Image.asset(
-                  'assets/logobms.png',
-                  height: 24,
-                  fit: BoxFit.contain,
-                ),
-              ],
-            ),
-          ),
+          ],
+        ),
+        child: Image.asset(
+          'assets/logobms.png',
+          fit: BoxFit.contain,
         ),
       ),
     );

@@ -370,6 +370,36 @@ class _SettingsScreenState extends State<SettingsScreen>
                         ],
                       ),
                     ),
+                // Company credit + app version.
+                Padding(
+                  padding: const EdgeInsets.only(top: 24, bottom: 8),
+                  child: Column(
+                    children: [
+                      Image.asset(
+                        'assets/logobms.png',
+                        height: 34,
+                        fit: BoxFit.contain,
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Bangkok Medical Software',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF6D756E),
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      const Text(
+                        'เวอร์ชัน 1.0.0',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Color(0xFF9AA3A0),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
