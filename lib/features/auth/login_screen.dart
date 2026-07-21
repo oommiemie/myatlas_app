@@ -52,33 +52,14 @@ class LoginScreen extends StatelessWidget {
                     const SizedBox(height: 24),
                     _SocialRow(onTap: () => _enterApp(context)),
                     const SizedBox(height: 24),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const _BmsBadge(),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Bangkok Medical Software',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.9),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 0.2,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          'เวอร์ชัน 1.0.0',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.6),
-                            fontSize: 11,
-                            letterSpacing: 0.3,
-                          ),
-                        ),
-                      ],
+                    Text(
+                      'เวอร์ชัน 1.0.0',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.6),
+                        fontSize: 11,
+                        letterSpacing: 0.3,
+                      ),
                     ),
                     const SizedBox(height: 8),
                   ],
@@ -333,13 +314,13 @@ class _BackgroundDecor extends StatelessWidget {
             final h = constraints.maxHeight;
             return Stack(
               children: [
-                // Top-left — Health (vital)
+                // Top-left — BMS logo (floats like the other feature circles)
                 Positioned(
                   left: 0.127 * w,
                   top: 0.135 * h,
                   child: _FeatureCircle(
-                    size: 0.218 * w,
-                    asset: 'assets/vital.png',
+                    size: 0.17 * w,
+                    asset: 'assets/bms-icon 1.png',
                   ),
                 ),
                 // Top-right — Family
@@ -360,13 +341,14 @@ class _BackgroundDecor extends StatelessWidget {
                     asset: 'assets/med.png',
                   ),
                 ),
-                // Bottom-left — Nutrition (kcal)
+                // Bottom-left — MyAtlas logo
                 Positioned(
                   left: 0.18 * w,
                   top: 0.74 * h,
                   child: _FeatureCircle(
-                    size: 0.16 * w,
-                    asset: 'assets/kcal.png',
+                    size: 0.17 * w,
+                    asset: 'assets/logoMyAtlascare.png',
+                    circleBg: true,
                   ),
                 ),
               ],
@@ -381,7 +363,14 @@ class _BackgroundDecor extends StatelessWidget {
 class _FeatureCircle extends StatefulWidget {
   final double size;
   final String asset;
-  const _FeatureCircle({required this.size, required this.asset});
+
+  /// Wraps the asset in a glossy silver sphere, matching the BMS icon's look.
+  final bool circleBg;
+  const _FeatureCircle({
+    required this.size,
+    required this.asset,
+    this.circleBg = false,
+  });
 
   @override
   State<_FeatureCircle> createState() => _FeatureCircleState();
@@ -419,10 +408,38 @@ class _FeatureCircleState extends State<_FeatureCircle>
           child: SizedBox(
             width: widget.size,
             height: widget.size,
-            child: Image.asset(
-              widget.asset,
-              fit: BoxFit.contain,
-            ),
+            child: widget.circleBg
+                ? Container(
+                    padding: EdgeInsets.all(widget.size * 0.13),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      // Glossy silver sphere — bright highlight up-left,
+                      // shading toward the rim (same feel as the BMS icon).
+                      gradient: const RadialGradient(
+                        center: Alignment(-0.3, -0.4),
+                        radius: 0.95,
+                        colors: [
+                          Color(0xFFFFFFFF),
+                          Color(0xFFF1F3F5),
+                          Color(0xFFDCE1E5),
+                          Color(0xFFC2C9CF),
+                        ],
+                        stops: [0.0, 0.45, 0.8, 1.0],
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.2),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Image.asset(widget.asset, fit: BoxFit.contain),
+                  )
+                : Image.asset(
+                    widget.asset,
+                    fit: BoxFit.contain,
+                  ),
           ),
         );
       },
@@ -430,6 +447,7 @@ class _FeatureCircleState extends State<_FeatureCircle>
   }
 }
 
+// ignore: unused_element
 class _BmsBadge extends StatelessWidget {
   const _BmsBadge();
 
@@ -469,7 +487,7 @@ class _PhoneMockup extends StatelessWidget {
       right: -236,
       bottom: -50,
       child: Image.asset(
-        'assets/loginimage.png',
+        'assets/hand.png',
         width: 490,
         fit: BoxFit.contain,
         alignment: Alignment.bottomCenter,
