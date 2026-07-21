@@ -27,16 +27,17 @@ class LoginScreen extends StatelessWidget {
           ),
         ),
         child: SafeArea(
-          child: Column(
+          child: Stack(
+            children: [
+              Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const Expanded(
+                // The decor widget also draws the phone, so orbiting circles
+                // can pass both behind and in front of it.
                 child: Stack(
                   clipBehavior: Clip.none,
-                  children: [
-                    _BackgroundDecor(),
-                    _PhoneMockup(),
-                  ],
+                  children: [_BackgroundDecor()],
                 ),
               ),
               Padding(
@@ -52,40 +53,77 @@ class LoginScreen extends StatelessWidget {
                     const SizedBox(height: 24),
                     _SocialRow(onTap: () => _enterApp(context)),
                     const SizedBox(height: 24),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const _BmsBadge(),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Bangkok Medical Software',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.9),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 0.2,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          'เวอร์ชัน 1.0.0',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.6),
-                            fontSize: 11,
-                            letterSpacing: 0.3,
-                          ),
-                        ),
-                      ],
+                    Text(
+                      'เวอร์ชัน 1.0.0',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.6),
+                        fontSize: 11,
+                        letterSpacing: 0.3,
+                      ),
                     ),
                     const SizedBox(height: 8),
                   ],
                 ),
               ),
             ],
+              ),
+            ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Large, very faint BMS logo sitting behind the login artwork.
+// ignore: unused_element
+class _BmsWatermark extends StatelessWidget {
+  const _BmsWatermark();
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned.fill(
+      child: IgnorePointer(
+        child: LayoutBuilder(
+          builder: (_, c) {
+            final w = c.maxWidth;
+            // Square watermark wider than the screen so it bleeds off both
+            // sides, pushed down so the bottom is cropped too.
+            final size = w * 1.1;
+            return Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Positioned(
+                  left: (w - size) / 2,
+                  bottom: size * 0.33,
+                  width: size,
+                  height: size,
+                  child: Opacity(
+                    opacity: 0.18,
+                    // Fade the watermark out toward its bottom edge.
+                    child: ShaderMask(
+                      shaderCallback: (r) => const LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Color(0xFFFFFFFF),
+                          Color(0xFFFFFFFF),
+                          Color(0x00FFFFFF),
+                        ],
+                        stops: [0.0, 0.5, 1.0],
+                      ).createShader(r),
+                      blendMode: BlendMode.dstIn,
+                      child: Image.asset(
+                        'assets/bms-icon 1.png',
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -318,62 +356,130 @@ class _RegisterFooter extends StatelessWidget {
   }
 }
 
-class _BackgroundDecor extends StatelessWidget {
+// ── Orbit ring geometry (tweak these to adjust the Saturn-ring layout) ──────
+const double _kOrbitCx = 0.525; // ring centre X (fraction of width)
+const double _kOrbitCy = 0.382; // ring centre Y (fraction of height)
+const double _kOrbitRx = 0.430; // horizontal radius (fraction of width)
+const double _kOrbitRy = 0.050; // vertical radius (fraction of height)
+const double _kOrbitTilt = -0.588; // ring tilt, radians
+
+class _BackgroundDecor extends StatefulWidget {
   const _BackgroundDecor();
 
   @override
+  State<_BackgroundDecor> createState() => _BackgroundDecorState();
+}
+
+class _BackgroundDecorState extends State<_BackgroundDecor>
+    with SingleTickerProviderStateMixin {
+  // Slow, continuous revolution around the phone.
+  late final AnimationController _spin = AnimationController(
+    vsync: this,
+    duration: const Duration(seconds: 44),
+  )..repeat();
+
+  @override
+  void dispose() {
+    _spin.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Positioned.fill(
-      child: IgnorePointer(
-        child: LayoutBuilder(
+    return Positioned.fill(child: IgnorePointer(child: _ring()));
+  }
+
+  Widget _ring() {
+    return LayoutBuilder(
           builder: (_, constraints) {
             // Figma decoration zone: 440 x 593 (frame width × y of title block).
             // Map normalized coords to actual zone size.
             final w = constraints.maxWidth;
             final h = constraints.maxHeight;
-            return Stack(
-              children: [
-                // Top-left — Health (vital)
-                Positioned(
-                  left: 0.127 * w,
-                  top: 0.135 * h,
-                  child: _FeatureCircle(
-                    size: 0.218 * w,
-                    asset: 'assets/vital.png',
-                  ),
-                ),
-                // Top-right — Family
-                Positioned(
-                  left: 0.83 * w,
-                  top: 0.05 * h,
-                  child: _FeatureCircle(
-                    size: 0.115 * w,
-                    asset: 'assets/fam.png',
-                  ),
-                ),
-                // Mid-left — Medicine
-                Positioned(
-                  left: 0.036 * w,
-                  top: 0.462 * h,
-                  child: _FeatureCircle(
-                    size: 0.186 * w,
-                    asset: 'assets/med.png',
-                  ),
-                ),
-                // Bottom-left — Nutrition (kcal)
-                Positioned(
-                  left: 0.18 * w,
-                  top: 0.74 * h,
-                  child: _FeatureCircle(
-                    size: 0.16 * w,
-                    asset: 'assets/kcal.png',
-                  ),
-                ),
-              ],
+
+            // Saturn-style ring: the circles revolve on a wide, squashed,
+            // tilted ellipse centred on the phone (geometry consts above).
+            const cxF = _kOrbitCx, cyF = _kOrbitCy;
+            const rxF = _kOrbitRx, ryF = _kOrbitRy;
+            const tilt = _kOrbitTilt;
+
+            return AnimatedBuilder(
+              animation: _spin,
+              builder: (_, __) {
+                final spin = _spin.value * 360.0;
+                // (sinA, widget) — sinA < 0 means the upper (near) half of the
+                // ring, which is drawn in front of the phone and scaled up.
+                final items = <(double, Widget)>[];
+
+                void orbit(
+                  double deg,
+                  double sizeF,
+                  String asset, {
+                  bool circleBg = false,
+                }) {
+                  final a = (deg + spin) * math.pi / 180;
+                  final sinA = math.sin(a);
+                  final ex = rxF * w * math.cos(a);
+                  final ey = ryF * h * sinA;
+                  final dx = ex * math.cos(tilt) - ey * math.sin(tilt);
+                  final dy = ex * math.sin(tilt) + ey * math.cos(tilt);
+                  // Top of the ring = nearest → largest; bottom = farthest.
+                  final depth = 0.52 + 0.86 * ((1 - sinA) / 2);
+                  final s = sizeF * w * depth;
+                  items.add((
+                    sinA,
+                    Positioned(
+                      // Keyed by asset so re-ordering between the front/back
+                      // layers doesn't reassign State (which looked like a
+                      // sudden jump backwards).
+                      key: ValueKey(asset),
+                      // No clamping — clamping pins circles at the frame edge
+                      // and makes the orbit stutter. The radii below are sized
+                      // so the whole ring stays in frame.
+                      left: cxF * w + dx - s / 2,
+                      top: cyF * h + dy - s / 2,
+                      // Distant circles also fade back slightly, which sells
+                      // the depth more than scale alone.
+                      child: Opacity(
+                        opacity: 0.62 + 0.38 * ((1 - sinA) / 2),
+                        child: _FeatureCircle(
+                          size: s,
+                          asset: asset,
+                          circleBg: circleBg,
+                        ),
+                      ),
+                    ),
+                  ));
+                }
+
+                // Evenly spaced around the ring so they revolve in formation.
+                orbit(0, 0.17, 'assets/vital.png');
+                orbit(60, 0.15, 'assets/med.png');
+                orbit(120, 0.14, 'assets/kcal.png');
+                orbit(180, 0.15, 'assets/bms-icon 1.png');
+                orbit(240, 0.145, 'assets/logoMyAtlascare.png', circleBg: true);
+                orbit(300, 0.13, 'assets/fam.png');
+
+                // Far half behind the phone, near half in front of it.
+                final far = [
+                  for (final it in items)
+                    if (it.$1 >= 0) it.$2,
+                ];
+                final near = [
+                  for (final it in items)
+                    if (it.$1 < 0) it.$2,
+                ];
+                return Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    ...far,
+                    const _PhoneMockup(),
+                    ...near,
+                  ],
+                );
+              },
             );
           },
-        ),
-      ),
     );
   }
 }
@@ -381,7 +487,14 @@ class _BackgroundDecor extends StatelessWidget {
 class _FeatureCircle extends StatefulWidget {
   final double size;
   final String asset;
-  const _FeatureCircle({required this.size, required this.asset});
+
+  /// Wraps the asset in a glossy silver sphere (for logos with no backdrop).
+  final bool circleBg;
+  const _FeatureCircle({
+    required this.size,
+    required this.asset,
+    this.circleBg = false,
+  });
 
   @override
   State<_FeatureCircle> createState() => _FeatureCircleState();
@@ -419,10 +532,37 @@ class _FeatureCircleState extends State<_FeatureCircle>
           child: SizedBox(
             width: widget.size,
             height: widget.size,
-            child: Image.asset(
-              widget.asset,
-              fit: BoxFit.contain,
-            ),
+            child: widget.circleBg
+                ? Container(
+                    padding: EdgeInsets.all(widget.size * 0.13),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      // Glossy silver sphere, matching the BMS icon's look.
+                      gradient: const RadialGradient(
+                        center: Alignment(-0.3, -0.4),
+                        radius: 0.95,
+                        colors: [
+                          Color(0xFFFFFFFF),
+                          Color(0xFFF1F3F5),
+                          Color(0xFFDCE1E5),
+                          Color(0xFFC2C9CF),
+                        ],
+                        stops: [0.0, 0.45, 0.8, 1.0],
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.2),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Image.asset(widget.asset, fit: BoxFit.contain),
+                  )
+                : Image.asset(
+                    widget.asset,
+                    fit: BoxFit.contain,
+                  ),
           ),
         );
       },
@@ -430,6 +570,7 @@ class _FeatureCircleState extends State<_FeatureCircle>
   }
 }
 
+// ignore: unused_element
 class _BmsBadge extends StatelessWidget {
   const _BmsBadge();
 
@@ -469,7 +610,7 @@ class _PhoneMockup extends StatelessWidget {
       right: -236,
       bottom: -50,
       child: Image.asset(
-        'assets/loginimage.png',
+        'assets/hand.png',
         width: 490,
         fit: BoxFit.contain,
         alignment: Alignment.bottomCenter,
