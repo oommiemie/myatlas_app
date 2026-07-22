@@ -51,5 +51,9 @@
 	<string>แอปต้องการเข้าถึงคลังภาพเพื่อเลือกภาพอาหารสำหรับวิเคราะห์โภชนาการ</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>แอปใช้ตำแหน่งเพื่อบันทึกสถานที่ที่วัดข้อมูลสุขภาพ</string>
+	<key>NSSupportsLiveActivities</key>
+	<true/>
+	<key>NSSupportsLiveActivitiesFrequentUpdates</key>
+	<true/>
 </dict>
 </plist>
