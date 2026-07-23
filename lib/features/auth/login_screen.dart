@@ -29,6 +29,8 @@ class LoginScreen extends StatelessWidget {
         child: SafeArea(
           child: Stack(
             children: [
+              // Faint BMS watermark behind the title / login block.
+              const _BmsWatermark(),
               Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -77,7 +79,6 @@ class LoginScreen extends StatelessWidget {
 }
 
 /// Large, very faint BMS logo sitting behind the login artwork.
-// ignore: unused_element
 class _BmsWatermark extends StatelessWidget {
   const _BmsWatermark();
 
@@ -90,13 +91,13 @@ class _BmsWatermark extends StatelessWidget {
             final w = c.maxWidth;
             // Square watermark wider than the screen so it bleeds off both
             // sides, pushed down so the bottom is cropped too.
-            final size = w * 1.1;
+            final size = w * 0.95;
             return Stack(
               clipBehavior: Clip.none,
               children: [
                 Positioned(
                   left: (w - size) / 2,
-                  bottom: size * 0.33,
+                  bottom: size * 0.40,
                   width: size,
                   height: size,
                   child: Opacity(
@@ -111,7 +112,7 @@ class _BmsWatermark extends StatelessWidget {
                           Color(0xFFFFFFFF),
                           Color(0x00FFFFFF),
                         ],
-                        stops: [0.0, 0.5, 1.0],
+                        stops: [0.0, 0.28, 1.0],
                       ).createShader(r),
                       blendMode: BlendMode.dstIn,
                       child: Image.asset(
@@ -357,11 +358,11 @@ class _RegisterFooter extends StatelessWidget {
 }
 
 // ── Orbit ring geometry (tweak these to adjust the Saturn-ring layout) ──────
-const double _kOrbitCx = 0.525; // ring centre X (fraction of width)
-const double _kOrbitCy = 0.382; // ring centre Y (fraction of height)
-const double _kOrbitRx = 0.430; // horizontal radius (fraction of width)
+const double _kOrbitCx = 0.555; // ring centre X (fraction of width)
+const double _kOrbitCy = 0.460; // ring centre Y (fraction of height)
+const double _kOrbitRx = 0.490; // horizontal radius (fraction of width)
 const double _kOrbitRy = 0.050; // vertical radius (fraction of height)
-const double _kOrbitTilt = -0.588; // ring tilt, radians
+const double _kOrbitTilt = -1.043; // ring tilt, radians
 
 class _BackgroundDecor extends StatefulWidget {
   const _BackgroundDecor();
@@ -453,12 +454,16 @@ class _BackgroundDecorState extends State<_BackgroundDecor>
                 }
 
                 // Evenly spaced around the ring so they revolve in formation.
-                orbit(0, 0.17, 'assets/vital.png');
-                orbit(60, 0.15, 'assets/med.png');
-                orbit(120, 0.14, 'assets/kcal.png');
-                orbit(180, 0.15, 'assets/bms-icon 1.png');
-                orbit(240, 0.145, 'assets/logoMyAtlascare.png', circleBg: true);
-                orbit(300, 0.13, 'assets/fam.png');
+                // The ring emerges from behind the phone at 180° and reaches
+                // its nearest point at 270°. The brand logos start just past
+                // 180° so they ride the whole front arc instead of being
+                // swept away straight after the screen opens.
+                orbit(190, 0.15, 'assets/bms-icon 1.png');
+                orbit(250, 0.145, 'assets/logoMyAtlascare.png', circleBg: true);
+                orbit(310, 0.13, 'assets/fam.png');
+                orbit(10, 0.17, 'assets/vital.png');
+                orbit(70, 0.15, 'assets/med.png');
+                orbit(130, 0.14, 'assets/kcal.png');
 
                 // Far half behind the phone, near half in front of it.
                 final far = [
@@ -608,7 +613,7 @@ class _PhoneMockup extends StatelessWidget {
   Widget build(BuildContext context) {
     return Positioned(
       right: -236,
-      bottom: -50,
+      bottom: -80,
       child: Image.asset(
         'assets/hand.png',
         width: 490,

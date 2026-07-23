@@ -12,7 +12,6 @@ import '../nutrition/food_lens/food_lens_flow.dart';
 import '../nutrition/nutrition_detail_screen.dart';
 import 'widgets/ai_advice_card.dart';
 import 'widgets/header_clouds.dart';
-import 'widgets/home_hospital_queue_card.dart';
 import 'widgets/home_sleep_card.dart';
 import 'widgets/home_summary_dashboard.dart';
 import 'widgets/home_votagex_hero.dart';
@@ -171,7 +170,9 @@ class _HomeScreenState extends State<HomeScreen>
                         ),
                       ],
                     ),
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 120),
+                    // Extra bottom room so the last card clears the floating
+                    // queue bar sitting above the navbar.
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 196),
                     child: HealthSummarySections(
               data: _healthData,
               // Home uses the dashboard grid's compact meal card instead of the
@@ -179,8 +180,8 @@ class _HomeScreenState extends State<HomeScreen>
               showNutrition: false,
               afterActivity: Column(
                 children: [
-                  const HomeHospitalQueueCard(),
-                  const SizedBox(height: 16),
+                  // Queue card moved out of the feed — it now floats above the
+                  // navbar (see FloatingQueueBar in MainShell).
                   // Dashboard grid (pulled from the Paiboon fork): meal-analysis
                   // card on the left, smart-watch + family stacked on the right.
                   HomeSummaryDashboard(

@@ -4,6 +4,7 @@ import '../family/care_giver_screen.dart';
 import '../health/health_screen.dart';
 import '../health/widgets/custom_tab_bar.dart';
 import '../home/home_screen.dart';
+import '../home/widgets/home_hospital_queue_card.dart';
 import '../me/me_screen.dart';
 import '../medicine/medicine_screen.dart';
 
@@ -55,7 +56,13 @@ class _MainShellState extends State<MainShell> {
             left: 0,
             right: 0,
             bottom: 0,
-            child: CustomTabBar(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Active-queue bar floats directly on top of the navbar, the
+                // way Grab keeps an ongoing order in reach.
+                if (_tabIndex == 0) const FloatingQueueBar(),
+                CustomTabBar(
               currentIndex: _tabIndex,
               onTap: (i) => setState(() => _tabIndex = i),
               items: const [
@@ -64,6 +71,8 @@ class _MainShellState extends State<MainShell> {
                 TabItem(CupertinoIcons.capsule, 'ทานยา'),
                 TabItem(CupertinoIcons.person_2, 'ครอบครัว'),
                 TabItem(CupertinoIcons.person_crop_circle, 'ฉัน'),
+              ],
+                ),
               ],
             ),
           ),

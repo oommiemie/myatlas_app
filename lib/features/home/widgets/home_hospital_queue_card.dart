@@ -60,9 +60,7 @@ class HomeHospitalQueueCard extends StatelessWidget {
 
   void _showDetails(BuildContext context) {
     Navigator.of(context).push(
-      CupertinoPageRoute<void>(
-        builder: (_) => _QueueDetailScreen(info: info),
-      ),
+      CupertinoPageRoute<void>(builder: (_) => _QueueDetailScreen(info: info)),
     );
   }
 
@@ -76,8 +74,16 @@ class HomeHospitalQueueCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(24),
           gradient: _grad,
           boxShadow: const [
-            BoxShadow(color: Color(0x0A000000), blurRadius: 4, offset: Offset(0, 2)),
-            BoxShadow(color: Color(0x0F000000), blurRadius: 2, offset: Offset(0, 1)),
+            BoxShadow(
+              color: Color(0x0A000000),
+              blurRadius: 4,
+              offset: Offset(0, 2),
+            ),
+            BoxShadow(
+              color: Color(0x0F000000),
+              blurRadius: 2,
+              offset: Offset(0, 1),
+            ),
           ],
         ),
         padding: const EdgeInsets.all(16),
@@ -150,7 +156,9 @@ class HomeHospitalQueueCard extends StatelessWidget {
                   const SizedBox(height: 10),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 4),
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xFFF59E0B).withValues(alpha: 0.95),
                       borderRadius: BorderRadius.circular(100),
@@ -182,6 +190,300 @@ class HomeHospitalQueueCard extends StatelessWidget {
             const SizedBox(width: 12),
             _QueueBadge(code: info.queueCode),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Wait-count copy, tiered so a short wait reads as "you're nearly up" instead
+/// of just showing another number to count down.
+///
+///   0 queues  -> ถึงคิวแล้ว
+///   1 queue   -> คิวต่อไปคือคุณ
+///   2+        -> เหลืออีก N คิว   ("เหลือ" frames the queue as draining, which
+///                                  reads shorter than the neutral "อีก")
+class _WaitCopy extends StatelessWidget {
+  const _WaitCopy({
+    required this.waitCount,
+    required this.accent,
+    required this.numberSize,
+    required this.labelSize,
+    required this.messageSize,
+  });
+
+  final int waitCount;
+  final Color accent;
+  final double numberSize;
+  final double labelSize;
+  final double messageSize;
+
+  @override
+  Widget build(BuildContext context) {
+    // Every state renders inside a box as tall as the tallest one (the number),
+    // so switching copy never changes the bar's height.
+    return SizedBox(
+      height: numberSize,
+      child: Align(
+        alignment: Alignment.centerLeft,
+        // widthFactor keeps the box hugging its copy — without it Align takes
+        // all the width it is offered.
+        widthFactor: 1,
+        child: waitCount <= 1 ? _message() : _countdown(),
+      ),
+    );
+  }
+
+  Widget _message() {
+    return Text(
+      waitCount <= 0 ? 'ถึงคิวแล้ว' : 'คิวต่อไปคือคุณ',
+      maxLines: 1,
+      style: TextStyle(
+        color: accent,
+        fontSize: messageSize,
+        fontWeight: FontWeight.w800,
+        fontVariations: const [FontVariation('wght', 800)],
+        height: 1.0,
+      ),
+    );
+  }
+
+  Widget _countdown() {
+    final label = TextStyle(
+      color: const Color(0xFF3E453F),
+      fontSize: labelSize,
+      fontWeight: FontWeight.w600,
+      height: 1.0,
+    );
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.baseline,
+      textBaseline: TextBaseline.alphabetic,
+      children: [
+        Text('เหลืออีก', style: label),
+        const SizedBox(width: 5),
+        // Only the number swaps, sliding up as the queue counts down.
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 380),
+          switchInCurve: Curves.easeOutBack,
+          switchOutCurve: Curves.easeIn,
+          transitionBuilder: (child, anim) => ClipRect(
+            child: FadeTransition(
+              opacity: anim,
+              child: SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(0, 0.8),
+                  end: Offset.zero,
+                ).animate(anim),
+                child: child,
+              ),
+            ),
+          ),
+          child: Text(
+            '$waitCount',
+            key: ValueKey(waitCount),
+            style: TextStyle(
+              color: accent,
+              fontSize: numberSize,
+              fontWeight: FontWeight.w900,
+              fontVariations: const [FontVariation('wght', 900)],
+              height: 1.0,
+              fontFeatures: const [FontFeature.tabularFigures()],
+            ),
+          ),
+        ),
+        const SizedBox(width: 4),
+        Text('คิว', style: label),
+      ],
+    );
+  }
+}
+
+/// Grab-style "ongoing order" bar: a compact card that floats just above the
+/// bottom navbar while the queue is active. Tapping it opens the full detail
+/// screen, same as the in-feed card.
+class FloatingQueueBar extends StatefulWidget {
+  const FloatingQueueBar({super.key, this.info = _defaultQueue});
+
+  final HospitalQueueInfo info;
+
+  @override
+  State<FloatingQueueBar> createState() => _FloatingQueueBarState();
+}
+
+class _FloatingQueueBarState extends State<FloatingQueueBar>
+    with SingleTickerProviderStateMixin {
+  // Slides up into place on first show, and survives hot reload.
+  late final AnimationController _enter = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 520),
+  )..forward();
+
+  bool _pressed = false;
+
+  @override
+  void dispose() {
+    _enter.dispose();
+    super.dispose();
+  }
+
+  void _open() {
+    Navigator.of(context, rootNavigator: true).push(
+      CupertinoPageRoute<void>(
+        builder: (_) => _QueueDetailScreen(info: widget.info),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final info = widget.info;
+    // Solid light surface — the bar sits on top of the feed, so it stays quiet
+    // and lets the accent colour do the signalling.
+    const accent = Color(0xFF1E88E5);
+    final anim = CurvedAnimation(parent: _enter, curve: Curves.easeOutCubic);
+    return AnimatedBuilder(
+      animation: anim,
+      builder: (_, child) => Opacity(
+        opacity: anim.value,
+        child: Transform.translate(
+          offset: Offset(0, (1 - anim.value) * 28),
+          child: child,
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTapDown: (_) => setState(() => _pressed = true),
+          onTapCancel: () => setState(() => _pressed = false),
+          onTapUp: (_) => setState(() => _pressed = false),
+          onTap: _open,
+          child: AnimatedScale(
+            scale: _pressed ? 0.97 : 1,
+            duration: const Duration(milliseconds: 140),
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: CupertinoColors.white,
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(
+                  color: const Color(0xFF747480).withValues(alpha: 0.12),
+                ),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x1A000000),
+                    blurRadius: 18,
+                    offset: Offset(0, 8),
+                  ),
+                ],
+              ),
+              // IntrinsicHeight lets the queue-code box stretch to the same
+              // height as the text column beside it.
+              child: IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Context line: where the queue is being served.
+                          Row(
+                            children: [
+                              const Icon(
+                                CupertinoIcons.location_solid,
+                                size: 10,
+                                color: Color(0xFF6B7280),
+                              ),
+                              const SizedBox(width: 4),
+                              Expanded(
+                                child: Text(
+                                  info.servicePoint,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    color: Color(0xFF6B7280),
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 7),
+                          // The answer to "how much longer?" — the loudest
+                          // thing in the bar.
+                          _WaitCopy(
+                            waitCount: info.waitCount,
+                            accent: accent,
+                            numberSize: 28,
+                            labelSize: 13,
+                            messageSize: 19,
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            info.hospitalName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: Color(0xFF9CA3AF),
+                              fontSize: 11,
+                              fontWeight: FontWeight.w500,
+                              height: 1.0,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    // The patient's own queue code — their identity in the queue,
+                    // boxed off so it reads as a separate fact.
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1E88E5).withValues(alpha: 0.09),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text(
+                            'คิวของคุณ',
+                            style: TextStyle(
+                              color: Color(0xFF6B7280),
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w600,
+                              height: 1.0,
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          Text(
+                            info.queueCode,
+                            style: const TextStyle(
+                              color: Color(0xFF1E88E5),
+                              fontSize: 24,
+                              fontWeight: FontWeight.w900,
+                              fontVariations: [FontVariation('wght', 900)],
+                              letterSpacing: 0.5,
+                              height: 1.0,
+                              fontFeatures: [FontFeature.tabularFigures()],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
         ),
       ),
     );
@@ -240,12 +542,7 @@ class _QueueBadge extends StatelessWidget {
                 letterSpacing: 2,
                 height: 1.0,
                 fontFeatures: [FontFeature.tabularFigures()],
-                shadows: [
-                  Shadow(
-                    color: Color(0x66FFFFFF),
-                    blurRadius: 12,
-                  ),
-                ],
+                shadows: [Shadow(color: Color(0x66FFFFFF), blurRadius: 12)],
               ),
             ),
           ),
@@ -363,10 +660,7 @@ class _QueueDetailScreenState extends State<_QueueDetailScreen>
         final t = anim.value;
         return Opacity(
           opacity: t,
-          child: Transform.translate(
-            offset: Offset(0, (1 - t) * 18),
-            child: c,
-          ),
+          child: Transform.translate(offset: Offset(0, (1 - t) * 18), child: c),
         );
       },
       child: child,
@@ -441,10 +735,6 @@ class _QueueDetailScreenState extends State<_QueueDetailScreen>
           ],
         ),
       ),
-      _StatusBanner(
-        waitCount: info.waitCount,
-        message: info.statusMessage,
-      ),
     ];
 
     return CupertinoPageScaffold(
@@ -489,13 +779,9 @@ class _QueueDetailScreenState extends State<_QueueDetailScreen>
                         ),
                         padding: const EdgeInsets.fromLTRB(16, 16, 16, 40),
                         itemCount: sections.length,
-                        separatorBuilder: (_, __) =>
-                            const SizedBox(height: 16),
-                        itemBuilder: (context, i) => _stagger(
-                          i,
-                          sections.length,
-                          sections[i],
-                        ),
+                        separatorBuilder: (_, __) => const SizedBox(height: 16),
+                        itemBuilder: (context, i) =>
+                            _stagger(i, sections.length, sections[i]),
                       ),
                     ),
                   ),
@@ -547,13 +833,13 @@ class _QueueHeroCard extends StatelessWidget {
                 height: 40,
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Color(0xFFE6F3FB),
+                  color: Color(0xFF1E88E5),
                 ),
                 alignment: Alignment.center,
                 child: const Icon(
                   Icons.local_hospital_rounded,
                   size: 22,
-                  color: Color(0xFF1E88E5),
+                  color: CupertinoColors.white,
                 ),
               ),
               const SizedBox(width: 12),
@@ -588,64 +874,67 @@ class _QueueHeroCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 18),
+          // Queue code block — light blue tint, matching the floating bar's
+          // theme instead of the old solid gradient.
           Container(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 18),
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(16, 18, 16, 18),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Color(0xFF4FC3F7), Color(0xFF1E88E5)],
-              ),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0x33093327),
-                  blurRadius: 14,
-                  offset: Offset(0, 6),
-                ),
-              ],
+              color: const Color(0xFF1E88E5).withValues(alpha: 0.08),
             ),
             child: Column(
               children: [
-                Text(
-                  'คิวของท่าน'.toUpperCase(),
+                const Text(
+                  'คิวของท่าน',
                   style: TextStyle(
-                    color: CupertinoColors.white.withValues(alpha: 0.7),
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.6,
+                    color: Color(0xFF6B7280),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.6,
                   ),
                 ),
                 const SizedBox(height: 8),
+                // The queue code is the patient's own number — it never
+                // changes, so it is rendered statically.
                 Text(
                   info.queueCode,
                   style: const TextStyle(
                     fontSize: 64,
-                    fontWeight: FontWeight.w800,
-                    color: CupertinoColors.white,
+                    fontWeight: FontWeight.w900,
+                    fontVariations: [FontVariation('wght', 900)],
+                    color: Color(0xFF1E88E5),
                     letterSpacing: 3,
                     height: 1.0,
                     fontFeatures: [FontFeature.tabularFigures()],
-                    shadows: [
-                      Shadow(
-                        color: Color(0x66FFFFFF),
-                        blurRadius: 20,
-                      ),
-                    ],
                   ),
                 ),
                 const SizedBox(height: 10),
-                Text(
-                  info.servicePoint,
-                  style: TextStyle(
-                    color: CupertinoColors.white.withValues(alpha: 0.9),
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      CupertinoIcons.location_solid,
+                      size: 11,
+                      color: Color(0xFF6B7280),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      info.servicePoint,
+                      style: const TextStyle(
+                        color: Color(0xFF6B7280),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
+          const SizedBox(height: 14),
+          // "Queues ahead" pill — its own element below the queue card.
+          Center(child: _WaitPill(waitCount: info.waitCount)),
         ],
       ),
     );
@@ -687,63 +976,36 @@ class _SectionCard extends StatelessWidget {
   }
 }
 
-class _StatusBanner extends StatelessWidget {
-  const _StatusBanner({required this.waitCount, required this.message});
+/// Tinted pill under the queue code on the detail screen, carrying the same
+/// wait copy as the floating bar.
+class _WaitPill extends StatelessWidget {
+  const _WaitPill({required this.waitCount});
   final int waitCount;
-  final String message;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+    // Same treatment as the floating bar: quiet tinted surface, accent-coloured
+    // copy carrying the meaning.
+    const accent = Color(0xFF1E88E5);
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      padding: const EdgeInsets.fromLTRB(16, 9, 16, 10),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        color: const Color(0xFFFEF3C7),
-        border: Border.all(
-          color: const Color(0xFFF59E0B).withValues(alpha: 0.35),
-        ),
+        borderRadius: BorderRadius.circular(100),
+        color: accent.withValues(alpha: 0.09),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 24,
-                height: 24,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Color(0xFFF59E0B),
-                ),
-                alignment: Alignment.center,
-                child: const Icon(
-                  Icons.hourglass_bottom_rounded,
-                  size: 14,
-                  color: CupertinoColors.white,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'คิวที่รอ: $waitCount คิว',
-                style: const TextStyle(
-                  color: Color(0xFF92400E),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            message,
-            style: const TextStyle(
-              color: Color(0xFF92400E),
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              height: 1.5,
-            ),
-          ),
-        ],
+      // The pill hugs its copy, so animate the width change too — the height
+      // is already fixed by _WaitCopy.
+      child: AnimatedSize(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOutCubic,
+        child: _WaitCopy(
+          waitCount: waitCount,
+          accent: accent,
+          numberSize: 22,
+          labelSize: 13,
+          messageSize: 15,
+        ),
       ),
     );
   }
@@ -769,15 +1031,14 @@ class _DetailRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // 24px solid circle + white icon — the app-wide convention for the
+          // chip in front of a label (settings, family, health, nutrition).
           Container(
             width: 24,
             height: 24,
-            decoration: BoxDecoration(
-              color: iconColor.withValues(alpha: 0.12),
-              shape: BoxShape.circle,
-            ),
+            decoration: BoxDecoration(color: iconColor, shape: BoxShape.circle),
             alignment: Alignment.center,
-            child: Icon(icon, size: 13, color: iconColor),
+            child: Icon(icon, size: 13, color: CupertinoColors.white),
           ),
           const SizedBox(width: 10),
           SizedBox(
