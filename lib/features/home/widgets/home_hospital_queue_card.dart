@@ -42,7 +42,7 @@ const _defaultQueue = HospitalQueueInfo(
   insurance: 'ชำระเงินครบ',
   department: 'อายุรกรรม',
   room: '022 ห้องจ่ายยา OPD',
-  waitCount: 2,
+  waitCount: 0,
   statusMessage:
       'คิวของท่านใกล้จะถึงแล้ว กรุณาเตรียมตัวเพื่อเข้ารับบริการในเร็ว ๆ นี้',
 );

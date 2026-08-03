@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../core/theme/app_typography.dart';
+import '../../core/widgets/large_title_header.dart';
 import '../../core/widgets/liquid_glass_button.dart';
 import '../../core/widgets/press_effect.dart';
 import '../appointment/appointment_screen.dart';
@@ -11,6 +12,7 @@ import 'behavior_screen.dart';
 import 'chronic_disease_screen.dart';
 import 'dental_screen.dart';
 import 'insurance_screen.dart';
+import 'invite_screen.dart';
 import 'opd/opd_registry_screen.dart';
 import 'settings_screen.dart';
 import 'treatment/treatment_screen.dart';
@@ -77,11 +79,10 @@ class _MeScreenState extends State<MeScreen>
           parent: AlwaysScrollableScrollPhysics(),
         ),
         slivers: [
-          CupertinoSliverNavigationBar(
-            largeTitle: const Text('ฉัน'),
-            backgroundColor: bg.withValues(alpha: 0.85),
-            border: null,
-            trailing: LiquidGlassButton(
+          LargeTitleHeader(
+            title: 'ฉัน',
+            backgroundColor: bg,
+            action: LiquidGlassButton(
               icon: CupertinoIcons.gear,
               onTap: () => Navigator.of(context).push(
                 CupertinoPageRoute(
@@ -103,6 +104,25 @@ class _MeScreenState extends State<MeScreen>
             padding: const EdgeInsets.fromLTRB(0, 0, 0, 120),
             sliver: SliverList(
               delegate: SliverChildListDelegate.fixed([
+                // Referral summary — sits right under the profile so the count
+                // is visible without scrolling.
+                _stagger(
+                  1,
+                  5,
+                  const Padding(
+                    padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
+                    child: InviteCard(),
+                  ),
+                ),
+                // Mockup: quota reached — reward CTA. Remove before release.
+                _stagger(
+                  1,
+                  5,
+                  const Padding(
+                    padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
+                    child: InviteCard(info: kFullInvite),
+                  ),
+                ),
                 _stagger(
                   1,
                   5,

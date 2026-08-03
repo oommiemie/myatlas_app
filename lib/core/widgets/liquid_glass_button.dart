@@ -44,12 +44,14 @@ class LiquidGlassButton extends StatelessWidget {
         height: size,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
+          // The plain-glass shadow stays tight so it reads as a lift rather
+          // than a bloom, and fits inside clipped headers without being cut.
           boxShadow: [
             BoxShadow(
               color: (tint ?? CupertinoColors.black)
-                  .withValues(alpha: hasTint ? 0.35 : 0.12),
-              blurRadius: hasTint ? 18 : 24,
-              offset: Offset(0, hasTint ? 8 : 6),
+                  .withValues(alpha: hasTint ? 0.35 : 0.10),
+              blurRadius: hasTint ? 18 : 8,
+              offset: Offset(0, hasTint ? 8 : 2),
             ),
           ],
         ),

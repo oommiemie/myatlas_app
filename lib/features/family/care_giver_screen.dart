@@ -10,6 +10,7 @@ import '../../core/widgets/skeleton_box.dart';
 import 'add_family_member_sheet.dart';
 import 'fall_alert.dart';
 import 'family_detail_screen.dart';
+import '../../core/widgets/large_title_header.dart';
 import '../../core/widgets/liquid_glass_button.dart';
 
 enum FamilyMemberStatus { allSafe, attentionNeeded }
@@ -286,11 +287,10 @@ class _CareGiverScreenState extends State<CareGiverScreen>
           parent: AlwaysScrollableScrollPhysics(),
         ),
         slivers: [
-          CupertinoSliverNavigationBar(
-            largeTitle: const Text('ครอบครัว'),
-            backgroundColor: bg.withValues(alpha: 0.85),
-            border: null,
-            trailing: LiquidGlassButton(
+          LargeTitleHeader(
+            title: 'ครอบครัว',
+            backgroundColor: bg,
+            action: LiquidGlassButton(
               icon: CupertinoIcons.plus,
               onTap: () => showAddFamilyMemberSheet(context),
               size: 36,

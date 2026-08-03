@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../core/services/app_strings.dart';
 import '../../core/widgets/liquid_glass_button.dart';
@@ -375,8 +376,8 @@ class _SettingsScreenState extends State<SettingsScreen>
                   padding: const EdgeInsets.only(top: 24, bottom: 8),
                   child: Column(
                     children: [
-                      Image.asset(
-                        'assets/logobms.png',
+                      SvgPicture.asset(
+                        'assets/logo_bmsgroup.svg',
                         height: 34,
                         fit: BoxFit.contain,
                       ),

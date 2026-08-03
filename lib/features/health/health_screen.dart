@@ -6,6 +6,7 @@ import 'package:flutter/material.dart' show Icons;
 import '../../core/responsive/responsive.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_typography.dart';
+import '../../core/widgets/large_title_header.dart';
 import '../../core/widgets/liquid_glass_button.dart';
 import '../../core/widgets/skeleton_box.dart';
 import '../family/family_devices.dart';
@@ -132,11 +133,10 @@ class _HealthScreenState extends State<HealthScreen>
               parent: AlwaysScrollableScrollPhysics(),
             ),
             slivers: [
-              CupertinoSliverNavigationBar(
-                largeTitle: const Text('สรุปสุขภาพ'),
-                backgroundColor: bg.withValues(alpha: 0.85),
-                border: null,
-                trailing: LiquidGlassButton(
+              LargeTitleHeader(
+                title: 'สรุปสุขภาพ',
+                backgroundColor: bg,
+                action: LiquidGlassButton(
                   icon: Icons.bluetooth,
                   onTap: _openDevicePairing,
                   size: 36,

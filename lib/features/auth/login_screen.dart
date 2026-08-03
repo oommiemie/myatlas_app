@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../shell/main_shell.dart';
@@ -115,9 +116,17 @@ class _BmsWatermark extends StatelessWidget {
                         stops: [0.0, 0.28, 1.0],
                       ).createShader(r),
                       blendMode: BlendMode.dstIn,
-                      child: Image.asset(
-                        'assets/bms-icon 1.png',
-                        fit: BoxFit.contain,
+                      // Group logo on a white disc, like the orbit chip.
+                      child: Container(
+                        padding: EdgeInsets.all(size * 0.13),
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white,
+                        ),
+                        child: SvgPicture.asset(
+                          'assets/logo_bmsgroup.svg',
+                          fit: BoxFit.contain,
+                        ),
                       ),
                     ),
                   ),
@@ -140,7 +149,7 @@ class _TitleBlock extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'My Atlas',
+          'MyAtlas',
           style: TextStyle(
             fontFamily: 'IBM Plex Sans Thai Looped',
             fontSize: 36,
@@ -458,7 +467,7 @@ class _BackgroundDecorState extends State<_BackgroundDecor>
                 // its nearest point at 270°. The brand logos start just past
                 // 180° so they ride the whole front arc instead of being
                 // swept away straight after the screen opens.
-                orbit(190, 0.15, 'assets/bms-icon 1.png');
+                orbit(190, 0.15, 'assets/logo_bmsgroup.svg', circleBg: true);
                 orbit(250, 0.145, 'assets/logoMyAtlascare.png', circleBg: true);
                 orbit(310, 0.13, 'assets/fam.png');
                 orbit(10, 0.17, 'assets/vital.png');
@@ -562,17 +571,19 @@ class _FeatureCircleState extends State<_FeatureCircle>
                         ),
                       ],
                     ),
-                    child: Image.asset(widget.asset, fit: BoxFit.contain),
+                    child: _assetImage(widget.asset),
                   )
-                : Image.asset(
-                    widget.asset,
-                    fit: BoxFit.contain,
-                  ),
+                : _assetImage(widget.asset),
           ),
         );
       },
     );
   }
+
+  /// Renders either raster or SVG assets with the same contain fit.
+  Widget _assetImage(String asset) => asset.endsWith('.svg')
+      ? SvgPicture.asset(asset, fit: BoxFit.contain)
+      : Image.asset(asset, fit: BoxFit.contain);
 }
 
 // ignore: unused_element
@@ -597,8 +608,8 @@ class _BmsBadge extends StatelessWidget {
             ),
           ],
         ),
-        child: Image.asset(
-          'assets/logobms.png',
+        child: SvgPicture.asset(
+          'assets/logo_bmsgroup.svg',
           fit: BoxFit.contain,
         ),
       ),

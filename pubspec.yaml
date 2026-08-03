@@ -73,6 +73,7 @@ flutter:
   assets:
     - assets/Appname.png
     - assets/logobms.png
+    - assets/logo_bmsgroup.svg
     - assets/bms-icon 1.png
     - assets/logoMyAtlascare.png
     - assets/taichi.png
@@ -80,6 +81,9 @@ flutter:
     - assets/bgappointment.png
     - assets/bgvisitappointment.png
     - assets/bgpacket.png
+    - assets/get-reward.png
+    - assets/default-reward.png
+    - assets/claim-reward.png
     - assets/watch.png
     - assets/AiBOT.png
     - assets/AiBOT2.png

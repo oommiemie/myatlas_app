@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/press_effect.dart';
@@ -133,8 +134,8 @@ class _ProfileBannerState extends State<ProfileBanner>
                                   ),
                                 ],
                               ),
-                              child: Image.asset(
-                                'assets/logobms.png',
+                              child: SvgPicture.asset(
+                                'assets/logo_bmsgroup.svg',
                                 fit: BoxFit.contain,
                               ),
                             ),
