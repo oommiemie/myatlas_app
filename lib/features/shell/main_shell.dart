@@ -5,6 +5,7 @@ import '../health/health_screen.dart';
 import '../health/widgets/custom_tab_bar.dart';
 import '../home/home_screen.dart';
 import '../home/widgets/home_hospital_queue_card.dart';
+import '../me/invite_screen.dart';
 import '../me/me_screen.dart';
 import '../medicine/medicine_screen.dart';
 
@@ -21,6 +22,18 @@ class MainShell extends StatefulWidget {
 
 class _MainShellState extends State<MainShell> {
   int _tabIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    // First-time users get the invite-code popup right after entering.
+    // Dismissing it is fine — the Me screen has a card that reopens it.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future<void>.delayed(const Duration(milliseconds: 600), () {
+        if (mounted) maybeShowEnterInviteCodePopup(context);
+      });
+    });
+  }
 
   void setTab(int i) {
     if (i == _tabIndex) return;
@@ -63,15 +76,15 @@ class _MainShellState extends State<MainShell> {
                 // way Grab keeps an ongoing order in reach.
                 if (_tabIndex == 0) const FloatingQueueBar(),
                 CustomTabBar(
-              currentIndex: _tabIndex,
-              onTap: (i) => setState(() => _tabIndex = i),
-              items: const [
-                TabItem(CupertinoIcons.house, 'หน้าหลัก'),
-                TabItem(CupertinoIcons.heart, 'สุขภาพ'),
-                TabItem(CupertinoIcons.capsule, 'ทานยา'),
-                TabItem(CupertinoIcons.person_2, 'ครอบครัว'),
-                TabItem(CupertinoIcons.person_crop_circle, 'ฉัน'),
-              ],
+                  currentIndex: _tabIndex,
+                  onTap: (i) => setState(() => _tabIndex = i),
+                  items: const [
+                    TabItem(CupertinoIcons.house, 'หน้าหลัก'),
+                    TabItem(CupertinoIcons.heart, 'สุขภาพ'),
+                    TabItem(CupertinoIcons.capsule, 'ทานยา'),
+                    TabItem(CupertinoIcons.person_2, 'ครอบครัว'),
+                    TabItem(CupertinoIcons.person_crop_circle, 'ฉัน'),
+                  ],
                 ),
               ],
             ),

@@ -123,6 +123,15 @@ class _MeScreenState extends State<MeScreen>
                     child: InviteCard(info: kFullInvite),
                   ),
                 ),
+                // Redeem entry point for users who closed the first-run popup.
+                _stagger(
+                  1,
+                  5,
+                  const Padding(
+                    padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
+                    child: EnterInviteCodeCard(),
+                  ),
+                ),
                 _stagger(
                   1,
                   5,

@@ -1,3 +1,5 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 
@@ -302,9 +304,19 @@ class InviteCard extends StatelessWidget {
 /// The final count (10) carries the gift artwork; the numbers in
 /// between show a plain person marker.
 class _RewardStagesCard extends StatelessWidget {
-  const _RewardStagesCard({required this.joined});
+  const _RewardStagesCard({
+    required this.joined,
+    required this.claimed,
+    required this.onClaimed,
+  });
 
   final int joined;
+
+  /// Person-counts whose reward was already claimed.
+  final Set<int> claimed;
+
+  /// Called when the user collects the reward for a count.
+  final ValueChanged<int> onClaimed;
 
   @override
   Widget build(BuildContext context) {
@@ -321,6 +333,8 @@ class _RewardStagesCard extends StatelessWidget {
                   child: _RewardStageTile(
                     count: row * 5 + col + 1,
                     joined: joined,
+                    claimedCounts: claimed,
+                    onClaimed: onClaimed,
                   ),
                 ),
               ],
@@ -335,13 +349,21 @@ class _RewardStagesCard extends StatelessWidget {
 /// One person-count card. Milestones show the reward box in its state;
 /// non-milestones show a person marker that fills in once reached.
 class _RewardStageTile extends StatelessWidget {
-  const _RewardStageTile({required this.count, required this.joined});
+  const _RewardStageTile({
+    required this.count,
+    required this.joined,
+    required this.claimedCounts,
+    required this.onClaimed,
+  });
 
   final int count;
   final int joined;
 
-  /// Person-counts whose reward was already claimed — mock until the API.
-  static const _claimedCounts = <int>{};
+  /// Person-counts whose reward was already claimed.
+  final Set<int> claimedCounts;
+
+  /// Called when the user collects this tile's reward.
+  final ValueChanged<int> onClaimed;
 
   /// Milestone → index into [_rewards]; null for plain counts.
   int? get _milestone {
@@ -352,10 +374,10 @@ class _RewardStageTile extends StatelessWidget {
   bool get _reached => joined >= count;
 
   bool get _claimable =>
-      _milestone != null && _reached && !_claimedCounts.contains(count);
+      _milestone != null && _reached && !claimedCounts.contains(count);
 
   bool get _claimed =>
-      _milestone != null && _reached && _claimedCounts.contains(count);
+      _milestone != null && _reached && claimedCounts.contains(count);
 
   /// Standard luminance grayscale — used to grey out claimed gift art.
   static const _grayscale = ColorFilter.matrix([
@@ -376,6 +398,7 @@ class _RewardStageTile extends StatelessWidget {
               context,
               reward: _rewards[_milestone!],
               claimed: _claimed,
+              onClaimed: _claimable ? () => onClaimed(count) : null,
             )
           : null,
       child: Container(
@@ -560,6 +583,9 @@ class InviteScreen extends StatefulWidget {
 class _InviteScreenState extends State<InviteScreen>
     with SingleTickerProviderStateMixin {
   final ValueNotifier<double> _scrollOffset = ValueNotifier<double>(0);
+
+  /// Person-counts whose reward has been collected — mock until the API.
+  final Set<int> _claimedRewards = {};
   late final AnimationController _enter = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 900),
@@ -573,7 +599,11 @@ class _InviteScreenState extends State<InviteScreen>
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Future<void>.delayed(const Duration(milliseconds: 400), () {
           if (!mounted) return;
-          showClaimRewardPopup(context, reward: _rewards.last);
+          showClaimRewardPopup(
+            context,
+            reward: _rewards.last,
+            onClaimed: () => setState(() => _claimedRewards.add(_stages.last)),
+          );
         });
       });
     }
@@ -618,7 +648,11 @@ class _InviteScreenState extends State<InviteScreen>
     final info = widget.info;
     final sections = <Widget>[
       _CodeCard(code: info.code, joined: info.joinedCount, onCopy: _copyCode),
-      _RewardStagesCard(joined: info.joinedCount),
+      _RewardStagesCard(
+        joined: info.joinedCount,
+        claimed: _claimedRewards,
+        onClaimed: (count) => setState(() => _claimedRewards.add(count)),
+      ),
       const _HowItWorksCard(),
     ];
 
@@ -1028,7 +1062,11 @@ class _SectionCard extends StatelessWidget {
 
 /// Full-screen sheet with the user's invite QR — titled for inviting (not the
 /// family connect flow), with save-to-device and share actions.
-Future<void> showInviteQrSheet(BuildContext context, {required String code}) {
+Future<void> showInviteQrSheet(
+  BuildContext context, {
+  required String code,
+  int initialTab = 0,
+}) {
   return Navigator.of(context, rootNavigator: true).push(
     PageRouteBuilder(
       opaque: false,
@@ -1036,7 +1074,8 @@ Future<void> showInviteQrSheet(BuildContext context, {required String code}) {
       barrierDismissible: true,
       transitionDuration: const Duration(milliseconds: 380),
       reverseTransitionDuration: const Duration(milliseconds: 260),
-      pageBuilder: (_, __, ___) => _InviteQrSheet(code: code),
+      pageBuilder: (_, __, ___) =>
+          _InviteQrSheet(code: code, initialTab: initialTab),
       transitionsBuilder: (_, anim, __, child) {
         return SlideTransition(
           position: Tween<Offset>(begin: const Offset(0, 1), end: Offset.zero)
@@ -1055,16 +1094,17 @@ Future<void> showInviteQrSheet(BuildContext context, {required String code}) {
 }
 
 class _InviteQrSheet extends StatefulWidget {
-  const _InviteQrSheet({required this.code});
+  const _InviteQrSheet({required this.code, this.initialTab = 0});
 
   final String code;
+  final int initialTab;
 
   @override
   State<_InviteQrSheet> createState() => _InviteQrSheetState();
 }
 
 class _InviteQrSheetState extends State<_InviteQrSheet> {
-  int _tab = 0; // 0 = My QR, 1 = Scan
+  late int _tab = widget.initialTab; // 0 = My QR, 1 = Scan
 
   @override
   Widget build(BuildContext context) {
@@ -1554,10 +1594,571 @@ class _QrSheetButton extends StatelessWidget {
 
 /// Centre popup when claiming a reward: the opened gift box pops in over a
 /// blurred barrier, names the reward, and confirms with one button.
+// ─────────────────────────────────────────────────────────────────────────────
+// Enter an invite code (redeem)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Mock first-run flag — swap for persisted storage once the API exists.
+bool _enterCodePopupShown = false;
+
+/// Shows the code-entry popup once per app run, for first-time users.
+/// Dismissing it is fine — the Me screen keeps a card that reopens it.
+void maybeShowEnterInviteCodePopup(BuildContext context) {
+  if (_enterCodePopupShown) return;
+  _enterCodePopupShown = true;
+  showEnterInviteCodePopup(context, confirmSkip: true);
+}
+
+Future<void> showEnterInviteCodePopup(
+  BuildContext context, {
+  String dismissLabel = 'ข้าม',
+  bool confirmSkip = false,
+}) {
+  return showGeneralDialog<void>(
+    context: context,
+    useRootNavigator: true,
+    barrierDismissible: true,
+    barrierLabel: 'enter-invite-code',
+    barrierColor: CupertinoColors.black.withValues(alpha: 0.45),
+    transitionDuration: const Duration(milliseconds: 380),
+    pageBuilder: (_, __, ___) => _EnterInviteCodePopup(
+      dismissLabel: dismissLabel,
+      confirmSkip: confirmSkip,
+    ),
+    transitionBuilder: (_, anim, __, child) {
+      final curved = CurvedAnimation(
+        parent: anim,
+        curve: Curves.easeOutBack,
+        reverseCurve: Curves.easeInCubic,
+      );
+      return FadeTransition(
+        opacity: anim,
+        child: ScaleTransition(scale: curved, child: child),
+      );
+    },
+  );
+}
+
+class _EnterInviteCodePopup extends StatefulWidget {
+  const _EnterInviteCodePopup({
+    required this.dismissLabel,
+    this.confirmSkip = false,
+  });
+
+  /// Corner-button label: first-run reads "skip", the Me-card entry "close".
+  final String dismissLabel;
+
+  /// First-run only: skipping asks for confirmation and explains where the
+  /// code can be entered later.
+  final bool confirmSkip;
+
+  @override
+  State<_EnterInviteCodePopup> createState() => _EnterInviteCodePopupState();
+}
+
+class _EnterInviteCodePopupState extends State<_EnterInviteCodePopup> {
+  final TextEditingController _code = TextEditingController();
+
+  @override
+  void dispose() {
+    _code.dispose();
+    super.dispose();
+  }
+
+  Future<void> _dismiss() async {
+    if (!widget.confirmSkip) {
+      Navigator.of(context).pop();
+      return;
+    }
+    // First-run: make sure the user knows where to enter the code later
+    // (and for how long) before letting the popup go.
+    final skip = await _showSkipCodeNotice(context);
+    if (skip == true && mounted) Navigator.of(context).pop();
+  }
+
+  void _submit() {
+    if (_code.text.trim().isEmpty) {
+      AppToast.warning(context, 'กรอกโค้ดก่อนนะ');
+      return;
+    }
+    Navigator.of(context).pop();
+    // Mock redeem — swap for the referral API once it exists.
+    AppToast.success(context, 'ใช้โค้ดเรียบร้อยแล้ว');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Keyboard-aware: the sheet rides above the keyboard instead of
+    // being covered by it.
+    return AnimatedPadding(
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeOut,
+      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+      child: Center(
+        child: Container(
+          width: 300,
+          margin: const EdgeInsets.symmetric(horizontal: 32),
+          padding: const EdgeInsets.fromLTRB(24, 28, 24, 20),
+          decoration: BoxDecoration(
+            color: CupertinoColors.white,
+            borderRadius: BorderRadius.circular(28),
+          ),
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              // Dismiss lives in the corner so the button stack below stays
+              // a clean primary/secondary pair.
+              Positioned(
+                top: -16,
+                right: -12,
+                child: PressEffect(
+                  onTap: _dismiss,
+                  haptic: HapticKind.selection,
+                  scale: 0.92,
+                  borderRadius: BorderRadius.circular(100),
+                  child: Container(
+                    height: 32,
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(100),
+                      border: Border.all(color: const Color(0xFFE0E4E2)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          CupertinoIcons.xmark,
+                          size: 12,
+                          color: Color(0xFF6D756E),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          widget.dismissLabel,
+                          style: const TextStyle(
+                            color: Color(0xFF6D756E),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            fontVariations: [FontVariation('wght', 500)],
+                            height: 1.0,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Image.asset(
+                    'assets/get-reward.png',
+                    width: 96,
+                    height: 96,
+                    fit: BoxFit.contain,
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'มีโค้ดชวนจากเพื่อน?',
+                    style: TextStyle(
+                      color: Color(0xFF1A1A1A),
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                      fontVariations: [FontVariation('wght', 800)],
+                      height: 1.0,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'กรอกโค้ดที่ได้รับเพื่อรับสิทธิพิเศษ',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Color(0xFF6D756E),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      height: 1.4,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  CupertinoTextField(
+                    controller: _code,
+                    textAlign: TextAlign.center,
+                    textCapitalization: TextCapitalization.characters,
+                    placeholder: 'ATLS-XXXX-XXXX',
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    style: const TextStyle(
+                      color: Color(0xFF1A1A1A),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      fontVariations: [FontVariation('wght', 800)],
+                      letterSpacing: 1.2,
+                      fontFeatures: [FontFeature.tabularFigures()],
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF4F6F5),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    onSubmitted: (_) => _submit(),
+                  ),
+                  const SizedBox(height: 16),
+                  PressEffect(
+                    onTap: _submit,
+                    haptic: HapticKind.selection,
+                    scale: 0.96,
+                    borderRadius: BorderRadius.circular(100),
+                    child: Container(
+                      width: double.infinity,
+                      height: 44,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(100),
+                        gradient: const LinearGradient(
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                          colors: [Color(0xFF93B9F8), Color(0xFF5E8BEF)],
+                        ),
+                      ),
+                      child: const Text(
+                        'ยืนยัน',
+                        style: TextStyle(
+                          color: CupertinoColors.white,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                          fontVariations: [FontVariation('wght', 800)],
+                          height: 1.0,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  // Second path: scan the friend's QR instead of typing.
+                  PressEffect(
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      showInviteQrSheet(
+                        context,
+                        code: kDefaultInvite.code,
+                        initialTab: 1,
+                      );
+                    },
+                    haptic: HapticKind.selection,
+                    scale: 0.96,
+                    borderRadius: BorderRadius.circular(100),
+                    child: Container(
+                      width: double.infinity,
+                      height: 44,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(100),
+                        border: Border.all(color: const Color(0xFF5E8BEF)),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            CupertinoIcons.qrcode_viewfinder,
+                            size: 18,
+                            color: Color(0xFF5E8BEF),
+                          ),
+                          SizedBox(width: 6),
+                          Text(
+                            'สแกน QR Code',
+                            style: TextStyle(
+                              color: Color(0xFF5E8BEF),
+                              fontSize: 14,
+                              fontWeight: FontWeight.w800,
+                              fontVariations: [FontVariation('wght', 800)],
+                              height: 1.0,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Floating bottom sheet (same look as the logout sheet) shown when the
+/// first-run user skips entering a code: says where to enter it later and
+/// how long the window stays open. Resolves true when the user skips.
+Future<bool?> _showSkipCodeNotice(BuildContext context) {
+  return showCupertinoModalPopup<bool>(
+    context: context,
+    barrierColor: CupertinoColors.black.withValues(alpha: 0.35),
+    builder: (ctx) => Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(38),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 28, sigmaY: 28),
+          child: Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8F8FA).withValues(alpha: 0.92),
+              borderRadius: BorderRadius.circular(38),
+              border: Border.all(
+                color: CupertinoColors.white.withValues(alpha: 0.35),
+                width: 0.5,
+              ),
+            ),
+            child: SafeArea(
+              top: false,
+              bottom: false,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Container(
+                      width: 36,
+                      height: 5,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1A1A1A).withValues(alpha: 0.25),
+                        borderRadius: BorderRadius.circular(100),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Container(
+                    width: 72,
+                    height: 72,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [Color(0xFF93B9F8), Color(0xFF5E8BEF)],
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(
+                            0xFF5E8BEF,
+                          ).withValues(alpha: 0.35),
+                          blurRadius: 18,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
+                    ),
+                    alignment: Alignment.center,
+                    child: const Icon(
+                      CupertinoIcons.ticket_fill,
+                      color: CupertinoColors.white,
+                      size: 32,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'ข้ามการกรอกโค้ด?',
+                    style: TextStyle(
+                      color: Color(0xFF1A1A1A),
+                      fontSize: 22,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: -0.2,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 32),
+                    child: Text(
+                      'กรอกทีหลังได้ที่หน้า "ฉัน" เมนู "กรอกโค้ดชวนเพื่อน" '
+                      'ภายใน 7 วันหลังเริ่มใช้งาน',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Color(0xFF6D756E),
+                        fontSize: 14,
+                        height: 20 / 14,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                    child: Column(
+                      children: [
+                        _NoticeSheetButton(
+                          label: 'กลับไปกรอกโค้ด',
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF93B9F8), Color(0xFF5E8BEF)],
+                          ),
+                          textColor: CupertinoColors.white,
+                          onTap: () => Navigator.of(ctx).pop(false),
+                        ),
+                        const SizedBox(height: 8),
+                        // Deliberately quiet: skipping stays possible but
+                        // the sheet's job is to pull the user back in.
+                        PressEffect(
+                          onTap: () {
+                            HapticFeedback.selectionClick();
+                            Navigator.of(ctx).pop(true);
+                          },
+                          haptic: HapticKind.none,
+                          scale: 0.97,
+                          borderRadius: BorderRadius.circular(100),
+                          child: Container(
+                            height: 44,
+                            alignment: Alignment.center,
+                            child: const Text(
+                              'ข้ามเลย',
+                              style: TextStyle(
+                                color: Color(0xFF9CA3AF),
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                height: 1.0,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+class _NoticeSheetButton extends StatelessWidget {
+  const _NoticeSheetButton({
+    required this.label,
+    required this.textColor,
+    required this.onTap,
+    this.gradient,
+  });
+
+  final String label;
+  final Color textColor;
+  final VoidCallback onTap;
+  final Gradient? gradient;
+
+  @override
+  Widget build(BuildContext context) {
+    return PressEffect(
+      onTap: onTap,
+      haptic: HapticKind.none,
+      scale: 0.97,
+      borderRadius: BorderRadius.circular(100),
+      child: Container(
+        height: 52,
+        decoration: BoxDecoration(
+          gradient: gradient,
+          borderRadius: BorderRadius.circular(100),
+          boxShadow: gradient != null
+              ? [
+                  BoxShadow(
+                    color: const Color(0xFF5E8BEF).withValues(alpha: 0.25),
+                    blurRadius: 14,
+                    offset: const Offset(0, 8),
+                  ),
+                ]
+              : null,
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          label,
+          style: TextStyle(
+            color: textColor,
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.2,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Compact Me-screen card that reopens the code-entry popup for users who
+/// dismissed it on first run.
+class EnterInviteCodeCard extends StatelessWidget {
+  const EnterInviteCodeCard({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return PressEffect(
+      onTap: () => showEnterInviteCodePopup(context, dismissLabel: 'ปิด'),
+      haptic: HapticKind.selection,
+      scale: 0.98,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+        decoration: BoxDecoration(
+          color: CupertinoColors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: const Color(0xFF747480).withValues(alpha: 0.08),
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                color: Color(0xFF5E8BEF),
+              ),
+              alignment: Alignment.center,
+              child: const Icon(
+                CupertinoIcons.ticket_fill,
+                size: 20,
+                color: CupertinoColors.white,
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'กรอกโค้ดชวนเพื่อน',
+                    style: TextStyle(
+                      color: Color(0xFF1A1A1A),
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                      fontVariations: [FontVariation('wght', 800)],
+                      height: 1.2,
+                    ),
+                  ),
+                  SizedBox(height: 2),
+                  Text(
+                    'ใส่โค้ดหรือสแกน QR จากเพื่อนได้เลย',
+                    style: TextStyle(
+                      color: Color(0xFF6D756E),
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w500,
+                      height: 1.3,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Icon(
+              CupertinoIcons.chevron_right,
+              size: 16,
+              color: Color(0xFF9CA3AF),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 Future<void> showClaimRewardPopup(
   BuildContext context, {
   required String reward,
   bool claimed = false,
+  VoidCallback? onClaimed,
 }) {
   return showGeneralDialog<void>(
     context: context,
@@ -1566,8 +2167,11 @@ Future<void> showClaimRewardPopup(
     barrierLabel: 'claim-reward',
     barrierColor: CupertinoColors.black.withValues(alpha: 0.45),
     transitionDuration: const Duration(milliseconds: 380),
-    pageBuilder: (_, __, ___) =>
-        _ClaimRewardPopup(reward: reward, claimed: claimed),
+    pageBuilder: (_, __, ___) => _ClaimRewardPopup(
+      reward: reward,
+      claimed: claimed,
+      onClaimed: onClaimed,
+    ),
     transitionBuilder: (_, anim, __, child) {
       final curved = CurvedAnimation(
         parent: anim,
@@ -1583,12 +2187,19 @@ Future<void> showClaimRewardPopup(
 }
 
 class _ClaimRewardPopup extends StatelessWidget {
-  const _ClaimRewardPopup({required this.reward, this.claimed = false});
+  const _ClaimRewardPopup({
+    required this.reward,
+    this.claimed = false,
+    this.onClaimed,
+  });
 
   final String reward;
 
   /// True when re-opening an already-claimed reward just to view it.
   final bool claimed;
+
+  /// Fired when the reward is collected, so the screen can flip its state.
+  final VoidCallback? onClaimed;
 
   @override
   Widget build(BuildContext context) {
@@ -1637,7 +2248,10 @@ class _ClaimRewardPopup extends StatelessWidget {
             PressEffect(
               onTap: () {
                 Navigator.of(context).pop();
-                if (!claimed) AppToast.success(context, 'เก็บรางวัลแล้ว');
+                if (!claimed) {
+                  onClaimed?.call();
+                  AppToast.success(context, 'เก็บรางวัลแล้ว');
+                }
               },
               haptic: HapticKind.selection,
               scale: 0.96,
