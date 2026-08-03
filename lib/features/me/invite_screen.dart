@@ -1658,10 +1658,28 @@ class _EnterInviteCodePopup extends StatefulWidget {
 
 class _EnterInviteCodePopupState extends State<_EnterInviteCodePopup> {
   final TextEditingController _code = TextEditingController();
+  final TextEditingController _hospitalQuery = TextEditingController();
+
+  /// Anchors the suggestion dropdown to the hospital field, so it can live
+  /// at the dialog level and stay tappable beyond the card bounds.
+  final LayerLink _fieldLink = LayerLink();
+
+  /// Referral source — exactly one of the two: 0 = friend's code,
+  /// 1 = invited by a hospital (picked from suggestions, not free text).
+  int _mode = 0;
+  String? _hospital;
+
+  /// Type-ahead matches for the hospital field; empty once one is picked.
+  List<String> get _suggestions {
+    final q = _hospitalQuery.text.trim();
+    if (q.isEmpty || q == _hospital) return const [];
+    return _kHospitals.where((h) => h.contains(q)).toList();
+  }
 
   @override
   void dispose() {
     _code.dispose();
+    _hospitalQuery.dispose();
     super.dispose();
   }
 
@@ -1677,212 +1695,428 @@ class _EnterInviteCodePopupState extends State<_EnterInviteCodePopup> {
   }
 
   void _submit() {
-    if (_code.text.trim().isEmpty) {
-      AppToast.warning(context, 'กรอกโค้ดก่อนนะ');
-      return;
-    }
-    Navigator.of(context).pop();
     // Mock redeem — swap for the referral API once it exists.
-    AppToast.success(context, 'ใช้โค้ดเรียบร้อยแล้ว');
+    if (_mode == 0) {
+      if (_code.text.trim().isEmpty) {
+        AppToast.warning(context, 'กรอกโค้ดก่อนนะ');
+        return;
+      }
+      Navigator.of(context).pop();
+      AppToast.success(context, 'ใช้โค้ดเรียบร้อยแล้ว');
+    } else {
+      if (_hospital == null) {
+        AppToast.warning(context, 'เลือกโรงพยาบาลก่อนนะ');
+        return;
+      }
+      Navigator.of(context).pop();
+      AppToast.success(context, 'บันทึกโรงพยาบาลที่ชวนแล้ว');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     // Keyboard-aware: the sheet rides above the keyboard instead of
     // being covered by it.
-    return AnimatedPadding(
-      duration: const Duration(milliseconds: 200),
-      curve: Curves.easeOut,
-      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
-      child: Center(
-        child: Container(
-          width: 300,
-          margin: const EdgeInsets.symmetric(horizontal: 32),
-          padding: const EdgeInsets.fromLTRB(24, 28, 24, 20),
-          decoration: BoxDecoration(
-            color: CupertinoColors.white,
-            borderRadius: BorderRadius.circular(28),
+    return Stack(
+      children: [
+        AnimatedPadding(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.viewInsetsOf(context).bottom,
           ),
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              // Dismiss lives in the corner so the button stack below stays
-              // a clean primary/secondary pair.
-              Positioned(
-                top: -16,
-                right: -12,
-                child: PressEffect(
-                  onTap: _dismiss,
-                  haptic: HapticKind.selection,
-                  scale: 0.92,
-                  borderRadius: BorderRadius.circular(100),
-                  child: Container(
-                    height: 32,
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(100),
-                      border: Border.all(color: const Color(0xFFE0E4E2)),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(
-                          CupertinoIcons.xmark,
-                          size: 12,
-                          color: Color(0xFF6D756E),
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          widget.dismissLabel,
-                          style: const TextStyle(
-                            color: Color(0xFF6D756E),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                            fontVariations: [FontVariation('wght', 500)],
-                            height: 1.0,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+          child: Center(
+            child: Container(
+              width: 300,
+              margin: const EdgeInsets.symmetric(horizontal: 32),
+              padding: const EdgeInsets.fromLTRB(24, 28, 24, 20),
+              decoration: BoxDecoration(
+                color: CupertinoColors.white,
+                borderRadius: BorderRadius.circular(28),
               ),
-              Column(
-                mainAxisSize: MainAxisSize.min,
+              child: Stack(
+                clipBehavior: Clip.none,
                 children: [
-                  Image.asset(
-                    'assets/get-reward.png',
-                    width: 96,
-                    height: 96,
-                    fit: BoxFit.contain,
-                  ),
-                  const SizedBox(height: 12),
-                  const Text(
-                    'มีโค้ดชวนจากเพื่อน?',
-                    style: TextStyle(
-                      color: Color(0xFF1A1A1A),
-                      fontSize: 20,
-                      fontWeight: FontWeight.w800,
-                      fontVariations: [FontVariation('wght', 800)],
-                      height: 1.0,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'กรอกโค้ดที่ได้รับเพื่อรับสิทธิพิเศษ',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Color(0xFF6D756E),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      height: 1.4,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  CupertinoTextField(
-                    controller: _code,
-                    textAlign: TextAlign.center,
-                    textCapitalization: TextCapitalization.characters,
-                    placeholder: 'ATLS-XXXX-XXXX',
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    style: const TextStyle(
-                      color: Color(0xFF1A1A1A),
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
-                      fontVariations: [FontVariation('wght', 800)],
-                      letterSpacing: 1.2,
-                      fontFeatures: [FontFeature.tabularFigures()],
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF4F6F5),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    onSubmitted: (_) => _submit(),
-                  ),
-                  const SizedBox(height: 16),
-                  PressEffect(
-                    onTap: _submit,
-                    haptic: HapticKind.selection,
-                    scale: 0.96,
-                    borderRadius: BorderRadius.circular(100),
-                    child: Container(
-                      width: double.infinity,
-                      height: 44,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(100),
-                        gradient: const LinearGradient(
-                          begin: Alignment.centerLeft,
-                          end: Alignment.centerRight,
-                          colors: [Color(0xFF93B9F8), Color(0xFF5E8BEF)],
+                  // Dismiss lives in the corner so the button stack below stays
+                  // a clean primary/secondary pair.
+                  Positioned(
+                    top: -16,
+                    right: -12,
+                    child: PressEffect(
+                      onTap: _dismiss,
+                      haptic: HapticKind.selection,
+                      scale: 0.92,
+                      borderRadius: BorderRadius.circular(100),
+                      child: Container(
+                        height: 32,
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(100),
+                          border: Border.all(color: const Color(0xFFE0E4E2)),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              CupertinoIcons.xmark,
+                              size: 12,
+                              color: Color(0xFF6D756E),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              widget.dismissLabel,
+                              style: const TextStyle(
+                                color: Color(0xFF6D756E),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                fontVariations: [FontVariation('wght', 500)],
+                                height: 1.0,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      child: const Text(
-                        'ยืนยัน',
+                    ),
+                  ),
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Image.asset(
+                        'assets/get-reward.png',
+                        width: 96,
+                        height: 96,
+                        fit: BoxFit.contain,
+                      ),
+                      const SizedBox(height: 12),
+                      const Text(
+                        'ใครชวนคุณมาใช้ MyAtlas?',
                         style: TextStyle(
-                          color: CupertinoColors.white,
-                          fontSize: 15,
+                          color: Color(0xFF1A1A1A),
+                          fontSize: 20,
                           fontWeight: FontWeight.w800,
                           fontVariations: [FontVariation('wght', 800)],
                           height: 1.0,
                         ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  // Second path: scan the friend's QR instead of typing.
-                  PressEffect(
-                    onTap: () {
-                      Navigator.of(context).pop();
-                      showInviteQrSheet(
-                        context,
-                        code: kDefaultInvite.code,
-                        initialTab: 1,
-                      );
-                    },
-                    haptic: HapticKind.selection,
-                    scale: 0.96,
-                    borderRadius: BorderRadius.circular(100),
-                    child: Container(
-                      width: double.infinity,
-                      height: 44,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(100),
-                        border: Border.all(color: const Color(0xFF5E8BEF)),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'เลือกช่องทางที่ถูกชวน',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Color(0xFF6D756E),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          height: 1.4,
+                        ),
                       ),
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            CupertinoIcons.qrcode_viewfinder,
-                            size: 18,
-                            color: Color(0xFF5E8BEF),
+                      const SizedBox(height: 16),
+                      // One source only: friend's code OR the inviting hospital.
+                      Container(
+                        height: 36,
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF4F6F5),
+                          borderRadius: BorderRadius.circular(100),
+                        ),
+                        child: Row(
+                          children: [
+                            for (var i = 0; i < 2; i++)
+                              Expanded(
+                                child: GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: () => setState(() => _mode = i),
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 200),
+                                    curve: Curves.easeOut,
+                                    decoration: BoxDecoration(
+                                      color: _mode == i
+                                          ? CupertinoColors.white
+                                          : const Color(0x00FFFFFF),
+                                      borderRadius: BorderRadius.circular(100),
+                                    ),
+                                    alignment: Alignment.center,
+                                    child: Text(
+                                      i == 0 ? 'จากเพื่อน' : 'จากโรงพยาบาล',
+                                      style: TextStyle(
+                                        color: _mode == i
+                                            ? const Color(0xFF5E8BEF)
+                                            : const Color(0xFF6D756E),
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w700,
+                                        fontVariations: const [
+                                          FontVariation('wght', 700),
+                                        ],
+                                        height: 1.0,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      // Fixed-height slot so switching tabs never resizes the
+                      // popup (buttons below must not shift under the finger).
+                      if (_mode == 1)
+                        // Hospital mode: type-ahead search — matches drop down
+                        // right under this field (dialog-level overlay).
+                        CompositedTransformTarget(
+                          link: _fieldLink,
+                          child: SizedBox(
+                            height: 48,
+                            child: CupertinoTextField(
+                              controller: _hospitalQuery,
+                              placeholder: 'ค้นหาโรงพยาบาล',
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                              ),
+                              prefix: const Padding(
+                                padding: EdgeInsets.only(left: 12),
+                                child: Icon(
+                                  CupertinoIcons.search,
+                                  size: 18,
+                                  color: Color(0xFF9CA3AF),
+                                ),
+                              ),
+                              style: const TextStyle(
+                                color: Color(0xFF1A1A1A),
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                                fontVariations: [FontVariation('wght', 700)],
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF4F6F5),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              onChanged: (v) => setState(() {
+                                _hospital = _kHospitals.contains(v.trim())
+                                    ? v.trim()
+                                    : null;
+                              }),
+                            ),
                           ),
-                          SizedBox(width: 6),
-                          Text(
-                            'สแกน QR Code',
+                        )
+                      else
+                        SizedBox(
+                          height: 48,
+                          child: CupertinoTextField(
+                            controller: _code,
+                            textAlign: TextAlign.center,
+                            textCapitalization: TextCapitalization.characters,
+                            placeholder: 'ATLS-XXXX-XXXX',
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            style: const TextStyle(
+                              color: Color(0xFF1A1A1A),
+                              fontSize: 16,
+                              fontWeight: FontWeight.w800,
+                              fontVariations: [FontVariation('wght', 800)],
+                              letterSpacing: 1.2,
+                              fontFeatures: [FontFeature.tabularFigures()],
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF4F6F5),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            onSubmitted: (_) => _submit(),
+                          ),
+                        ),
+                      const SizedBox(height: 8),
+                      // Second path: scan the friend's QR instead of typing.
+                      // In hospital mode the slot stays (invisible, untappable)
+                      // so the popup height never changes between tabs.
+                      IgnorePointer(
+                        ignoring: _mode == 1,
+                        child: AnimatedOpacity(
+                          duration: const Duration(milliseconds: 150),
+                          opacity: _mode == 0 ? 1 : 0,
+                          child: PressEffect(
+                            onTap: () {
+                              Navigator.of(context).pop();
+                              showInviteQrSheet(
+                                context,
+                                code: kDefaultInvite.code,
+                                initialTab: 1,
+                              );
+                            },
+                            haptic: HapticKind.selection,
+                            scale: 0.96,
+                            borderRadius: BorderRadius.circular(100),
+                            child: Container(
+                              width: double.infinity,
+                              height: 44,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(100),
+                                border: Border.all(
+                                  color: const Color(0xFF5E8BEF),
+                                ),
+                              ),
+                              child: const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    CupertinoIcons.qrcode_viewfinder,
+                                    size: 18,
+                                    color: Color(0xFF5E8BEF),
+                                  ),
+                                  SizedBox(width: 6),
+                                  Text(
+                                    'สแกน QR Code',
+                                    style: TextStyle(
+                                      color: Color(0xFF5E8BEF),
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w800,
+                                      fontVariations: [
+                                        FontVariation('wght', 800),
+                                      ],
+                                      height: 1.0,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      // Primary action pinned at the card's bottom edge.
+                      PressEffect(
+                        onTap: _submit,
+                        haptic: HapticKind.selection,
+                        scale: 0.96,
+                        borderRadius: BorderRadius.circular(100),
+                        child: Container(
+                          width: double.infinity,
+                          height: 44,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(100),
+                            gradient: const LinearGradient(
+                              begin: Alignment.centerLeft,
+                              end: Alignment.centerRight,
+                              colors: [Color(0xFF93B9F8), Color(0xFF5E8BEF)],
+                            ),
+                          ),
+                          child: const Text(
+                            'ยืนยัน',
                             style: TextStyle(
-                              color: Color(0xFF5E8BEF),
-                              fontSize: 14,
+                              color: CupertinoColors.white,
+                              fontSize: 15,
                               fontWeight: FontWeight.w800,
                               fontVariations: [FontVariation('wght', 800)],
                               height: 1.0,
                             ),
                           ),
-                        ],
+                        ),
                       ),
-                    ),
+                    ],
                   ),
                 ],
               ),
-            ],
+            ),
           ),
         ),
-      ),
+        // Autocomplete dropdown — anchored to the hospital field but living
+        // at the dialog level, so taps on rows below the card's edge still
+        // reach it instead of falling through to the dismiss barrier.
+        if (_mode == 1 && _suggestions.isNotEmpty)
+          CompositedTransformFollower(
+            link: _fieldLink,
+            showWhenUnlinked: false,
+            targetAnchor: Alignment.bottomLeft,
+            followerAnchor: Alignment.topLeft,
+            offset: const Offset(0, 4),
+            child: SizedBox(
+              width: 252,
+              child: Container(
+                constraints: const BoxConstraints(maxHeight: 156),
+                decoration: BoxDecoration(
+                  color: CupertinoColors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFFE0E4E2)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: CupertinoColors.black.withValues(alpha: 0.10),
+                      blurRadius: 16,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  itemCount: _suggestions.length,
+                  separatorBuilder: (_, __) => Container(
+                    height: 0.5,
+                    margin: const EdgeInsets.only(left: 12),
+                    color: const Color(0xFF747480).withValues(alpha: 0.12),
+                  ),
+                  itemBuilder: (_, i) {
+                    final h = _suggestions[i];
+                    return PressEffect(
+                      onTap: () {
+                        FocusScope.of(context).unfocus();
+                        setState(() {
+                          _hospital = h;
+                          _hospitalQuery.text = h;
+                        });
+                      },
+                      haptic: HapticKind.selection,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 10,
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              CupertinoIcons.building_2_fill,
+                              size: 16,
+                              color: Color(0xFF5E8BEF),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                h,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  color: Color(0xFF1A1A1A),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  height: 1.2,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }
+
+/// Mock hospital list until the hospital API exists.
+const _kHospitals = [
+  'รพ. กรุงเทพ',
+  'รพ. ศิริราช ปิยมหาราชการุณย์',
+  'รพ. บำรุงราษฎร์',
+  'รพ. รามาธิบดี',
+  'รพ. สมิติเวช สุขุมวิท',
+  'รพ. กรุงเทพคริสเตียน',
+  'รพ. เวชธานี',
+  'รพ. พญาไท 2',
+  'รพ. จุฬาลงกรณ์ สภากาชาดไทย',
+  'รพ. เปาโล พหลโยธิน',
+];
 
 /// Floating bottom sheet (same look as the logout sheet) shown when the
 /// first-run user skips entering a code: says where to enter it later and
@@ -1965,7 +2199,7 @@ Future<bool?> _showSkipCodeNotice(BuildContext context) {
                   const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 32),
                     child: Text(
-                      'กรอกทีหลังได้ที่หน้า "ฉัน" เมนู "กรอกโค้ดชวนเพื่อน" '
+                      'ระบุทีหลังได้ที่หน้า "ฉัน" เมนู "ใครชวนคุณมาใช้ MyAtlas?" '
                       'ภายใน 7 วันหลังเริ่มใช้งาน',
                       textAlign: TextAlign.center,
                       style: TextStyle(
@@ -2119,7 +2353,7 @@ class EnterInviteCodeCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'กรอกโค้ดชวนเพื่อน',
+                    'ใครชวนคุณมาใช้ MyAtlas?',
                     style: TextStyle(
                       color: Color(0xFF1A1A1A),
                       fontSize: 15,
@@ -2130,7 +2364,7 @@ class EnterInviteCodeCard extends StatelessWidget {
                   ),
                   SizedBox(height: 2),
                   Text(
-                    'ใส่โค้ดหรือสแกน QR จากเพื่อนได้เลย',
+                    'ใส่โค้ดจากเพื่อน หรือเลือกโรงพยาบาลที่ชวน',
                     style: TextStyle(
                       color: Color(0xFF6D756E),
                       fontSize: 12.5,
