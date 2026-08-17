@@ -170,9 +170,7 @@ class _HomeScreenState extends State<HomeScreen>
                         ),
                       ],
                     ),
-                    // Extra bottom room so the last card clears the floating
-                    // queue bar sitting above the navbar.
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 196),
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 120),
                     child: HealthSummarySections(
               data: _healthData,
               // Home uses the dashboard grid's compact meal card instead of the
@@ -180,8 +178,8 @@ class _HomeScreenState extends State<HomeScreen>
               showNutrition: false,
               afterActivity: Column(
                 children: [
-                  // Queue card moved out of the feed — it now floats above the
-                  // navbar (see FloatingQueueBar in MainShell).
+                  // Queue lives in the home notification banner (see the
+                  // queue entry in ProfileBanner's alert carousel).
                   // Dashboard grid (pulled from the Paiboon fork): meal-analysis
                   // card on the left, smart-watch + family stacked on the right.
                   HomeSummaryDashboard(

@@ -32,7 +32,9 @@ class HospitalQueueInfo {
   });
 }
 
-const _defaultQueue = HospitalQueueInfo(
+/// The active queue shown across the app (home banner + detail screen).
+/// Mock until the hospital queue API exists.
+const kDefaultQueue = HospitalQueueInfo(
   hospitalName: 'โรงพยาบาลสมเด็จพระยุพราชบ้านดุง',
   queueCode: 'A005',
   patientName: 'คุณ ณัฐพงษ์ นันทชัย',
@@ -48,7 +50,7 @@ const _defaultQueue = HospitalQueueInfo(
 );
 
 class HomeHospitalQueueCard extends StatelessWidget {
-  const HomeHospitalQueueCard({super.key, this.info = _defaultQueue});
+  const HomeHospitalQueueCard({super.key, this.info = kDefaultQueue});
 
   final HospitalQueueInfo info;
 
@@ -303,7 +305,7 @@ class _WaitCopy extends StatelessWidget {
 /// bottom navbar while the queue is active. Tapping it opens the full detail
 /// screen, same as the in-feed card.
 class FloatingQueueBar extends StatefulWidget {
-  const FloatingQueueBar({super.key, this.info = _defaultQueue});
+  const FloatingQueueBar({super.key, this.info = kDefaultQueue});
 
   final HospitalQueueInfo info;
 
@@ -488,6 +490,16 @@ class _FloatingQueueBarState extends State<FloatingQueueBar>
       ),
     );
   }
+}
+
+/// Opens the queue detail screen. Used by the home notification banner.
+void openQueueDetail(
+  BuildContext context, {
+  HospitalQueueInfo info = kDefaultQueue,
+}) {
+  Navigator.of(context, rootNavigator: true).push(
+    CupertinoPageRoute<void>(builder: (_) => _QueueDetailScreen(info: info)),
+  );
 }
 
 class _QueueBadge extends StatelessWidget {

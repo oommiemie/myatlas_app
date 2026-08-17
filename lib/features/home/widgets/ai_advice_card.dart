@@ -8,6 +8,7 @@ import '../../../core/widgets/app_toast.dart';
 import '../../appointment/data/mock_data.dart';
 import '../../medicine/theme/time_period.dart';
 import '../../medicine/widgets/decorative_elements.dart';
+import 'home_hospital_queue_card.dart';
 
 // Sparkle icon from Figma (node 923:5161).
 const String _kSparkleSvg =
@@ -63,8 +64,18 @@ const String _kFamilyHeartDetailSvg =
     'stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
 const List<String> _thMonth = [
-  'ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.',
-  'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.',
+  'ม.ค.',
+  'ก.พ.',
+  'มี.ค.',
+  'เม.ย.',
+  'พ.ค.',
+  'มิ.ย.',
+  'ก.ค.',
+  'ส.ค.',
+  'ก.ย.',
+  'ต.ค.',
+  'พ.ย.',
+  'ธ.ค.',
 ];
 
 // ── Medication slot data ─────────────────────────────────────────────────────
@@ -94,7 +105,8 @@ const List<_MedSlot> _kMedSlots = [
     time: '06:20 น.',
     meal: 'ก่อนอาหาร',
     name: _medName,
-    advice: 'มื้อเช้า · ก่อนอาหาร — ทาน Mucosolvan 1 เม็ด ก่อนอาหารเช้า '
+    advice:
+        'มื้อเช้า · ก่อนอาหาร — ทาน Mucosolvan 1 เม็ด ก่อนอาหารเช้า '
         'ประมาณ 30 นาที ดื่มน้ำตามมากๆ เพื่อให้ยาดูดซึมดี',
     period: TimePeriod.morning,
   ),
@@ -103,7 +115,8 @@ const List<_MedSlot> _kMedSlots = [
     time: '12:30 น.',
     meal: 'หลังอาหาร',
     name: _medName,
-    advice: 'มื้อกลางวัน · หลังอาหาร — ทานยา 1 เม็ดหลังอาหารกลางวันทันที '
+    advice:
+        'มื้อกลางวัน · หลังอาหาร — ทานยา 1 เม็ดหลังอาหารกลางวันทันที '
         'หากลืมให้ข้ามมื้อนั้นไป อย่าทานเพิ่มเป็น 2 เท่า',
     period: TimePeriod.day,
   ),
@@ -112,7 +125,8 @@ const List<_MedSlot> _kMedSlots = [
     time: '18:00 น.',
     meal: 'หลังอาหาร',
     name: _medName,
-    advice: 'มื้อเย็น · หลังอาหาร — ทานยา 1 เม็ดหลังอาหารเย็น และไม่ควร'
+    advice:
+        'มื้อเย็น · หลังอาหาร — ทานยา 1 เม็ดหลังอาหารเย็น และไม่ควร'
         'หยุดยาเองแม้อาการจะดีขึ้น',
     period: TimePeriod.evening,
   ),
@@ -194,6 +208,11 @@ const Map<TimePeriod, Color> _kAccentForPeriod = {
 };
 const Color _kApptAccent = Color(0xFF12A892);
 
+// Hospital-queue palette — the queue's long-standing blue accent.
+const List<Color> _kQueueGrad = [Color(0xFFBEDCF7), Color(0xFFEAF4FD)];
+const Color _kQueueInk = Color(0xFF0D3B66);
+const Color _kQueueAccent = Color(0xFF1E88E5);
+
 // Family (add members) palette — soft rose, warm "care" tone.
 const List<Color> _kFamilyGrad = [Color(0xFFF6D6DD), Color(0xFFFCEDF1)];
 const Color _kFamilyInk = Color(0xFF5E2738);
@@ -235,8 +254,10 @@ class _AiAdviceCardState extends State<AiAdviceCard> {
 
   // Start far in so the user can also swipe backwards; multiple of count → 1st.
   late final int _initialPage = _pageCount * 1000;
-  late final PageController _ctrl =
-      PageController(viewportFraction: 0.96, initialPage: _initialPage);
+  late final PageController _ctrl = PageController(
+    viewportFraction: 0.96,
+    initialPage: _initialPage,
+  );
   late int _index = _initialPage;
 
   @override
@@ -284,115 +305,167 @@ class _AiAdviceCardState extends State<AiAdviceCard> {
   List<_Page> _buildPages() {
     final pages = <_Page>[];
 
+    // 0) Active hospital queue — moved here from the floating bar that used
+    // to sit above the navbar. Most time-critical, so it leads.
+    final q = kDefaultQueue;
+    final waitText = q.waitCount <= 0
+        ? 'ถึงคิวแล้ว'
+        : q.waitCount == 1
+        ? 'คิวต่อไปคือคุณ'
+        : 'เหลืออีก ${q.waitCount} คิว';
+    pages.add(
+      _Page(
+        label: 'แจ้งเตือนคิว',
+        // The code is the right-hand card's whole job, so the left side
+        // carries only what decides the patient's next move: how much
+        // longer, and where to be. Date, time, payment status and the
+        // patient's own details live one tap away in the detail screen.
+        title: waitText,
+        body: [
+          if (q.waitCount > 0) 'รออีกประมาณ ${q.waitCount * 6} นาที',
+          '${q.servicePoint} · ${q.department}',
+          q.room,
+          q.hospitalName,
+        ].join('\n'),
+        grad: _kQueueGrad,
+        ink: _kQueueInk,
+        action: 'ดูรายละเอียดคิว',
+        accent: _kQueueAccent,
+        onAction: () => openQueueDetail(context),
+        right: _QueueReminderCard(info: q),
+      ),
+    );
+
     // 1) AI — general medication-use advice.
-    pages.add(_Page(
-      isAi: true,
-      label: 'คำแนะนำจาก AI',
-      title: 'วิธีใช้ยาให้ถูกต้อง',
-      body: 'ผู้ป่วยเบาหวานที่ฉีดอินซูลิน ควรฉีดใต้ผิวหนังบริเวณหน้าท้อง '
-          'สลับตำแหน่งทุกครั้ง เก็บยาในตู้เย็น และตรวจระดับน้ำตาลก่อนฉีดทุกมื้อ',
-      grad: _kAiUsageGrad,
-      ink: _kAiUsageInk,
-      right: const _AiBotCard(grad: _kAiUsageGrad),
-    ));
+    pages.add(
+      _Page(
+        isAi: true,
+        label: 'คำแนะนำจาก AI',
+        title: 'วิธีใช้ยาให้ถูกต้อง',
+        body:
+            'ผู้ป่วยเบาหวานที่ฉีดอินซูลิน ควรฉีดใต้ผิวหนังบริเวณหน้าท้อง '
+            'สลับตำแหน่งทุกครั้ง เก็บยาในตู้เย็น และตรวจระดับน้ำตาลก่อนฉีดทุกมื้อ',
+        grad: _kAiUsageGrad,
+        ink: _kAiUsageInk,
+        right: const _AiBotCard(grad: _kAiUsageGrad),
+      ),
+    );
 
     // 2) AI — health summary from the Health page data.
-    pages.add(_Page(
-      isAi: true,
-      label: 'สรุปสุขภาพจาก AI',
-      title: 'ภาพรวมสุขภาพของคุณ',
-      body: 'จากข้อมูลสุขภาพล่าสุด น้ำหนักและ BMI อยู่ในเกณฑ์ดี ความดันปกติ '
-          'แต่การนอนยังน้อยกว่าเป้าหมาย แนะนำพักผ่อนให้พอและออกกำลังสม่ำเสมอ',
-      grad: _kHealthGrad,
-      ink: _kHealthInk,
-      right: const _AiBotCard(grad: _kHealthGrad),
-    ));
+    pages.add(
+      _Page(
+        isAi: true,
+        label: 'สรุปสุขภาพจาก AI',
+        title: 'ภาพรวมสุขภาพของคุณ',
+        body:
+            'จากข้อมูลสุขภาพล่าสุด น้ำหนักและ BMI อยู่ในเกณฑ์ดี ความดันปกติ '
+            'แต่การนอนยังน้อยกว่าเป้าหมาย แนะนำพักผ่อนให้พอและออกกำลังสม่ำเสมอ',
+        grad: _kHealthGrad,
+        ink: _kHealthInk,
+        right: const _AiBotCard(grad: _kHealthGrad),
+      ),
+    );
 
     // 3) Family — add members (locked behind a package).
-    pages.add(_Page(
-      label: 'ครอบครัว',
-      isFamily: true,
-      title: 'ดูแลคนที่คุณรักกับเรา',
-      body: 'ติดตามสุขภาพ ตำแหน่ง แจ้งเตือนการล้ม และโทรหากันได้ทุกเมื่อ',
-      grad: _kFamilyGrad,
-      ink: _kFamilyInk,
-      action: 'Family Package',
-      accent: _kFamilyAccent,
-      onAction: () {
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(const SnackBar(
-            content: Text('Family Package'),
-            behavior: SnackBarBehavior.floating,
-          ));
-      },
-      right: const _FamilyReminderCard(),
-    ));
+    pages.add(
+      _Page(
+        label: 'ครอบครัว',
+        isFamily: true,
+        title: 'ดูแลคนที่คุณรักกับเรา',
+        body: 'ติดตามสุขภาพ ตำแหน่ง แจ้งเตือนการล้ม และโทรหากันได้ทุกเมื่อ',
+        grad: _kFamilyGrad,
+        ink: _kFamilyInk,
+        action: 'Family Package',
+        accent: _kFamilyAccent,
+        onAction: () {
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
+              const SnackBar(
+                content: Text('Family Package'),
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+        },
+        right: const _FamilyReminderCard(),
+      ),
+    );
 
     // 4) Medication reminders by time slot (reminder, not AI).
     for (final s in _kMedSlots) {
       final taken = _taken.contains(s.id);
-      pages.add(_Page(
-        label: 'แจ้งเตือนการทานยา',
-        title: '${_kMealName[s.period]} · ${s.time}',
-        body: 'ถึงเวลาทานยา ${s.name}\n'
-            'ครั้งละ 1 เม็ด · ${s.meal}',
-        grad: _kGradForPeriod[s.period]!,
-        ink: _kInkForPeriod[s.period]!,
-        action: taken ? 'บันทึกแล้ว' : 'บันทึกการทานยา',
-        onAction: taken ? null : () => _recordMed(s),
-        actionDone: taken,
-        accent: _kAccentForPeriod[s.period]!,
-        right: _MedReminderCard(slot: s),
-      ));
+      pages.add(
+        _Page(
+          label: 'แจ้งเตือนการทานยา',
+          title: '${_kMealName[s.period]} · ${s.time}',
+          body:
+              'ถึงเวลาทานยา ${s.name}\n'
+              'ครั้งละ 1 เม็ด · ${s.meal}',
+          grad: _kGradForPeriod[s.period]!,
+          ink: _kInkForPeriod[s.period]!,
+          action: taken ? 'บันทึกแล้ว' : 'บันทึกการทานยา',
+          onAction: taken ? null : () => _recordMed(s),
+          actionDone: taken,
+          accent: _kAccentForPeriod[s.period]!,
+          right: _MedReminderCard(slot: s),
+        ),
+      );
     }
 
     // 2) Appointment reminders — hospital + home visit (reminder, not AI).
     final hosp = _firstSoon(hospitalAppointments);
     if (hosp != null) {
-      pages.add(_Page(
-        label: 'แจ้งเตือนนัดหมาย',
-        title: 'นัดหมายโรงพยาบาล',
-        body: '${hosp.title} · ${hosp.subLeft}\n${_when(hosp)}\n${hosp.subRight}',
-        grad: _kApptGrad,
-        ink: _kApptInk,
-        action: 'ทำแบบประเมิน',
-        accent: _kApptAccent,
-        onAction: () {
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(const SnackBar(
-              content: Text('ทำแบบประเมิน'),
-              behavior: SnackBarBehavior.floating,
-            ));
-        },
-        right: _RecommendationCard(
-          data: ActivityRecommendation(
-            title: '${hosp.date.day} ${_thMonth[hosp.date.month - 1]}',
-            subtitle: '${hosp.time} น.',
-            badge: 'โรงพยาบาล',
-            image: 'assets/bgappointment.png',
+      pages.add(
+        _Page(
+          label: 'แจ้งเตือนนัดหมาย',
+          title: 'นัดหมายโรงพยาบาล',
+          body:
+              '${hosp.title} · ${hosp.subLeft}\n${_when(hosp)}\n${hosp.subRight}',
+          grad: _kApptGrad,
+          ink: _kApptInk,
+          action: 'ทำแบบประเมิน',
+          accent: _kApptAccent,
+          onAction: () {
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(
+                const SnackBar(
+                  content: Text('ทำแบบประเมิน'),
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+          },
+          right: _RecommendationCard(
+            data: ActivityRecommendation(
+              title: '${hosp.date.day} ${_thMonth[hosp.date.month - 1]}',
+              subtitle: '${hosp.time} น.',
+              badge: 'โรงพยาบาล',
+              image: 'assets/bgappointment.png',
+            ),
           ),
         ),
-      ));
+      );
     }
     final home = _firstSoon(homeVisitAppointments);
     if (home != null) {
-      pages.add(_Page(
-        label: 'แจ้งเตือนนัดหมาย',
-        title: 'นัดหมายเยี่ยมบ้าน',
-        body: '${home.title}\n${_when(home)}\n${home.subRight} · ${home.subLeft}',
-        grad: _kApptGrad,
-        ink: _kApptInk,
-        right: _RecommendationCard(
-          data: ActivityRecommendation(
-            title: '${home.date.day} ${_thMonth[home.date.month - 1]}',
-            subtitle: '${home.time} น.',
-            badge: 'เยี่ยมบ้าน',
-            image: 'assets/bgvisitappointment.png',
+      pages.add(
+        _Page(
+          label: 'แจ้งเตือนนัดหมาย',
+          title: 'นัดหมายเยี่ยมบ้าน',
+          body:
+              '${home.title}\n${_when(home)}\n${home.subRight} · ${home.subLeft}',
+          grad: _kApptGrad,
+          ink: _kApptInk,
+          right: _RecommendationCard(
+            data: ActivityRecommendation(
+              title: '${home.date.day} ${_thMonth[home.date.month - 1]}',
+              subtitle: '${home.time} น.',
+              badge: 'เยี่ยมบ้าน',
+              image: 'assets/bgvisitappointment.png',
+            ),
           ),
         ),
-      ));
+      );
     }
 
     return pages;
@@ -413,11 +486,7 @@ class _AiAdviceCardState extends State<AiAdviceCard> {
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [
-            deep,
-            bright,
-            bright.withValues(alpha: 0.0),
-          ],
+          colors: [deep, bright, bright.withValues(alpha: 0.0)],
           stops: const [0.0, 0.72, 1.0],
         ),
       ),
@@ -437,13 +506,12 @@ class _AiAdviceCardState extends State<AiAdviceCard> {
   }
 
   static Widget _topLeftLayout(
-      Widget? currentChild, List<Widget> previousChildren) {
+    Widget? currentChild,
+    List<Widget> previousChildren,
+  ) {
     return Stack(
       alignment: Alignment.topLeft,
-      children: [
-        ...previousChildren,
-        if (currentChild != null) currentChild,
-      ],
+      children: [...previousChildren, if (currentChild != null) currentChild],
     );
   }
 
@@ -461,8 +529,8 @@ class _AiAdviceCardState extends State<AiAdviceCard> {
             page.isAi
                 ? _SparkleIcon(key: ValueKey('sparkle$_index'))
                 : page.isFamily
-                    ? _FamilyIcon(key: ValueKey('fam$_index'))
-                    : _BellIcon(key: ValueKey('bell$_index')),
+                ? _FamilyIcon(key: ValueKey('fam$_index'))
+                : _BellIcon(key: ValueKey('bell$_index')),
             const SizedBox(width: 8),
             Expanded(
               child: AnimatedSwitcher(
@@ -505,12 +573,15 @@ class _AiAdviceCardState extends State<AiAdviceCard> {
           ],
         ),
         const SizedBox(height: 12),
+        // The body takes only the room its text needs, so the CTA sits
+        // directly under it. Copy longer than the cap is cut with an
+        // ellipsis so it can never push the button out of the card.
+        // Instant swap (no AnimatedSwitcher) so the body height doesn't
+        // briefly grow during transitions and shove the button around.
         Flexible(
-          // Instant swap (no AnimatedSwitcher) so the body height doesn't
-          // briefly grow during transitions and shove the button around.
           child: Text(
             page.body,
-            maxLines: 5,
+            maxLines: page.action != null ? 4 : 5,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
               fontSize: 13.5,
@@ -545,38 +616,38 @@ class _AiAdviceCardState extends State<AiAdviceCard> {
         controller: _ctrl,
         padEnds: false,
         physics: const BouncingScrollPhysics(),
-      onPageChanged: (i) => setState(() => _index = i),
-      // Infinite: content loops via modulo so the last page flows to the first.
-      itemCount: null,
-      itemBuilder: (_, i) {
-        final p = pages[i % pages.length];
-        // AI pages: same footprint as other cards; the bot overhangs from
-        // inside _AiBotCard (which carries its own shadow).
-        if (p.isAi) {
+        onPageChanged: (i) => setState(() => _index = i),
+        // Infinite: content loops via modulo so the last page flows to the first.
+        itemCount: null,
+        itemBuilder: (_, i) {
+          final p = pages[i % pages.length];
+          // AI pages: same footprint as other cards; the bot overhangs from
+          // inside _AiBotCard (which carries its own shadow).
+          if (p.isAi) {
+            return Padding(
+              padding: const EdgeInsets.fromLTRB(3, 6, 12, 8),
+              child: p.right,
+            );
+          }
+          // Inner padding leaves room for the card shadow (PageView clips its
+          // viewport, so the shadow must render inside the page bounds).
           return Padding(
             padding: const EdgeInsets.fromLTRB(3, 6, 12, 8),
-            child: p.right,
-          );
-        }
-        // Inner padding leaves room for the card shadow (PageView clips its
-        // viewport, so the shadow must render inside the page bounds).
-        return Padding(
-          padding: const EdgeInsets.fromLTRB(3, 6, 12, 8),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.10),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.10),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: p.right,
             ),
-            child: p.right,
-          ),
-        );
-      },
+          );
+        },
       ),
     );
   }
@@ -626,7 +697,10 @@ class _ActionButtonState extends State<_ActionButton>
         final t = Curves.easeOutCubic.transform(_c.value);
         return Opacity(
           opacity: t,
-          child: Transform.translate(offset: Offset(0, (1 - t) * 10), child: child),
+          child: Transform.translate(
+            offset: Offset(0, (1 - t) * 10),
+            child: child,
+          ),
         );
       },
       child: Align(
@@ -773,8 +847,11 @@ class _BellIconState extends State<_BellIcon>
             colors: [Color(0xFFF6B11E), Color(0xFFE2890C), Color(0xFFB5650A)],
           ).createShader(r),
           blendMode: BlendMode.srcIn,
-          child: const Icon(Icons.notifications_active_rounded,
-              size: 24, color: Colors.white),
+          child: const Icon(
+            Icons.notifications_active_rounded,
+            size: 24,
+            color: Colors.white,
+          ),
         ),
       ),
     );
@@ -878,7 +955,11 @@ class _FamilyIconState extends State<_FamilyIcon>
               shaderCallback: (r) => const LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [Color(0xFFF98FB0), Color(0xFFE5618A), Color(0xFFC74570)],
+                colors: [
+                  Color(0xFFF98FB0),
+                  Color(0xFFE5618A),
+                  Color(0xFFC74570),
+                ],
               ).createShader(r),
               blendMode: BlendMode.srcIn,
               child: SvgPicture.string(_kFamilyHeartSvg, width: 24, height: 24),
@@ -974,7 +1055,10 @@ class _SparkleIconState extends State<_SparkleIcon>
               ),
               if (pOp > 0.01)
                 for (int i = 0; i < 6; i++) _particle(i, dist, pOp),
-              Transform.scale(scale: (0.2 + 0.8 * pop).clamp(0.0, 1.2), child: child),
+              Transform.scale(
+                scale: (0.2 + 0.8 * pop).clamp(0.0, 1.2),
+                child: child,
+              ),
             ],
           );
         },
@@ -1083,10 +1167,7 @@ class _MedReminderCard extends StatelessWidget {
             child: Wrap(
               spacing: 6,
               runSpacing: 6,
-              children: [
-                _pill(slot.time),
-                _pill(slot.meal),
-              ],
+              children: [_pill(slot.time), _pill(slot.meal)],
             ),
           ),
           // Med name as a pill (same style as the time/meal badges), bottom-left.
@@ -1097,8 +1178,10 @@ class _MedReminderCard extends StatelessWidget {
             child: Align(
               alignment: Alignment.centerLeft,
               child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 5,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
@@ -1152,36 +1235,210 @@ class _MedReminderCard extends StatelessWidget {
       case TimePeriod.morning:
         return DecorativeElements(size: w);
       case TimePeriod.day:
-        return SvgPicture.asset('assets/svg/deco_day_rainbow.svg',
-            width: w, height: h, fit: BoxFit.contain);
+        return SvgPicture.asset(
+          'assets/svg/deco_day_rainbow.svg',
+          width: w,
+          height: h,
+          fit: BoxFit.contain,
+        );
       case TimePeriod.evening:
-        return SvgPicture.asset('assets/svg/deco_evening_frame1.svg',
-            width: w, height: h, fit: BoxFit.contain);
+        return SvgPicture.asset(
+          'assets/svg/deco_evening_frame1.svg',
+          width: w,
+          height: h,
+          fit: BoxFit.contain,
+        );
       case TimePeriod.bedtime:
-        return SvgPicture.asset('assets/svg/deco_bedtime_moon.svg',
-            width: w, height: h, fit: BoxFit.contain);
+        return SvgPicture.asset(
+          'assets/svg/deco_bedtime_moon.svg',
+          width: w,
+          height: h,
+          fit: BoxFit.contain,
+        );
     }
   }
 
   Widget _pill(String text) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Text(
-          text,
-          style: const TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w800,
-            fontVariations: [FontVariation('wght', 800)],
-            color: Color(0xFF3A3A3A),
-          ),
-        ),
-      );
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(12),
+    ),
+    child: Text(
+      text,
+      style: const TextStyle(
+        fontSize: 12,
+        fontWeight: FontWeight.w800,
+        fontVariations: [FontVariation('wght', 800)],
+        color: Color(0xFF3A3A3A),
+      ),
+    ),
+  );
 }
 
+/// Right-side visual for the queue page — same pill language as the medicine
+/// reminder card, with the patient's queue code as the hero fact (the way the
+/// standalone queue card led with it).
+class _QueueReminderCard extends StatelessWidget {
+  const _QueueReminderCard({required this.info});
+  final HospitalQueueInfo info;
 
+  static const _ink = Color(0xFF1565C0);
+  static const _base = Color(0xFFDCEAF9); // flat backdrop, no gradient
+
+  // Ticket geometry: outer inset, torn-edge stub height, notch diameter.
+  static const double _inset = 10;
+  static const double _stub = 34;
+  static const double _notch = 18;
+
+  @override
+  Widget build(BuildContext context) {
+    // "A005" → prefix letters on top, digits underneath.
+    final m = RegExp(r'^([A-Za-z]*)(.*)$').firstMatch(info.queueCode)!;
+    final prefix = m.group(1) ?? '';
+    final digits = m.group(2) ?? '';
+    const style = TextStyle(
+      fontSize: 62,
+      fontWeight: FontWeight.w900,
+      fontVariations: [FontVariation('wght', 900)],
+      color: _ink,
+      letterSpacing: 1,
+      height: 0.98,
+      fontFeatures: [FontFeature.tabularFigures()],
+    );
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          const ColoredBox(color: _base),
+          // The ticket itself — a raised paper stub, lifted off the backdrop
+          // by its shadow rather than by any painted decoration.
+          Padding(
+            padding: const EdgeInsets.all(_inset),
+            child: CustomPaint(
+              // The notches are cut out of the paper itself, so the shadow
+              // follows them and the backdrop stays one flat colour.
+              painter: const _TicketShape(),
+              child: Column(
+                children: [
+                  // Stub sits at the top: label, then the tear line.
+                  const SizedBox(
+                    height: _stub,
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: Center(
+                            child: Text(
+                              'คิวของฉัน',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w800,
+                                fontVariations: [FontVariation('wght', 800)],
+                                color: Color(0xFF7C93B5),
+                                letterSpacing: 0.5,
+                                height: 1.0,
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 1,
+                          child: CustomPaint(
+                            size: Size.fromHeight(1),
+                            painter: _TicketPerforation(),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // The number — the reason the ticket exists.
+                  Expanded(
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (prefix.isNotEmpty)
+                                Text(
+                                  prefix,
+                                  style: style.copyWith(fontSize: 54),
+                                ),
+                              Text(digits, style: style),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Dashed tear line across the ticket.
+class _TicketPerforation extends CustomPainter {
+  const _TicketPerforation();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = const Color(0xFF7C93B5).withValues(alpha: 0.45)
+      ..strokeWidth = 1;
+    const dash = 4.0, gap = 4.0;
+    for (double x = 12; x < size.width - 12; x += dash + gap) {
+      canvas.drawLine(Offset(x, 0.5), Offset(x + dash, 0.5), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _TicketPerforation oldDelegate) => false;
+}
+
+/// The ticket outline: a rounded rectangle with a half-circle bitten out of
+/// each side at the tear line, so the cut-outs show the flat backdrop.
+class _TicketShape extends CustomPainter {
+  const _TicketShape();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final body = Path()
+      ..addRRect(
+        RRect.fromRectAndRadius(
+          Offset.zero & size,
+          const Radius.circular(12),
+        ),
+      );
+    final r = _QueueReminderCard._notch / 2;
+    final bites = Path()
+      ..addOval(
+        Rect.fromCircle(
+          center: Offset(0, _QueueReminderCard._stub),
+          radius: r,
+        ),
+      )
+      ..addOval(
+        Rect.fromCircle(
+          center: Offset(size.width, _QueueReminderCard._stub),
+          radius: r,
+        ),
+      );
+    final ticket = Path.combine(PathOperation.difference, body, bites);
+
+    canvas.drawPath(ticket, Paint()..color = Colors.white);
+  }
+
+  @override
+  bool shouldRepaint(covariant _TicketShape oldDelegate) => false;
+}
 
 // ── Image recommendation card (appointment / activities) ─────────────────────
 
