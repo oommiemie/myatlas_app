@@ -492,13 +492,13 @@ class _AiAdviceCardState extends State<AiAdviceCard> {
       ),
       padding: const EdgeInsets.fromLTRB(16, 14, 0, 14),
       child: SizedBox(
-        height: 196,
+        height: 156,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Expanded(flex: 53, child: _advice(page)),
-            const SizedBox(width: 12),
-            Expanded(flex: 47, child: _carousel(pages)),
+            Expanded(flex: 64, child: _advice(page)),
+            const SizedBox(width: 10),
+            Expanded(flex: 36, child: _carousel(pages)),
           ],
         ),
       ),
@@ -546,7 +546,7 @@ class _AiAdviceCardState extends State<AiAdviceCard> {
                       child: Text(
                         page.label,
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: 11,
                           color: page.ink.withValues(alpha: 0.66),
                           fontWeight: FontWeight.w700,
                           fontVariations: const [FontVariation('wght', 700)],
@@ -559,7 +559,7 @@ class _AiAdviceCardState extends State<AiAdviceCard> {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 15,
                         color: page.ink,
                         fontWeight: FontWeight.w800,
                         fontVariations: const [FontVariation('wght', 800)],
@@ -572,7 +572,7 @@ class _AiAdviceCardState extends State<AiAdviceCard> {
             ),
           ],
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 10),
         // The body takes only the room its text needs, so the CTA sits
         // directly under it. Copy longer than the cap is cut with an
         // ellipsis so it can never push the button out of the card.
@@ -581,11 +581,11 @@ class _AiAdviceCardState extends State<AiAdviceCard> {
         Flexible(
           child: Text(
             page.body,
-            maxLines: page.action != null ? 4 : 5,
+            maxLines: page.action != null ? 3 : 5,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              fontSize: 13.5,
-              height: 1.6,
+              fontSize: 12.5,
+              height: 1.5,
               color: page.ink.withValues(alpha: 0.86),
               fontWeight: FontWeight.w600,
               fontVariations: const [FontVariation('wght', 600)],
@@ -593,7 +593,7 @@ class _AiAdviceCardState extends State<AiAdviceCard> {
           ),
         ),
         if (page.action != null) ...[
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
           _ActionButton(
             key: ValueKey('act$_index'),
             label: page.action!,
@@ -708,7 +708,7 @@ class _ActionButtonState extends State<_ActionButton>
         child: GestureDetector(
           onTap: onTap,
           child: Container(
-            padding: const EdgeInsets.fromLTRB(14, 7, 14, 7),
+            padding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
             decoration: BoxDecoration(
               // Pending → vivid page-tone CTA; done → soft tinted chip.
               color: done ? color.withValues(alpha: 0.16) : color,
@@ -733,7 +733,7 @@ class _ActionButtonState extends State<_ActionButton>
                 Text(
                   label,
                   style: TextStyle(
-                    fontSize: 12.5,
+                    fontSize: 12,
                     fontWeight: FontWeight.w800,
                     color: done ? color : Colors.white,
                   ),
@@ -1159,45 +1159,23 @@ class _MedReminderCard extends StatelessWidget {
           // Per-period background: real colour + decoration, positioned to
           // match the Figma card (sun/deco at 47,-100 size 220x240 on a 177 card).
           Positioned.fill(child: _background()),
-          // Time + meal-timing badges — wrap to a new line if they overflow.
+          // Time badge up top; the meal-timing badge anchors the bottom.
           Positioned(
             top: 8,
             left: 8,
             right: 8,
-            child: Wrap(
-              spacing: 6,
-              runSpacing: 6,
-              children: [_pill(slot.time), _pill(slot.meal)],
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: _pill(slot.time),
             ),
           ),
-          // Med name as a pill (same style as the time/meal badges), bottom-left.
           Positioned(
             left: 8,
             right: 8,
             bottom: 8,
             child: Align(
               alignment: Alignment.centerLeft,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 5,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  slot.name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w800,
-                    fontVariations: [FontVariation('wght', 800)],
-                    color: Color(0xFF3A3A3A),
-                  ),
-                ),
-              ),
+              child: _pill(slot.meal),
             ),
           ),
         ],
@@ -1287,9 +1265,9 @@ class _QueueReminderCard extends StatelessWidget {
   static const _base = Color(0xFFDCEAF9); // flat backdrop, no gradient
 
   // Ticket geometry: outer inset, torn-edge stub height, notch diameter.
-  static const double _inset = 10;
-  static const double _stub = 34;
-  static const double _notch = 18;
+  static const double _inset = 8;
+  static const double _stub = 28;
+  static const double _notch = 14;
 
   @override
   Widget build(BuildContext context) {
@@ -1298,7 +1276,7 @@ class _QueueReminderCard extends StatelessWidget {
     final prefix = m.group(1) ?? '';
     final digits = m.group(2) ?? '';
     const style = TextStyle(
-      fontSize: 62,
+      fontSize: 54,
       fontWeight: FontWeight.w900,
       fontVariations: [FontVariation('wght', 900)],
       color: _ink,
@@ -1332,7 +1310,7 @@ class _QueueReminderCard extends StatelessWidget {
                             child: Text(
                               'คิวของฉัน',
                               style: TextStyle(
-                                fontSize: 12,
+                                fontSize: 11,
                                 fontWeight: FontWeight.w800,
                                 fontVariations: [FontVariation('wght', 800)],
                                 color: Color(0xFF7C93B5),
@@ -1365,7 +1343,7 @@ class _QueueReminderCard extends StatelessWidget {
                               if (prefix.isNotEmpty)
                                 Text(
                                   prefix,
-                                  style: style.copyWith(fontSize: 54),
+                                  style: style.copyWith(fontSize: 46),
                                 ),
                               Text(digits, style: style),
                             ],
