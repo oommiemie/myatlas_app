@@ -1,0 +1,161 @@
+{
+  "$description": "MyAtlas design tokens — shape (radius, border width)",
+  "radius": {
+    "none": {
+      "$value": 0,
+      "$type": "dimension"
+    },
+    "xs": {
+      "$value": 4,
+      "$type": "dimension"
+    },
+    "sm": {
+      "$value": 8,
+      "$type": "dimension"
+    },
+    "md": {
+      "$value": 12,
+      "$type": "dimension"
+    },
+    "lg": {
+      "$value": 16,
+      "$type": "dimension"
+    },
+    "xl": {
+      "$value": 20,
+      "$type": "dimension"
+    },
+    "2xl": {
+      "$value": 24,
+      "$type": "dimension"
+    },
+    "3xl": {
+      "$value": 28,
+      "$type": "dimension"
+    },
+    "4xl": {
+      "$value": 32,
+      "$type": "dimension"
+    },
+    "5xl": {
+      "$value": 40,
+      "$type": "dimension"
+    },
+    "full": {
+      "$value": 9999,
+      "$type": "dimension",
+      "$description": "pill / วงกลม"
+    },
+    "role": {
+      "button": {
+        "$value": "{radius.full}",
+        "$type": "dimension",
+        "$description": "ปุ่มทั้งหมดเป็นทรงแคปซูล — ใช้จริง 226 จุด"
+      },
+      "buttonSquare": {
+        "$value": "{radius.md}",
+        "$type": "dimension",
+        "$description": "ปุ่มสี่เหลี่ยมเฉพาะในตาราง/คีย์แพด"
+      },
+      "chip": {
+        "$value": "{radius.full}",
+        "$type": "dimension"
+      },
+      "badge": {
+        "$value": "{radius.full}",
+        "$type": "dimension"
+      },
+      "field": {
+        "$value": "{radius.md}",
+        "$type": "dimension",
+        "$description": "ช่องกรอกข้อความ"
+      },
+      "card": {
+        "$value": "{radius.2xl}",
+        "$type": "dimension",
+        "$description": "การ์ดหลัก — ใช้จริง 147 จุด"
+      },
+      "cardInner": {
+        "$value": "{radius.sm}",
+        "$type": "dimension",
+        "$description": "กล่องซ้อนในการ์ด เมื่อ inset.card = 16 (กฎ concentric)"
+      },
+      "tile": {
+        "$value": "{radius.lg}",
+        "$type": "dimension",
+        "$description": "ไทล์/ช่องย่อยในกริด — ใช้จริง 80 จุด"
+      },
+      "image": {
+        "$value": "{radius.lg}",
+        "$type": "dimension"
+      },
+      "modal": {
+        "$value": "{radius.3xl}",
+        "$type": "dimension",
+        "$description": "ป็อปอัปกลางจอ"
+      },
+      "sheet": {
+        "$value": "{radius.5xl}",
+        "$type": "dimension",
+        "$description": "bottom sheet — เดิม 38 ปัดเข้ากริดเป็น 40"
+      },
+      "sheetHandle": {
+        "$value": "{radius.full}",
+        "$type": "dimension"
+      },
+      "track": {
+        "$value": "{radius.full}",
+        "$type": "dimension",
+        "$description": "แถบ progress"
+      },
+      "avatar": {
+        "$value": "{radius.full}",
+        "$type": "dimension"
+      },
+      "tooltip": {
+        "$value": "{radius.md}",
+        "$type": "dimension"
+      }
+    }
+  },
+  "borderWidth": {
+    "hairline": {
+      "$value": 0.5,
+      "$type": "dimension",
+      "$description": "เส้นคั่น 1px จริงบนจอ 2x"
+    },
+    "default": {
+      "$value": 1,
+      "$type": "dimension"
+    },
+    "strong": {
+      "$value": 2,
+      "$type": "dimension"
+    },
+    "focus": {
+      "$value": 2,
+      "$type": "dimension",
+      "$description": "วงโฟกัส ต้องมี contrast >= 3:1"
+    }
+  },
+  "$extensions": {
+    "com.myatlas.rules": {
+      "concentric": "กล่องซ้อนกล่อง: radius ใน = radius นอก − ระยะ padding เช่น การ์ด 24 + padding 16 → กล่องในต้องเป็น 8 ไม่ใช่ 16 ไม่งั้นมุมจะดูไม่ขนานกัน",
+      "concentricFormula": "innerRadius = max(0, outerRadius - gap)",
+      "oneRolePerValue": "หนึ่งบทบาทหนึ่งค่า — ปุ่มทุกตัวในแอปต้อง radius เท่ากันเสมอ ห้ามเลือกรายตัว",
+      "sizeCorrelation": "พื้นที่ยิ่งใหญ่ radius ยิ่งใหญ่: chip < field < tile < card < modal < sheet",
+      "fullUsage": "radius.full สงวนไว้ให้ ปุ่ม chip badge avatar และแถบ progress เท่านั้น ห้ามใช้กับการ์ด",
+      "migrationMap": {
+        "2.5": 4,
+        "3": 4,
+        "14": 16,
+        "18": 20,
+        "22": 24,
+        "38": 40,
+        "100": "full",
+        "999": "full"
+      },
+      "rnNote": "React Native ไม่มี BorderRadius.circular — ใช้ borderRadius: 9999 แทน และบน Android ต้องมี overflow:'hidden' ถ้ามีลูกล้นขอบ"
+    }
+  }
+}

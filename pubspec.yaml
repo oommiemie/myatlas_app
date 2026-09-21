@@ -95,6 +95,7 @@ flutter:
     - assets/sky3.webp
     - assets/sky4.webp
     - assets/sky5.webp
+    - assets/exercise_cover.png
     - assets/Aerobic1.png
     - assets/Aerobic2.png
     - assets/rest.png
@@ -112,6 +113,7 @@ flutter:
     - assets/apple.png
     - assets/vital.png
     - assets/fam.png
+    - assets/payment.png
     - assets/med.png
     - assets/kcal.png
     - assets/Pill.png

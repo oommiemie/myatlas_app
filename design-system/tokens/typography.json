@@ -1,0 +1,465 @@
+{
+  "$description": "MyAtlas design tokens — typography",
+  "font": {
+    "family": {
+      "default": {
+        "$value": [
+          "IBMPlexSansThaiLooped",
+          "NunitoNum",
+          "System"
+        ],
+        "$type": "fontFamily",
+        "$description": "ค่าเริ่มต้นของแอป: ตัวอักษร IBM Plex Thai + ตัวเลข Nunito"
+      },
+      "numeric": {
+        "$value": [
+          "NunitoNum",
+          "IBMPlexSansThaiLooped"
+        ],
+        "$type": "fontFamily",
+        "$description": "เฉพาะตัวเลขเด่น เช่น เลขคิว ค่าตรวจ — Nunito มี weight ถึง 900"
+      },
+      "alt": {
+        "sukhumvit": {
+          "$value": [
+            "SukhumvitSet"
+          ],
+          "$type": "fontFamily"
+        },
+        "googleSans": {
+          "$value": [
+            "GoogleSans"
+          ],
+          "$type": "fontFamily"
+        },
+        "sarabun": {
+          "$value": [
+            "Sarabun"
+          ],
+          "$type": "fontFamily"
+        },
+        "notoThai": {
+          "$value": [
+            "NotoSansThai"
+          ],
+          "$type": "fontFamily"
+        }
+      }
+    },
+    "weight": {
+      "regular": {
+        "$value": 400,
+        "$type": "fontWeight"
+      },
+      "medium": {
+        "$value": 500,
+        "$type": "fontWeight"
+      },
+      "semibold": {
+        "$value": 600,
+        "$type": "fontWeight"
+      },
+      "bold": {
+        "$value": 700,
+        "$type": "fontWeight",
+        "$description": "หนักสุดที่ตัวอักษรไทยรองรับจริง"
+      },
+      "extrabold": {
+        "$value": 800,
+        "$type": "fontWeight",
+        "$description": "ใช้ได้กับตัวเลข Nunito เท่านั้น ตัวอักษรไทยจะถอยไป 700"
+      },
+      "black": {
+        "$value": 900,
+        "$type": "fontWeight",
+        "$description": "ใช้ได้กับตัวเลข Nunito เท่านั้น"
+      }
+    },
+    "size": {
+      "50": {
+        "$value": 10,
+        "$type": "dimension"
+      },
+      "75": {
+        "$value": 11,
+        "$type": "dimension"
+      },
+      "100": {
+        "$value": 12,
+        "$type": "dimension"
+      },
+      "150": {
+        "$value": 13,
+        "$type": "dimension"
+      },
+      "200": {
+        "$value": 14,
+        "$type": "dimension"
+      },
+      "250": {
+        "$value": 15,
+        "$type": "dimension"
+      },
+      "300": {
+        "$value": 16,
+        "$type": "dimension"
+      },
+      "350": {
+        "$value": 17,
+        "$type": "dimension"
+      },
+      "400": {
+        "$value": 18,
+        "$type": "dimension"
+      },
+      "450": {
+        "$value": 20,
+        "$type": "dimension"
+      },
+      "500": {
+        "$value": 22,
+        "$type": "dimension"
+      },
+      "550": {
+        "$value": 24,
+        "$type": "dimension"
+      },
+      "600": {
+        "$value": 28,
+        "$type": "dimension"
+      },
+      "700": {
+        "$value": 32,
+        "$type": "dimension"
+      },
+      "800": {
+        "$value": 40,
+        "$type": "dimension"
+      },
+      "900": {
+        "$value": 64,
+        "$type": "dimension"
+      }
+    }
+  },
+  "typography": {
+    "display": {
+      "xl": {
+        "$value": {
+          "fontFamily": "{font.family.default}",
+          "fontSize": 64,
+          "fontWeight": "{font.weight.black}",
+          "lineHeight": 67,
+          "letterSpacing": -1.0
+        },
+        "$type": "typography",
+        "$description": "เลขคิว / ตัวเลขเด่นเต็มการ์ด",
+        "$extensions": {
+          "com.myatlas": {
+            "lineHeightRatio": 1.05,
+            "androidFontFace": "IBMPlexSansThaiLooped-Bold"
+          }
+        }
+      },
+      "lg": {
+        "$value": {
+          "fontFamily": "{font.family.default}",
+          "fontSize": 40,
+          "fontWeight": "{font.weight.extrabold}",
+          "lineHeight": 44,
+          "letterSpacing": -0.8
+        },
+        "$type": "typography",
+        "$description": "ตัวเลขสรุปขนาดใหญ่",
+        "$extensions": {
+          "com.myatlas": {
+            "lineHeightRatio": 1.1,
+            "androidFontFace": "IBMPlexSansThaiLooped-Bold"
+          }
+        }
+      },
+      "md": {
+        "$value": {
+          "fontFamily": "{font.family.default}",
+          "fontSize": 32,
+          "fontWeight": "{font.weight.extrabold}",
+          "lineHeight": 37,
+          "letterSpacing": -0.6
+        },
+        "$type": "typography",
+        "$extensions": {
+          "com.myatlas": {
+            "lineHeightRatio": 1.15,
+            "androidFontFace": "IBMPlexSansThaiLooped-Bold"
+          }
+        }
+      }
+    },
+    "title": {
+      "xl": {
+        "$value": {
+          "fontFamily": "{font.family.default}",
+          "fontSize": 28,
+          "fontWeight": "{font.weight.bold}",
+          "lineHeight": 35,
+          "letterSpacing": -0.4
+        },
+        "$type": "typography",
+        "$description": "หัวข้อหน้า (title1)",
+        "$extensions": {
+          "com.myatlas": {
+            "lineHeightRatio": 1.25,
+            "androidFontFace": "IBMPlexSansThaiLooped-Bold"
+          }
+        }
+      },
+      "lg": {
+        "$value": {
+          "fontFamily": "{font.family.default}",
+          "fontSize": 24,
+          "fontWeight": "{font.weight.bold}",
+          "lineHeight": 30,
+          "letterSpacing": -0.4
+        },
+        "$type": "typography",
+        "$extensions": {
+          "com.myatlas": {
+            "lineHeightRatio": 1.25,
+            "androidFontFace": "IBMPlexSansThaiLooped-Bold"
+          }
+        }
+      },
+      "md": {
+        "$value": {
+          "fontFamily": "{font.family.default}",
+          "fontSize": 22,
+          "fontWeight": "{font.weight.bold}",
+          "lineHeight": 29,
+          "letterSpacing": -0.3
+        },
+        "$type": "typography",
+        "$description": "หัวข้อ section (title2)",
+        "$extensions": {
+          "com.myatlas": {
+            "lineHeightRatio": 1.3,
+            "androidFontFace": "IBMPlexSansThaiLooped-Bold"
+          }
+        }
+      },
+      "sm": {
+        "$value": {
+          "fontFamily": "{font.family.default}",
+          "fontSize": 20,
+          "fontWeight": "{font.weight.semibold}",
+          "lineHeight": 26,
+          "letterSpacing": -0.2
+        },
+        "$type": "typography",
+        "$description": "หัวข้อการ์ด (title3)",
+        "$extensions": {
+          "com.myatlas": {
+            "lineHeightRatio": 1.3,
+            "androidFontFace": "IBMPlexSansThaiLooped-SemiBold"
+          }
+        }
+      }
+    },
+    "headline": {
+      "$value": {
+        "fontFamily": "{font.family.default}",
+        "fontSize": 17,
+        "fontWeight": "{font.weight.semibold}",
+        "lineHeight": 23,
+        "letterSpacing": 0.0
+      },
+      "$type": "typography",
+      "$description": "หัวข้อในรายการ — ใช้จริง 50 จุด",
+      "$extensions": {
+        "com.myatlas": {
+          "lineHeightRatio": 1.35,
+          "androidFontFace": "IBMPlexSansThaiLooped-SemiBold"
+        }
+      }
+    },
+    "body": {
+      "lg": {
+        "$value": {
+          "fontFamily": "{font.family.default}",
+          "fontSize": 16,
+          "fontWeight": "{font.weight.regular}",
+          "lineHeight": 24,
+          "letterSpacing": 0.0
+        },
+        "$type": "typography",
+        "$description": "เนื้อหาขนาดใหญ่ (callout)",
+        "$extensions": {
+          "com.myatlas": {
+            "lineHeightRatio": 1.5,
+            "androidFontFace": "IBMPlexSansThaiLooped-Regular"
+          }
+        }
+      },
+      "md": {
+        "$value": {
+          "fontFamily": "{font.family.default}",
+          "fontSize": 15,
+          "fontWeight": "{font.weight.regular}",
+          "lineHeight": 22,
+          "letterSpacing": 0.0
+        },
+        "$type": "typography",
+        "$description": "เนื้อหาหลัก (subheadline) — ใช้จริง 83 จุด",
+        "$extensions": {
+          "com.myatlas": {
+            "lineHeightRatio": 1.5,
+            "androidFontFace": "IBMPlexSansThaiLooped-Regular"
+          }
+        }
+      },
+      "sm": {
+        "$value": {
+          "fontFamily": "{font.family.default}",
+          "fontSize": 14,
+          "fontWeight": "{font.weight.regular}",
+          "lineHeight": 21,
+          "letterSpacing": 0.0
+        },
+        "$type": "typography",
+        "$description": "เนื้อหารอง — ขนาดที่ใช้บ่อยสุดในแอป",
+        "$extensions": {
+          "com.myatlas": {
+            "lineHeightRatio": 1.5,
+            "androidFontFace": "IBMPlexSansThaiLooped-Regular"
+          }
+        }
+      }
+    },
+    "label": {
+      "lg": {
+        "$value": {
+          "fontFamily": "{font.family.default}",
+          "fontSize": 16,
+          "fontWeight": "{font.weight.semibold}",
+          "lineHeight": 22,
+          "letterSpacing": 0.0
+        },
+        "$type": "typography",
+        "$extensions": {
+          "com.myatlas": {
+            "lineHeightRatio": 1.35,
+            "androidFontFace": "IBMPlexSansThaiLooped-SemiBold"
+          }
+        }
+      },
+      "md": {
+        "$value": {
+          "fontFamily": "{font.family.default}",
+          "fontSize": 14,
+          "fontWeight": "{font.weight.semibold}",
+          "lineHeight": 19,
+          "letterSpacing": 0.0
+        },
+        "$type": "typography",
+        "$description": "ป้ายกำกับ / ปุ่มรอง",
+        "$extensions": {
+          "com.myatlas": {
+            "lineHeightRatio": 1.35,
+            "androidFontFace": "IBMPlexSansThaiLooped-SemiBold"
+          }
+        }
+      },
+      "sm": {
+        "$value": {
+          "fontFamily": "{font.family.default}",
+          "fontSize": 12,
+          "fontWeight": "{font.weight.semibold}",
+          "lineHeight": 16,
+          "letterSpacing": 0.0
+        },
+        "$type": "typography",
+        "$extensions": {
+          "com.myatlas": {
+            "lineHeightRatio": 1.35,
+            "androidFontFace": "IBMPlexSansThaiLooped-SemiBold"
+          }
+        }
+      }
+    },
+    "button": {
+      "$value": {
+        "fontFamily": "{font.family.default}",
+        "fontSize": 15,
+        "fontWeight": "{font.weight.bold}",
+        "lineHeight": 18,
+        "letterSpacing": 0.0
+      },
+      "$type": "typography",
+      "$description": "ตัวอักษรบนปุ่ม",
+      "$extensions": {
+        "com.myatlas": {
+          "lineHeightRatio": 1.2,
+          "androidFontFace": "IBMPlexSansThaiLooped-Bold"
+        }
+      }
+    },
+    "caption": {
+      "$value": {
+        "fontFamily": "{font.family.default}",
+        "fontSize": 12,
+        "fontWeight": "{font.weight.regular}",
+        "lineHeight": 17,
+        "letterSpacing": 0.0
+      },
+      "$type": "typography",
+      "$description": "คำอธิบาย (caption1)",
+      "$extensions": {
+        "com.myatlas": {
+          "lineHeightRatio": 1.4,
+          "androidFontFace": "IBMPlexSansThaiLooped-Regular"
+        }
+      },
+      "sm": {
+        "$value": {
+          "fontFamily": "{font.family.default}",
+          "fontSize": 11,
+          "fontWeight": "{font.weight.regular}",
+          "lineHeight": 15,
+          "letterSpacing": 0.0
+        },
+        "$type": "typography",
+        "$description": "คำอธิบายเล็ก (caption2) — ใช้จริง 70 จุด",
+        "$extensions": {
+          "com.myatlas": {
+            "lineHeightRatio": 1.4,
+            "androidFontFace": "IBMPlexSansThaiLooped-Regular"
+          }
+        }
+      }
+    },
+    "overline": {
+      "$value": {
+        "fontFamily": "{font.family.default}",
+        "fontSize": 10,
+        "fontWeight": "{font.weight.bold}",
+        "lineHeight": 12,
+        "letterSpacing": 1.5
+      },
+      "$type": "typography",
+      "$description": "ป้ายหมวดตัวเล็ก — ตัวอักษรละตินเท่านั้น",
+      "$extensions": {
+        "com.myatlas": {
+          "lineHeightRatio": 1.2,
+          "androidFontFace": "IBMPlexSansThaiLooped-Bold"
+        }
+      }
+    }
+  },
+  "$extensions": {
+    "com.myatlas.rules": {
+      "lineHeightIsAbsolute": "React Native รับ lineHeight เป็น px ไม่ใช่ตัวคูณ ค่าที่ให้คำนวณไว้แล้ว",
+      "androidIncludeFontPadding": "ตั้ง includeFontPadding:false บน Android ไม่งั้นกล่องบรรทัดภาษาไทยจะสูงกว่า iOS",
+      "thaiLetterSpacing": "ห้ามใส่ letterSpacing บวกกับข้อความไทย จะทำให้สระ/วรรณยุกต์หลุดจากพยัญชนะ ใช้ได้เฉพาะ overline ที่เป็นละติน",
+      "maxThaiWeight": "IBM Plex Sans Thai Looped มีถึง 700 เท่านั้น — 800/900 ใช้กับตัวเลข Nunito"
+    }
+  }
+}

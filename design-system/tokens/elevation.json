@@ -1,0 +1,285 @@
+{
+  "$description": "MyAtlas design tokens — elevation",
+  "elevation": {
+    "light": {
+      "none": {
+        "$value": {
+          "ios": {
+            "shadowColor": "transparent",
+            "shadowOffset": {
+              "width": 0,
+              "height": 0
+            },
+            "shadowOpacity": 0,
+            "shadowRadius": 0
+          },
+          "android": {
+            "elevation": 0
+          },
+          "css": "none"
+        },
+        "$type": "shadow",
+        "$description": "พื้นราบ — อยู่ระนาบเดียวกับพื้นหลัง"
+      },
+      "xs": {
+        "$value": {
+          "ios": {
+            "shadowColor": "#1A1A1A",
+            "shadowOffset": {
+              "width": 0,
+              "height": 1
+            },
+            "shadowOpacity": 0.06,
+            "shadowRadius": 1.5
+          },
+          "android": {
+            "elevation": 1,
+            "shadowColor": "#1A1A1A"
+          },
+          "css": "0px 1px 3px #1A1A1A0F"
+        },
+        "$type": "shadow",
+        "$description": "ยกขึ้นบางๆ — chip, การ์ดในลิสต์"
+      },
+      "sm": {
+        "$value": {
+          "ios": {
+            "shadowColor": "#1A1A1A",
+            "shadowOffset": {
+              "width": 0,
+              "height": 2
+            },
+            "shadowOpacity": 0.08,
+            "shadowRadius": 4.0
+          },
+          "android": {
+            "elevation": 2,
+            "shadowColor": "#1A1A1A"
+          },
+          "css": "0px 2px 8px #1A1A1A14"
+        },
+        "$type": "shadow",
+        "$description": "การ์ดทั่วไปที่ลอยจากพื้น"
+      },
+      "md": {
+        "$value": {
+          "ios": {
+            "shadowColor": "#1A1A1A",
+            "shadowOffset": {
+              "width": 0,
+              "height": 4
+            },
+            "shadowOpacity": 0.1,
+            "shadowRadius": 6.0
+          },
+          "android": {
+            "elevation": 4,
+            "shadowColor": "#1A1A1A"
+          },
+          "css": "0px 4px 12px #1A1A1A1A"
+        },
+        "$type": "shadow",
+        "$description": "แถบที่ปักอยู่กับที่ / ปุ่มลอย"
+      },
+      "lg": {
+        "$value": {
+          "ios": {
+            "shadowColor": "#1A1A1A",
+            "shadowOffset": {
+              "width": 0,
+              "height": 8
+            },
+            "shadowOpacity": 0.12,
+            "shadowRadius": 10.0
+          },
+          "android": {
+            "elevation": 8,
+            "shadowColor": "#1A1A1A"
+          },
+          "css": "0px 8px 20px #1A1A1A1F"
+        },
+        "$type": "shadow",
+        "$description": "popover, dropdown, เมนู"
+      },
+      "xl": {
+        "$value": {
+          "ios": {
+            "shadowColor": "#1A1A1A",
+            "shadowOffset": {
+              "width": 0,
+              "height": 12
+            },
+            "shadowOpacity": 0.16,
+            "shadowRadius": 16.0
+          },
+          "android": {
+            "elevation": 12,
+            "shadowColor": "#1A1A1A"
+          },
+          "css": "0px 12px 32px #1A1A1A29"
+        },
+        "$type": "shadow",
+        "$description": "modal, bottom sheet, toast"
+      }
+    },
+    "dark": {
+      "none": {
+        "$value": {
+          "surface": "{color.semantic.dark.surface.base}",
+          "ios": {
+            "shadowOpacity": 0
+          },
+          "android": {
+            "elevation": 0
+          }
+        },
+        "$type": "shadow",
+        "$description": "พื้นหลังหน้าจอ"
+      },
+      "xs": {
+        "$value": {
+          "surface": "{color.semantic.dark.surface.raised}",
+          "ios": {
+            "shadowOpacity": 0
+          },
+          "android": {
+            "elevation": 0
+          }
+        },
+        "$type": "shadow",
+        "$description": "การ์ด — ยกด้วยความสว่าง ไม่ใช่เงา"
+      },
+      "sm": {
+        "$value": {
+          "surface": "{color.semantic.dark.surface.raised}",
+          "ios": {
+            "shadowOpacity": 0
+          },
+          "android": {
+            "elevation": 0
+          }
+        },
+        "$type": "shadow"
+      },
+      "md": {
+        "$value": {
+          "surface": "{color.semantic.dark.surface.raisedAlt}",
+          "ios": {
+            "shadowOpacity": 0
+          },
+          "android": {
+            "elevation": 0
+          }
+        },
+        "$type": "shadow"
+      },
+      "lg": {
+        "$value": {
+          "surface": "{color.semantic.dark.surface.overlay}",
+          "ios": {
+            "shadowOpacity": 0
+          },
+          "android": {
+            "elevation": 0
+          }
+        },
+        "$type": "shadow"
+      },
+      "xl": {
+        "$value": {
+          "surface": "{color.semantic.dark.surface.overlay}",
+          "ios": {
+            "shadowColor": "#000000",
+            "shadowOffset": {
+              "width": 0,
+              "height": 12
+            },
+            "shadowOpacity": 0.48,
+            "shadowRadius": 16
+          },
+          "android": {
+            "elevation": 12,
+            "shadowColor": "#000000"
+          }
+        },
+        "$type": "shadow",
+        "$description": "modal/sheet — ใช้เงาดำเข้มช่วยแยกชั้นจากพื้นหลังที่มืดอยู่แล้ว"
+      }
+    },
+    "tinted": {
+      "brand": {
+        "$value": {
+          "ios": {
+            "shadowColor": "{color.brand.600}",
+            "shadowOffset": {
+              "width": 0,
+              "height": 6
+            },
+            "shadowOpacity": 0.28,
+            "shadowRadius": 6
+          },
+          "android": {
+            "elevation": 6,
+            "shadowColor": "{color.brand.600}"
+          },
+          "css": "0px 6px 12px rgba(29,139,107,0.28)"
+        },
+        "$type": "shadow",
+        "$description": "ปุ่มหลักสีแบรนด์"
+      },
+      "queue": {
+        "$value": {
+          "ios": {
+            "shadowColor": "{color.blue.500}",
+            "shadowOffset": {
+              "width": 0,
+              "height": 6
+            },
+            "shadowOpacity": 0.22,
+            "shadowRadius": 8
+          },
+          "android": {
+            "elevation": 6,
+            "shadowColor": "{color.blue.500}"
+          },
+          "css": "0px 6px 16px rgba(30,136,229,0.22)"
+        },
+        "$type": "shadow",
+        "$description": "การ์ด/บัตรคิว"
+      },
+      "danger": {
+        "$value": {
+          "ios": {
+            "shadowColor": "{color.error.600}",
+            "shadowOffset": {
+              "width": 0,
+              "height": 6
+            },
+            "shadowOpacity": 0.25,
+            "shadowRadius": 7
+          },
+          "android": {
+            "elevation": 6,
+            "shadowColor": "{color.error.600}"
+          },
+          "css": "0px 6px 14px rgba(220,38,38,0.25)"
+        },
+        "$type": "shadow",
+        "$description": "ปุ่มลบ/เตือน"
+      }
+    }
+  },
+  "$extensions": {
+    "com.myatlas.rules": {
+      "singleLightSource": "แหล่งแสงเดียวจากด้านบน — x offset = 0 เสมอ y เป็นบวกเสมอ (โค้ดปัจจุบันทำถูกอยู่แล้วทุกจุด)",
+      "proportion": "blur ประมาณ 2.5-3 เท่าของ y-offset ยิ่งลอยสูง blur ยิ่งกว้าง",
+      "meaningNotStyle": "เลือกระดับจากความหมาย ไม่ใช่ความสวย: xs=chip, sm=การ์ด, md=แถบปักอยู่กับที่, lg=popover, xl=modal",
+      "tintedShadow": "พื้นผิวที่มีสีให้ใช้เงาย้อมสีเดียวกัน ห้ามใช้ดำล้วน เพราะจะออกเทาสกปรก",
+      "darkMode": "โหมดมืดไม่ใช้เงา — ยกชั้นด้วยการเพิ่มความสว่างของพื้นผิวแทน ยกเว้น modal ที่ยังต้องใช้เงาดำช่วยแยกชั้น",
+      "iosShadowRadiusIsHalf": "RN iOS shadowRadius ไม่เท่ากับ blur ของ Flutter/CSS — ต้องหารสอง เช่น Flutter blurRadius 12 = RN shadowRadius 6",
+      "androidLimits": "Android คุมได้แค่ค่า elevation ตัวเดียว กำหนดทิศทาง/ระยะเบลอไม่ได้ และสีเงาใช้ได้ตั้งแต่ API 28 ขึ้นไป",
+      "androidNeedsBackground": "บน Android ถ้า View ไม่มี backgroundColor เงาจะไม่ขึ้นเลย",
+      "newArch": "RN 0.76+ (New Architecture) รองรับ boxShadow แบบ CSS แล้ว ใช้ค่า css ในโทเคนได้ตรง"
+    }
+  }
+}

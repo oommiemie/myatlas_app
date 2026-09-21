@@ -1,0 +1,392 @@
+{
+  "$description": "MyAtlas design tokens — spacing, layout grid, breakpoints, sizing",
+  "space": {
+    "0": {
+      "$value": 0,
+      "$type": "dimension"
+    },
+    "4": {
+      "$value": 4,
+      "$type": "dimension"
+    },
+    "8": {
+      "$value": 8,
+      "$type": "dimension"
+    },
+    "12": {
+      "$value": 12,
+      "$type": "dimension"
+    },
+    "16": {
+      "$value": 16,
+      "$type": "dimension"
+    },
+    "20": {
+      "$value": 20,
+      "$type": "dimension"
+    },
+    "24": {
+      "$value": 24,
+      "$type": "dimension"
+    },
+    "28": {
+      "$value": 28,
+      "$type": "dimension"
+    },
+    "32": {
+      "$value": 32,
+      "$type": "dimension"
+    },
+    "40": {
+      "$value": 40,
+      "$type": "dimension"
+    },
+    "48": {
+      "$value": 48,
+      "$type": "dimension"
+    },
+    "56": {
+      "$value": 56,
+      "$type": "dimension"
+    },
+    "64": {
+      "$value": 64,
+      "$type": "dimension"
+    },
+    "80": {
+      "$value": 80,
+      "$type": "dimension"
+    },
+    "96": {
+      "$value": 96,
+      "$type": "dimension"
+    }
+  },
+  "layout": {
+    "inset": {
+      "screen": {
+        "$value": "{space.16}",
+        "$type": "dimension",
+        "$description": "ขอบซ้ายขวาของหน้าจอ (มือถือ)"
+      },
+      "screenWide": {
+        "$value": "{space.24}",
+        "$type": "dimension",
+        "$description": "ขอบหน้าจอบนแท็บเล็ต"
+      },
+      "card": {
+        "$value": "{space.16}",
+        "$type": "dimension",
+        "$description": "ระยะในการ์ดมาตรฐาน"
+      },
+      "cardTight": {
+        "$value": "{space.12}",
+        "$type": "dimension",
+        "$description": "การ์ดหนาแน่น เช่น ตารางสรุป"
+      },
+      "sheet": {
+        "$value": "{space.16}",
+        "$type": "dimension"
+      },
+      "field": {
+        "$value": "{space.12}",
+        "$type": "dimension",
+        "$description": "ระยะในช่องกรอก"
+      },
+      "chip": {
+        "$value": "{space.8}",
+        "$type": "dimension"
+      }
+    },
+    "gap": {
+      "hairline": {
+        "$value": "{space.4}",
+        "$type": "dimension",
+        "$description": "ระหว่างข้อความที่เป็นก้อนเดียวกัน เช่น หัวข้อกับคำบรรยาย"
+      },
+      "tight": {
+        "$value": "{space.8}",
+        "$type": "dimension",
+        "$description": "ระหว่างองค์ประกอบที่สัมพันธ์กันโดยตรง"
+      },
+      "cozy": {
+        "$value": "{space.12}",
+        "$type": "dimension",
+        "$description": "ระหว่างรายการในลิสต์"
+      },
+      "default": {
+        "$value": "{space.16}",
+        "$type": "dimension",
+        "$description": "ระหว่างการ์ด — จังหวะหลักของแอป"
+      },
+      "section": {
+        "$value": "{space.24}",
+        "$type": "dimension",
+        "$description": "ระหว่างกลุ่มเนื้อหาคนละเรื่อง"
+      },
+      "sectionLg": {
+        "$value": "{space.32}",
+        "$type": "dimension",
+        "$description": "ระหว่าง section ใหญ่"
+      }
+    },
+    "stack": {
+      "listBottomSafe": {
+        "$value": "{space.96}",
+        "$type": "dimension",
+        "$description": "เว้นท้ายลิสต์ให้พ้น tab bar"
+      }
+    },
+    "breakpoint": {
+      "compact": {
+        "$value": 0,
+        "$type": "dimension",
+        "$description": "มือถือแนวตั้ง < 600"
+      },
+      "medium": {
+        "$value": 600,
+        "$type": "dimension",
+        "$description": "แท็บเล็ตแนวตั้ง / มือถือแนวนอน"
+      },
+      "expanded": {
+        "$value": 840,
+        "$type": "dimension",
+        "$description": "แท็บเล็ตแนวนอน"
+      },
+      "large": {
+        "$value": 1200,
+        "$type": "dimension",
+        "$description": "เดสก์ท็อป / เว็บ"
+      }
+    },
+    "grid": {
+      "compact": {
+        "columns": {
+          "$value": 4,
+          "$type": "number"
+        },
+        "gutter": {
+          "$value": "{space.16}",
+          "$type": "dimension"
+        },
+        "margin": {
+          "$value": "{space.16}",
+          "$type": "dimension"
+        }
+      },
+      "medium": {
+        "columns": {
+          "$value": 8,
+          "$type": "number"
+        },
+        "gutter": {
+          "$value": "{space.24}",
+          "$type": "dimension"
+        },
+        "margin": {
+          "$value": "{space.24}",
+          "$type": "dimension"
+        }
+      },
+      "expanded": {
+        "columns": {
+          "$value": 12,
+          "$type": "number"
+        },
+        "gutter": {
+          "$value": "{space.24}",
+          "$type": "dimension"
+        },
+        "margin": {
+          "$value": "{space.32}",
+          "$type": "dimension"
+        }
+      },
+      "large": {
+        "columns": {
+          "$value": 12,
+          "$type": "number"
+        },
+        "gutter": {
+          "$value": "{space.32}",
+          "$type": "dimension"
+        },
+        "margin": {
+          "$value": "{space.40}",
+          "$type": "dimension"
+        }
+      }
+    },
+    "container": {
+      "content": {
+        "$value": 720,
+        "$type": "dimension",
+        "$description": "ความกว้างสูงสุดของคอลัมน์อ่าน — คุมความยาวบรรทัดไว้ ~45-75 ตัวอักษร"
+      },
+      "form": {
+        "$value": 520,
+        "$type": "dimension",
+        "$description": "ฟอร์ม/หน้าล็อกอิน (ค่าที่ ResponsiveFrame ใช้อยู่)"
+      },
+      "wide": {
+        "$value": 1080,
+        "$type": "dimension",
+        "$description": "หน้าที่มีหลายคอลัมน์บนแท็บเล็ตแนวนอน"
+      }
+    }
+  },
+  "size": {
+    "touchTarget": {
+      "min": {
+        "$value": 44,
+        "$type": "dimension",
+        "$description": "ขั้นต่ำตาม Apple HIG — ห้ามต่ำกว่านี้"
+      },
+      "comfortable": {
+        "$value": 48,
+        "$type": "dimension",
+        "$description": "ขั้นต่ำตาม Material / WCAG 2.2 Target Size (AAA)"
+      }
+    },
+    "control": {
+      "xs": {
+        "$value": 28,
+        "$type": "dimension",
+        "$description": "chip เล็ก"
+      },
+      "sm": {
+        "$value": 32,
+        "$type": "dimension"
+      },
+      "md": {
+        "$value": 36,
+        "$type": "dimension",
+        "$description": "ปุ่มไอคอนใน header"
+      },
+      "lg": {
+        "$value": 44,
+        "$type": "dimension",
+        "$description": "ปุ่มหลัก / ช่องกรอก"
+      },
+      "xl": {
+        "$value": 56,
+        "$type": "dimension",
+        "$description": "ปุ่มเต็มความกว้างแบบเด่น"
+      }
+    },
+    "icon": {
+      "xs": {
+        "$value": 12,
+        "$type": "dimension"
+      },
+      "sm": {
+        "$value": 16,
+        "$type": "dimension"
+      },
+      "md": {
+        "$value": 20,
+        "$type": "dimension"
+      },
+      "lg": {
+        "$value": 24,
+        "$type": "dimension"
+      },
+      "xl": {
+        "$value": 32,
+        "$type": "dimension"
+      },
+      "2xl": {
+        "$value": 40,
+        "$type": "dimension"
+      }
+    },
+    "avatar": {
+      "xs": {
+        "$value": 24,
+        "$type": "dimension"
+      },
+      "sm": {
+        "$value": 32,
+        "$type": "dimension"
+      },
+      "md": {
+        "$value": 40,
+        "$type": "dimension"
+      },
+      "lg": {
+        "$value": 56,
+        "$type": "dimension"
+      },
+      "xl": {
+        "$value": 72,
+        "$type": "dimension"
+      },
+      "2xl": {
+        "$value": 96,
+        "$type": "dimension"
+      }
+    },
+    "hitSlop": {
+      "$value": 8,
+      "$type": "dimension",
+      "$description": "ขยายพื้นที่กดของไอคอนเล็กให้ถึง 44 โดยไม่ขยายภาพ"
+    }
+  },
+  "zIndex": {
+    "base": {
+      "$value": 0,
+      "$type": "number"
+    },
+    "raised": {
+      "$value": 10,
+      "$type": "number"
+    },
+    "sticky": {
+      "$value": 100,
+      "$type": "number"
+    },
+    "header": {
+      "$value": 200,
+      "$type": "number"
+    },
+    "overlay": {
+      "$value": 300,
+      "$type": "number"
+    },
+    "modal": {
+      "$value": 400,
+      "$type": "number"
+    },
+    "toast": {
+      "$value": 500,
+      "$type": "number"
+    }
+  },
+  "$extensions": {
+    "com.myatlas.rules": {
+      "base": "กริด 4pt — ทุกระยะต้องหารด้วย 4 ลงตัว",
+      "migrationMap": {
+        "2": 4,
+        "2.5": 4,
+        "3": 4,
+        "6": 8,
+        "9": 8,
+        "10": 12,
+        "11": 12,
+        "12.5": 12,
+        "13": 12,
+        "13.5": 16,
+        "14": 16,
+        "15": 16,
+        "17": 16,
+        "18": 20,
+        "22": 24,
+        "30": 32
+      },
+      "proximity": "ระยะบอกความสัมพันธ์: 4 = ก้อนเดียวกัน, 8 = สัมพันธ์กัน, 16 = คนละการ์ด, 24+ = คนละเรื่อง",
+      "touchTarget": "ทุก control ต้องมีพื้นที่กด >= 44x44 ถ้าภาพเล็กกว่านั้นให้ใช้ hitSlop ไม่ใช่ขยายภาพ",
+      "tabletStrategy": "compact = คอลัมน์เดียว, medium ขึ้นไป = คุมความกว้างเนื้อหาที่ container.content แล้วจัดกึ่งกลาง หรือแยกเป็น 2 คอลัมน์",
+      "migrationScope": "ใช้กับระยะห่าง ขนาดไอคอน และความสูง control — ไม่ใช้กับขนาดตัวอักษร (ดู typography.json)"
+    }
+  }
+}

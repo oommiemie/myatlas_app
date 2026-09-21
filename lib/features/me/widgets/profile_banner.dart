@@ -11,6 +11,7 @@ import '../../appointment/data/mock_data.dart';
 import '../../nutrition/food_lens/food_lens_flow.dart';
 import '../../shell/main_shell.dart';
 import '../profile_screen.dart' show ProfileScreen, ProfileAvatarImage;
+import '../../../core/widgets/liquid_glass_button.dart';
 
 /// Personal-info banner used on the Me page (and embedded in the Home header):
 /// mesh-gradient card with the wellness-ring avatar, name, location and the
@@ -22,6 +23,8 @@ class ProfileBanner extends StatefulWidget {
     this.watchName,
     this.watchConnected = false,
     this.watchBattery,
+    this.unreadNotifications = 0,
+    this.onNotificationsTap,
   });
 
   /// Compact layout for the Home header: no edit button, smaller avatar/text
@@ -33,6 +36,10 @@ class ProfileBanner extends StatefulWidget {
   final String? watchName;
   final bool watchConnected;
   final int? watchBattery;
+
+  /// จำนวนแจ้งเตือนที่ยังไม่อ่าน > 0 = ขึ้นจุดแดงบนกระดิ่ง (โหมด compact)
+  final int unreadNotifications;
+  final VoidCallback? onNotificationsTap;
 
   @override
   State<ProfileBanner> createState() => _ProfileBannerState();
@@ -83,7 +90,9 @@ class _ProfileBannerState extends State<ProfileBanner>
                       end: Alignment.centerRight,
                       colors: [
                         CupertinoColors.white.withValues(alpha: 0),
-                        CupertinoColors.white.withValues(alpha: light ? 0.5 : 0.18),
+                        CupertinoColors.white.withValues(
+                          alpha: light ? 0.5 : 0.18,
+                        ),
                         CupertinoColors.white.withValues(alpha: 0),
                       ],
                     ),
@@ -127,8 +136,9 @@ class _ProfileBannerState extends State<ProfileBanner>
                                 color: CupertinoColors.white,
                                 boxShadow: [
                                   BoxShadow(
-                                    color: CupertinoColors.black
-                                        .withValues(alpha: 0.15),
+                                    color: CupertinoColors.black.withValues(
+                                      alpha: 0.15,
+                                    ),
                                     blurRadius: 4,
                                     offset: const Offset(0, 1),
                                   ),
@@ -155,8 +165,9 @@ class _ProfileBannerState extends State<ProfileBanner>
                               style: TextStyle(
                                 color: light
                                     ? const Color(0xFF8A97A3)
-                                    : CupertinoColors.white
-                                        .withValues(alpha: 0.7),
+                                    : CupertinoColors.white.withValues(
+                                        alpha: 0.7,
+                                      ),
                                 fontSize: c ? 9 : 11,
                                 letterSpacing: 1.4,
                                 fontWeight: FontWeight.w600,
@@ -168,16 +179,17 @@ class _ProfileBannerState extends State<ProfileBanner>
                                 Flexible(
                                   child: Text(
                                     'คุณณัฐพงษ์',
-                                    style: AppTypography.headline(
-                                      light
-                                          ? const Color(0xFF1A1A2E)
-                                          : CupertinoColors.white,
-                                    ).copyWith(
-                                      fontSize: c ? 15 : 22,
-                                      fontWeight: FontWeight.w700,
-                                      letterSpacing: -0.3,
-                                      height: 1.1,
-                                    ),
+                                    style:
+                                        AppTypography.headline(
+                                          light
+                                              ? const Color(0xFF1A1A2E)
+                                              : CupertinoColors.white,
+                                        ).copyWith(
+                                          fontSize: c ? 15 : 22,
+                                          fontWeight: FontWeight.w700,
+                                          letterSpacing: -0.3,
+                                          height: 1.1,
+                                        ),
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
@@ -209,11 +221,12 @@ class _ProfileBannerState extends State<ProfileBanner>
                                       ? BoxDecoration(
                                           color: light
                                               ? CupertinoColors.black
-                                                  .withValues(alpha: 0.05)
+                                                    .withValues(alpha: 0.05)
                                               : CupertinoColors.white
-                                                  .withValues(alpha: 0.18),
-                                          borderRadius:
-                                              BorderRadius.circular(100),
+                                                    .withValues(alpha: 0.18),
+                                          borderRadius: BorderRadius.circular(
+                                            100,
+                                          ),
                                         )
                                       : null,
                                   child: (c && widget.watchName != null)
@@ -282,8 +295,9 @@ class _ProfileBannerState extends State<ProfileBanner>
                             shape: BoxShape.circle,
                             color: CupertinoColors.white.withValues(alpha: 0.2),
                             border: Border.all(
-                              color:
-                                  CupertinoColors.white.withValues(alpha: 0.3),
+                              color: CupertinoColors.white.withValues(
+                                alpha: 0.3,
+                              ),
                               width: 0.5,
                             ),
                           ),
@@ -293,6 +307,16 @@ class _ProfileBannerState extends State<ProfileBanner>
                             color: CupertinoColors.white,
                             size: 14,
                           ),
+                        ),
+                      ),
+                    // Home card: notification bell pinned to the card's
+                    // right edge; the dot marks unread items.
+                    if (c)
+                      Padding(
+                        padding: const EdgeInsets.only(left: 8),
+                        child: _NotificationButton(
+                          hasUnread: widget.unreadNotifications > 0,
+                          onTap: widget.onNotificationsTap,
                         ),
                       ),
                     // (Family cluster removed from the right of the card.)
@@ -397,8 +421,18 @@ class _AiAlertCarousel extends StatefulWidget {
 
 class _AiAlertCarouselState extends State<_AiAlertCarousel> {
   static const _thMonth = [
-    'ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.',
-    'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.',
+    'ม.ค.',
+    'ก.พ.',
+    'มี.ค.',
+    'เม.ย.',
+    'พ.ค.',
+    'มิ.ย.',
+    'ก.ค.',
+    'ส.ค.',
+    'ก.ย.',
+    'ต.ค.',
+    'พ.ย.',
+    'ธ.ค.',
   ];
 
   // TEST: set to false to show real notifications again.
@@ -421,7 +455,8 @@ class _AiAlertCarouselState extends State<_AiAlertCarousel> {
       const _AiNotif(
         icon: CupertinoIcons.alarm_fill,
         title: 'ถึงเวลาทานยา · 12:30 น.',
-        body: 'Metformin 500 mg — รับประทาน 1 เม็ด หลังอาหารกลางวัน พร้อมน้ำ 1 แก้ว',
+        body:
+            'Metformin 500 mg — รับประทาน 1 เม็ด หลังอาหารกลางวัน พร้อมน้ำ 1 แก้ว',
         kind: _AiKind.medication,
       ),
       _AiNotif(
@@ -445,9 +480,9 @@ class _AiAlertCarouselState extends State<_AiAlertCarousel> {
         // Switch the bottom-nav to the "ทานยา" tab (index 2).
         MainShell.switchTab(context, 2);
       case _AiKind.appointment:
-        Navigator.of(context).push(
-          CupertinoPageRoute(builder: (_) => const AppointmentScreen()),
-        );
+        Navigator.of(
+          context,
+        ).push(CupertinoPageRoute(builder: (_) => const AppointmentScreen()));
       case _AiKind.meal:
         openFoodLens(context);
     }
@@ -530,8 +565,9 @@ class _AiAlertCarouselState extends State<_AiAlertCarousel> {
                   width: 4,
                   height: i == _active ? 12 : 4,
                   decoration: BoxDecoration(
-                    color: CupertinoColors.white
-                        .withValues(alpha: i == _active ? 1 : 0.45),
+                    color: CupertinoColors.white.withValues(
+                      alpha: i == _active ? 1 : 0.45,
+                    ),
                     borderRadius: BorderRadius.circular(100),
                   ),
                 ),
@@ -732,9 +768,7 @@ class _WellnessAvatar extends StatelessWidget {
               ],
             ),
             padding: const EdgeInsets.all(2),
-            child: const ClipOval(
-              child: ProfileAvatarImage(fit: BoxFit.cover),
-            ),
+            child: const ClipOval(child: ProfileAvatarImage(fit: BoxFit.cover)),
           ),
         ],
       ),
@@ -939,32 +973,28 @@ class _FamilyCluster extends StatelessWidget {
         height: 66,
         child: Stack(
           clipBehavior: Clip.none,
-        children: [
-          // bottom-left, small (right edge aligned with top-left's right edge)
-          Positioned(
-            left: _big - _small,
-            top: 38,
-            child: _tile('assets/images/family/pat.png', _bgPink, _small),
-          ),
-          // top-left, big (top edge aligned with top-right)
-          Positioned(
-            left: 0,
-            top: 0,
-            child: _tile('assets/images/family/somchai.png', _bgPurple, _big),
-          ),
-          // top-right, small (left edge aligned with bottom-right badge)
-          Positioned(
-            right: _big - _small,
-            top: 0,
-            child: _tile('assets/images/family/somsri.png', _bgTeal, _small),
-          ),
-          // bottom-right, big badge (bottom edge aligned with bottom-left)
-          Positioned(
-            right: 0,
-            top: 38 + _small - _big,
-            child: _badge(_big),
-          ),
-        ],
+          children: [
+            // bottom-left, small (right edge aligned with top-left's right edge)
+            Positioned(
+              left: _big - _small,
+              top: 38,
+              child: _tile('assets/images/family/pat.png', _bgPink, _small),
+            ),
+            // top-left, big (top edge aligned with top-right)
+            Positioned(
+              left: 0,
+              top: 0,
+              child: _tile('assets/images/family/somchai.png', _bgPurple, _big),
+            ),
+            // top-right, small (left edge aligned with bottom-right badge)
+            Positioned(
+              right: _big - _small,
+              top: 0,
+              child: _tile('assets/images/family/somsri.png', _bgTeal, _small),
+            ),
+            // bottom-right, big badge (bottom edge aligned with bottom-left)
+            Positioned(right: 0, top: 38 + _small - _big, child: _badge(_big)),
+          ],
         ),
       ),
     );
@@ -1022,10 +1052,7 @@ class FamilyRow extends StatelessWidget {
       child: CustomPaint(
         foregroundPainter: _DashedRRectPainter(radius: 14, color: _dash),
         // Equal padding on every side so the photo sits inset in the frame.
-        child: Padding(
-          padding: const EdgeInsets.all(4),
-          child: child,
-        ),
+        child: Padding(padding: const EdgeInsets.all(4), child: child),
       ),
     );
   }
@@ -1199,7 +1226,10 @@ class FamilyUpsellCard extends StatelessWidget {
                       SizedBox(height: 2),
                       Text(
                         'อัปเกรดแพ็กเกจเพื่อดูแลคนที่คุณรัก',
-                        style: TextStyle(fontSize: 11, color: Color(0xFF6D756E)),
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Color(0xFF6D756E),
+                        ),
                       ),
                     ],
                   ),
@@ -1221,10 +1251,12 @@ List<InlineSpan> _emphasizeDigits(String s) {
   var last = 0;
   for (final m in re.allMatches(s)) {
     if (m.start > last) spans.add(TextSpan(text: s.substring(last, m.start)));
-    spans.add(TextSpan(
-      text: m.group(0),
-      style: const TextStyle(fontWeight: FontWeight.w800),
-    ));
+    spans.add(
+      TextSpan(
+        text: m.group(0),
+        style: const TextStyle(fontWeight: FontWeight.w800),
+      ),
+    );
     last = m.end;
   }
   if (last < s.length) spans.add(TextSpan(text: s.substring(last)));
@@ -1242,8 +1274,10 @@ class _DashedRRectPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.4
       ..color = color;
-    final rrect =
-        RRect.fromRectAndRadius(Offset.zero & size, Radius.circular(radius));
+    final rrect = RRect.fromRectAndRadius(
+      Offset.zero & size,
+      Radius.circular(radius),
+    );
     final path = Path()..addRRect(rrect);
     const dash = 4.0, gap = 3.5;
     for (final metric in path.computeMetrics()) {
@@ -1258,4 +1292,45 @@ class _DashedRRectPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _DashedRRectPainter old) =>
       old.radius != radius || old.color != color;
+}
+
+/// ปุ่มแจ้งเตือนมุมขวาของการ์ดโปรไฟล์หน้าแรก
+/// ใช้ปุ่ม Liquid Glass ชุดเดียวกับปุ่มกลมอื่น ๆ ทั้งแอป
+class _NotificationButton extends StatelessWidget {
+  const _NotificationButton({required this.hasUnread, this.onTap});
+
+  final bool hasUnread;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        LiquidGlassButton(
+          icon: CupertinoIcons.bell_fill,
+          onTap: onTap,
+          size: 36,
+          iconSize: 17,
+          iconColor: const Color(0xFF1A1A2E),
+          // การ์ดโปรไฟล์มีเงาของตัวเองอยู่แล้ว เงาปุ่มจึงเบาลง
+          shadowStrength: 0.45,
+        ),
+        if (hasUnread)
+          Positioned(
+            right: 1,
+            top: 1,
+            child: Container(
+              width: 9,
+              height: 9,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: const Color(0xFFFF383C),
+                border: Border.all(color: CupertinoColors.white, width: 1.5),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
 }

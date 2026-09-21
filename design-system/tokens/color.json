@@ -1,0 +1,875 @@
+{
+  "$description": "MyAtlas design tokens — color. รูปแบบ W3C Design Tokens (DTCG)",
+  "color": {
+    "neutral": {
+      "0": {
+        "$value": "#FFFFFF",
+        "$type": "color"
+      },
+      "25": {
+        "$value": "#FBFCFB",
+        "$type": "color"
+      },
+      "50": {
+        "$value": "#F4F8F5",
+        "$type": "color"
+      },
+      "100": {
+        "$value": "#ECF0ED",
+        "$type": "color"
+      },
+      "200": {
+        "$value": "#E5E5E5",
+        "$type": "color"
+      },
+      "300": {
+        "$value": "#D1D6D2",
+        "$type": "color"
+      },
+      "400": {
+        "$value": "#AFB6B0",
+        "$type": "color"
+      },
+      "500": {
+        "$value": "#8C958D",
+        "$type": "color"
+      },
+      "600": {
+        "$value": "#6D756E",
+        "$type": "color"
+      },
+      "650": {
+        "$value": "#5C665E",
+        "$type": "color"
+      },
+      "700": {
+        "$value": "#505851",
+        "$type": "color"
+      },
+      "725": {
+        "$value": "#4A524B",
+        "$type": "color"
+      },
+      "800": {
+        "$value": "#3E453F",
+        "$type": "color"
+      },
+      "850": {
+        "$value": "#2E3532",
+        "$type": "color"
+      },
+      "900": {
+        "$value": "#262B27",
+        "$type": "color"
+      },
+      "925": {
+        "$value": "#1F2421",
+        "$type": "color"
+      },
+      "950": {
+        "$value": "#1A1A1A",
+        "$type": "color"
+      },
+      "975": {
+        "$value": "#141816",
+        "$type": "color"
+      },
+      "1000": {
+        "$value": "#000000",
+        "$type": "color"
+      }
+    },
+    "brand": {
+      "50": {
+        "$value": "#E4F5F0",
+        "$type": "color"
+      },
+      "100": {
+        "$value": "#BEE7DB",
+        "$type": "color"
+      },
+      "200": {
+        "$value": "#8FD7C2",
+        "$type": "color"
+      },
+      "300": {
+        "$value": "#4AB99C",
+        "$type": "color"
+      },
+      "400": {
+        "$value": "#2BB892",
+        "$type": "color"
+      },
+      "500": {
+        "$value": "#26A37E",
+        "$type": "color"
+      },
+      "600": {
+        "$value": "#1D8B6B",
+        "$type": "color"
+      },
+      "700": {
+        "$value": "#157F5E",
+        "$type": "color"
+      },
+      "800": {
+        "$value": "#12624A",
+        "$type": "color"
+      },
+      "900": {
+        "$value": "#093327",
+        "$type": "color"
+      }
+    },
+    "blue": {
+      "50": {
+        "$value": "#EFF6FA",
+        "$type": "color"
+      },
+      "100": {
+        "$value": "#D3E7F8",
+        "$type": "color"
+      },
+      "200": {
+        "$value": "#A8CFF2",
+        "$type": "color"
+      },
+      "300": {
+        "$value": "#63AEEC",
+        "$type": "color"
+      },
+      "400": {
+        "$value": "#3D9BE8",
+        "$type": "color"
+      },
+      "500": {
+        "$value": "#1E88E5",
+        "$type": "color"
+      },
+      "600": {
+        "$value": "#0F6FC0",
+        "$type": "color"
+      },
+      "700": {
+        "$value": "#0369A1",
+        "$type": "color"
+      },
+      "800": {
+        "$value": "#0B4A6F",
+        "$type": "color"
+      },
+      "900": {
+        "$value": "#082F45",
+        "$type": "color"
+      }
+    },
+    "sky": {
+      "200": {
+        "$value": "#93B9F8",
+        "$type": "color"
+      },
+      "400": {
+        "$value": "#5E8BEF",
+        "$type": "color"
+      }
+    },
+    "success": {
+      "50": {
+        "$value": "#ECFDF3",
+        "$type": "color"
+      },
+      "100": {
+        "$value": "#D1FADF",
+        "$type": "color"
+      },
+      "300": {
+        "$value": "#6CE9A6",
+        "$type": "color"
+      },
+      "500": {
+        "$value": "#22C55E",
+        "$type": "color"
+      },
+      "600": {
+        "$value": "#16A34A",
+        "$type": "color"
+      },
+      "700": {
+        "$value": "#15803D",
+        "$type": "color"
+      }
+    },
+    "warning": {
+      "50": {
+        "$value": "#FFFCDB",
+        "$type": "color"
+      },
+      "100": {
+        "$value": "#FEF9C3",
+        "$type": "color"
+      },
+      "300": {
+        "$value": "#FDE047",
+        "$type": "color"
+      },
+      "500": {
+        "$value": "#F59E0B",
+        "$type": "color"
+      },
+      "600": {
+        "$value": "#D97706",
+        "$type": "color"
+      },
+      "700": {
+        "$value": "#B45309",
+        "$type": "color"
+      }
+    },
+    "error": {
+      "50": {
+        "$value": "#FEF3F2",
+        "$type": "color"
+      },
+      "100": {
+        "$value": "#FEE4E2",
+        "$type": "color"
+      },
+      "300": {
+        "$value": "#FDA29B",
+        "$type": "color"
+      },
+      "500": {
+        "$value": "#EF4444",
+        "$type": "color"
+      },
+      "600": {
+        "$value": "#DC2626",
+        "$type": "color"
+      },
+      "700": {
+        "$value": "#B91C1C",
+        "$type": "color"
+      },
+      "800": {
+        "$value": "#BC1B06",
+        "$type": "color"
+      }
+    },
+    "info": {
+      "50": {
+        "$value": "#F0F9FF",
+        "$type": "color"
+      },
+      "100": {
+        "$value": "#E0F2FE",
+        "$type": "color"
+      },
+      "300": {
+        "$value": "#7CD4FD",
+        "$type": "color"
+      },
+      "500": {
+        "$value": "#0EA5E9",
+        "$type": "color"
+      },
+      "600": {
+        "$value": "#0891B2",
+        "$type": "color"
+      },
+      "700": {
+        "$value": "#0369A1",
+        "$type": "color"
+      }
+    },
+    "violet": {
+      "100": {
+        "$value": "#E3D8F8",
+        "$type": "color"
+      },
+      "300": {
+        "$value": "#A855F7",
+        "$type": "color"
+      },
+      "500": {
+        "$value": "#9333EA",
+        "$type": "color"
+      },
+      "600": {
+        "$value": "#7C3AED",
+        "$type": "color"
+      }
+    },
+    "orange": {
+      "100": {
+        "$value": "#FFE7D6",
+        "$type": "color"
+      },
+      "300": {
+        "$value": "#FF9C66",
+        "$type": "color"
+      },
+      "500": {
+        "$value": "#F97316",
+        "$type": "color"
+      },
+      "600": {
+        "$value": "#EA580C",
+        "$type": "color"
+      }
+    },
+    "rose": {
+      "100": {
+        "$value": "#F6D6DD",
+        "$type": "color"
+      },
+      "300": {
+        "$value": "#F08BA8",
+        "$type": "color"
+      },
+      "500": {
+        "$value": "#E5618A",
+        "$type": "color"
+      },
+      "600": {
+        "$value": "#BE123C",
+        "$type": "color"
+      }
+    },
+    "lime": {
+      "300": {
+        "$value": "#A6EF67",
+        "$type": "color"
+      },
+      "500": {
+        "$value": "#4CA30D",
+        "$type": "color"
+      }
+    },
+    "gold": {
+      "200": {
+        "$value": "#F9E4A0",
+        "$type": "color"
+      },
+      "400": {
+        "$value": "#E7BC5C",
+        "$type": "color"
+      },
+      "600": {
+        "$value": "#C28F38",
+        "$type": "color"
+      },
+      "700": {
+        "$value": "#B8862B",
+        "$type": "color"
+      }
+    },
+    "semantic": {
+      "light": {
+        "text": {
+          "primary": {
+            "$value": "{color.neutral.950}",
+            "$type": "color",
+            "$description": "หัวข้อและเนื้อหาหลัก 17.4:1"
+          },
+          "secondary": {
+            "$value": "{color.neutral.800}",
+            "$type": "color",
+            "$description": "ข้อความรอง 9.9:1"
+          },
+          "tertiary": {
+            "$value": "{color.neutral.600}",
+            "$type": "color",
+            "$description": "คำอธิบาย/label 4.75:1 ต่ำสุดที่ยัง AA"
+          },
+          "disabled": {
+            "$value": "{color.neutral.500}",
+            "$type": "color",
+            "$description": "เฉพาะ control ที่ปิดใช้งาน (WCAG ยกเว้น)"
+          },
+          "placeholder": {
+            "$value": "{color.neutral.600}",
+            "$type": "color"
+          },
+          "inverse": {
+            "$value": "{color.neutral.0}",
+            "$type": "color"
+          },
+          "brand": {
+            "$value": "{color.brand.700}",
+            "$type": "color",
+            "$description": "สีแบรนด์สำหรับ 'ตัวหนังสือ' บนพื้นขาว 4.97:1"
+          },
+          "onBrand": {
+            "$value": "{color.neutral.0}",
+            "$type": "color"
+          },
+          "danger": {
+            "$value": "{color.error.600}",
+            "$type": "color"
+          },
+          "success": {
+            "$value": "{color.success.700}",
+            "$type": "color"
+          },
+          "warning": {
+            "$value": "{color.warning.700}",
+            "$type": "color"
+          },
+          "info": {
+            "$value": "{color.info.700}",
+            "$type": "color"
+          }
+        },
+        "surface": {
+          "base": {
+            "$value": "{color.neutral.50}",
+            "$type": "color",
+            "$description": "พื้นหลังหน้าจอ"
+          },
+          "raised": {
+            "$value": "{color.neutral.0}",
+            "$type": "color",
+            "$description": "card / sheet"
+          },
+          "raisedAlt": {
+            "$value": "{color.neutral.25}",
+            "$type": "color",
+            "$description": "card ซ้อนชั้นสอง"
+          },
+          "sunken": {
+            "$value": "{color.neutral.100}",
+            "$type": "color",
+            "$description": "ช่องกรอก / พื้นที่เว้า"
+          },
+          "overlay": {
+            "$value": "{color.neutral.0}",
+            "$type": "color",
+            "$description": "popover / dropdown"
+          },
+          "inverse": {
+            "$value": "{color.neutral.950}",
+            "$type": "color",
+            "$description": "tooltip / toast เข้ม"
+          },
+          "scrim": {
+            "$value": "#0000005C",
+            "$type": "color",
+            "$description": "ฉากหลัง modal 36%"
+          },
+          "brandSubtle": {
+            "$value": "{color.brand.50}",
+            "$type": "color"
+          }
+        },
+        "border": {
+          "subtle": {
+            "$value": "{color.neutral.100}",
+            "$type": "color",
+            "$description": "เส้นคั่นในรายการ"
+          },
+          "default": {
+            "$value": "{color.neutral.200}",
+            "$type": "color",
+            "$description": "ขอบ card"
+          },
+          "strong": {
+            "$value": "{color.neutral.500}",
+            "$type": "color",
+            "$description": "ขอบ control ที่ต้องอ่านออก 3.03:1"
+          },
+          "focus": {
+            "$value": "{color.brand.600}",
+            "$type": "color",
+            "$description": "วงโฟกัส"
+          },
+          "danger": {
+            "$value": "{color.error.500}",
+            "$type": "color"
+          }
+        },
+        "action": {
+          "primaryBg": {
+            "$value": "{color.brand.700}",
+            "$type": "color",
+            "$description": "ปุ่มหลัก — ขาวบนสีนี้ 4.97:1"
+          },
+          "primaryFg": {
+            "$value": "{color.neutral.0}",
+            "$type": "color"
+          },
+          "primaryPressed": {
+            "$value": "{color.brand.800}",
+            "$type": "color"
+          },
+          "primaryDisabled": {
+            "$value": "{color.neutral.200}",
+            "$type": "color"
+          },
+          "secondaryBg": {
+            "$value": "{color.brand.50}",
+            "$type": "color"
+          },
+          "secondaryFg": {
+            "$value": "{color.brand.800}",
+            "$type": "color"
+          },
+          "ghostFg": {
+            "$value": "{color.brand.700}",
+            "$type": "color"
+          },
+          "destructiveBg": {
+            "$value": "{color.error.600}",
+            "$type": "color"
+          },
+          "destructiveFg": {
+            "$value": "{color.neutral.0}",
+            "$type": "color"
+          }
+        },
+        "status": {
+          "successFg": {
+            "$value": "{color.success.700}",
+            "$type": "color"
+          },
+          "successBg": {
+            "$value": "{color.success.50}",
+            "$type": "color"
+          },
+          "successBorder": {
+            "$value": "{color.success.100}",
+            "$type": "color"
+          },
+          "warningFg": {
+            "$value": "{color.warning.700}",
+            "$type": "color"
+          },
+          "warningBg": {
+            "$value": "{color.warning.50}",
+            "$type": "color"
+          },
+          "warningBorder": {
+            "$value": "{color.warning.100}",
+            "$type": "color"
+          },
+          "errorFg": {
+            "$value": "{color.error.600}",
+            "$type": "color"
+          },
+          "errorBg": {
+            "$value": "#FFF6F5",
+            "$type": "color"
+          },
+          "errorBorder": {
+            "$value": "{color.error.100}",
+            "$type": "color"
+          },
+          "infoFg": {
+            "$value": "{color.info.700}",
+            "$type": "color"
+          },
+          "infoBg": {
+            "$value": "{color.info.50}",
+            "$type": "color"
+          },
+          "infoBorder": {
+            "$value": "{color.info.100}",
+            "$type": "color"
+          }
+        }
+      },
+      "dark": {
+        "text": {
+          "primary": {
+            "$value": "#F2F5F3",
+            "$type": "color",
+            "$description": "16.3:1"
+          },
+          "secondary": {
+            "$value": "#A9B2AC",
+            "$type": "color",
+            "$description": "8.2:1"
+          },
+          "tertiary": {
+            "$value": "#8B948D",
+            "$type": "color",
+            "$description": "4.6:1"
+          },
+          "disabled": {
+            "$value": "{color.neutral.650}",
+            "$type": "color"
+          },
+          "placeholder": {
+            "$value": "#8B948D",
+            "$type": "color"
+          },
+          "inverse": {
+            "$value": "{color.neutral.950}",
+            "$type": "color"
+          },
+          "brand": {
+            "$value": "{color.brand.300}",
+            "$type": "color",
+            "$description": "6.5:1 บนพื้นเข้ม"
+          },
+          "onBrand": {
+            "$value": "{color.neutral.975}",
+            "$type": "color"
+          },
+          "danger": {
+            "$value": "{color.error.300}",
+            "$type": "color"
+          },
+          "success": {
+            "$value": "{color.success.300}",
+            "$type": "color"
+          },
+          "warning": {
+            "$value": "{color.warning.300}",
+            "$type": "color"
+          },
+          "info": {
+            "$value": "{color.info.300}",
+            "$type": "color"
+          }
+        },
+        "surface": {
+          "base": {
+            "$value": "{color.neutral.975}",
+            "$type": "color",
+            "$description": "พื้นหลังหน้าจอ"
+          },
+          "raised": {
+            "$value": "{color.neutral.925}",
+            "$type": "color",
+            "$description": "card — สว่างขึ้นแทนการใช้เงา"
+          },
+          "raisedAlt": {
+            "$value": "{color.neutral.900}",
+            "$type": "color",
+            "$description": "card ซ้อนชั้นสอง"
+          },
+          "sunken": {
+            "$value": "{color.neutral.1000}",
+            "$type": "color"
+          },
+          "overlay": {
+            "$value": "{color.neutral.850}",
+            "$type": "color",
+            "$description": "popover ยิ่งลอยยิ่งสว่าง"
+          },
+          "inverse": {
+            "$value": "{color.neutral.50}",
+            "$type": "color"
+          },
+          "scrim": {
+            "$value": "#000000A3",
+            "$type": "color",
+            "$description": "ฉากหลัง modal 64%"
+          },
+          "brandSubtle": {
+            "$value": "#10241D",
+            "$type": "color"
+          }
+        },
+        "border": {
+          "subtle": {
+            "$value": "{color.neutral.900}",
+            "$type": "color"
+          },
+          "default": {
+            "$value": "{color.neutral.850}",
+            "$type": "color"
+          },
+          "strong": {
+            "$value": "#6A736C",
+            "$type": "color",
+            "$description": "3.0:1"
+          },
+          "focus": {
+            "$value": "{color.brand.300}",
+            "$type": "color"
+          },
+          "danger": {
+            "$value": "{color.error.300}",
+            "$type": "color"
+          }
+        },
+        "action": {
+          "primaryBg": {
+            "$value": "{color.brand.400}",
+            "$type": "color",
+            "$description": "เข้มบนสีนี้ 7.2:1"
+          },
+          "primaryFg": {
+            "$value": "{color.neutral.975}",
+            "$type": "color"
+          },
+          "primaryPressed": {
+            "$value": "{color.brand.500}",
+            "$type": "color"
+          },
+          "primaryDisabled": {
+            "$value": "{color.neutral.850}",
+            "$type": "color"
+          },
+          "secondaryBg": {
+            "$value": "#10241D",
+            "$type": "color"
+          },
+          "secondaryFg": {
+            "$value": "{color.brand.300}",
+            "$type": "color"
+          },
+          "ghostFg": {
+            "$value": "{color.brand.300}",
+            "$type": "color"
+          },
+          "destructiveBg": {
+            "$value": "{color.error.500}",
+            "$type": "color"
+          },
+          "destructiveFg": {
+            "$value": "{color.neutral.975}",
+            "$type": "color"
+          }
+        },
+        "status": {
+          "successFg": {
+            "$value": "{color.success.300}",
+            "$type": "color"
+          },
+          "successBg": {
+            "$value": "#0C2418",
+            "$type": "color"
+          },
+          "successBorder": {
+            "$value": "#14472C",
+            "$type": "color"
+          },
+          "warningFg": {
+            "$value": "{color.warning.300}",
+            "$type": "color"
+          },
+          "warningBg": {
+            "$value": "#2B2109",
+            "$type": "color"
+          },
+          "warningBorder": {
+            "$value": "#4E3C0C",
+            "$type": "color"
+          },
+          "errorFg": {
+            "$value": "{color.error.300}",
+            "$type": "color"
+          },
+          "errorBg": {
+            "$value": "#2C1512",
+            "$type": "color"
+          },
+          "errorBorder": {
+            "$value": "#57241F",
+            "$type": "color"
+          },
+          "infoFg": {
+            "$value": "{color.info.300}",
+            "$type": "color"
+          },
+          "infoBg": {
+            "$value": "#0A2233",
+            "$type": "color"
+          },
+          "infoBorder": {
+            "$value": "#0E3B57",
+            "$type": "color"
+          }
+        }
+      }
+    },
+    "accent": {
+      "brand": {
+        "$value": "{color.brand.600}",
+        "$type": "color",
+        "$description": "เขียวแบรนด์ MyAtlas — ใช้เป็นสีเติม/ตกแต่ง (ตัวหนังสือใช้ text.brand)"
+      },
+      "queue": {
+        "$value": "{color.blue.500}",
+        "$type": "color",
+        "$description": "คิวโรงพยาบาล"
+      },
+      "nutrition": {
+        "$value": "{color.success.500}",
+        "$type": "color",
+        "$description": "โภชนาการ"
+      },
+      "activity": {
+        "$value": "{color.orange.500}",
+        "$type": "color",
+        "$description": "กิจกรรม/ออกกำลัง"
+      },
+      "sleep": {
+        "$value": "{color.violet.500}",
+        "$type": "color",
+        "$description": "การนอน"
+      },
+      "family": {
+        "$value": "{color.rose.500}",
+        "$type": "color",
+        "$description": "ครอบครัว"
+      },
+      "vital": {
+        "$value": "{color.error.500}",
+        "$type": "color",
+        "$description": "สัญญาณชีพ/หัวใจ"
+      },
+      "reward": {
+        "$value": "{color.gold.600}",
+        "$type": "color",
+        "$description": "รางวัลใหญ่"
+      },
+      "inviteFrom": {
+        "$value": "{color.sky.200}",
+        "$type": "color",
+        "$description": "ไล่สีการ์ดชวนเพื่อน — ต้น"
+      },
+      "inviteTo": {
+        "$value": "{color.sky.400}",
+        "$type": "color",
+        "$description": "ไล่สีการ์ดชวนเพื่อน — ปลาย"
+      }
+    },
+    "medicine": {
+      "morning": {
+        "$value": "#B9E0F7",
+        "$type": "color"
+      },
+      "day": {
+        "$value": "#F8DCB9",
+        "$type": "color"
+      },
+      "evening": {
+        "$value": "#DDD4F1",
+        "$type": "color"
+      },
+      "bedtime": {
+        "$value": "#C2DFEF",
+        "$type": "color"
+      },
+      "morningInk": {
+        "$value": "#11375E",
+        "$type": "color"
+      },
+      "dayInk": {
+        "$value": "#5E3415",
+        "$type": "color"
+      },
+      "eveningInk": {
+        "$value": "#332658",
+        "$type": "color"
+      },
+      "bedtimeInk": {
+        "$value": "#0B3550",
+        "$type": "color"
+      }
+    }
+  }
+}

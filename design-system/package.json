@@ -1,0 +1,11 @@
+{
+  "name": "@myatlas/design-system",
+  "version": "0.1.0",
+  "private": true,
+  "description": "MyAtlas design tokens และธีมสำหรับ React Native",
+  "main": "src/theme.ts",
+  "types": "src/theme.ts",
+  "scripts": {
+    "build": "node scripts/build.mjs"
+  }
+}

@@ -6,6 +6,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../core/widgets/app_toast.dart';
 import '../../appointment/data/mock_data.dart';
+import '../../appointment/payment_screen.dart';
 import '../../medicine/theme/time_period.dart';
 import '../../medicine/widgets/decorative_elements.dart';
 import 'home_hospital_queue_card.dart';
@@ -213,6 +214,11 @@ const List<Color> _kQueueGrad = [Color(0xFFBEDCF7), Color(0xFFEAF4FD)];
 const Color _kQueueInk = Color(0xFF0D3B66);
 const Color _kQueueAccent = Color(0xFF1E88E5);
 
+// Pending-payment palette — the receipt's brand green.
+const List<Color> _kPayGrad = [Color(0xFFCFEAE1), Color(0xFFECF7F3)];
+const Color _kPayInk = Color(0xFF0D453E);
+const Color _kPayAccent = Color(0xFF1D8B6B);
+
 // Family (add members) palette — soft rose, warm "care" tone.
 const List<Color> _kFamilyGrad = [Color(0xFFF6D6DD), Color(0xFFFCEDF1)];
 const Color _kFamilyInk = Color(0xFF5E2738);
@@ -246,7 +252,8 @@ class _AiAdviceCardState extends State<AiAdviceCard> {
 
   // Number of distinct pages (stable; content loops via modulo).
   int get _pageCount {
-    var n = _kMedSlots.length + 2; // med slots + 2 AI pages
+    // queue + pending bill + 2 AI pages + family + med slots
+    var n = _kMedSlots.length + 5;
     if (_firstSoon(hospitalAppointments) != null) n++;
     if (_firstSoon(homeVisitAppointments) != null) n++;
     return n;
@@ -336,7 +343,40 @@ class _AiAdviceCardState extends State<AiAdviceCard> {
       ),
     );
 
-    // 1) AI — general medication-use advice.
+    // 1) ค่าบริการที่ยังไม่ได้ชำระ — กลับบ้านแล้วจ่ายผ่านแอปได้ ไม่ต้องต่อคิว
+    final bill = kPendingBill;
+    pages.add(
+      _Page(
+        label: 'รอชำระค่าบริการ',
+        // ยอดเงินอยู่บนใบเสร็จย่อทางขวาแล้ว หัวข้อจึงบอกว่าต้องทำอะไรต่อ
+        title: 'มีค่าบริการรอชำระ',
+        body: [
+          'จากการเข้ารับบริการ ${bill.visitedLabel}',
+          bill.hospitalName,
+          'ชำระผ่านแอปได้เลย ไม่ต้องรอคิวที่โรงพยาบาล',
+        ].join('\n'),
+        grad: _kPayGrad,
+        ink: _kPayInk,
+        action: 'ชำระเงิน',
+        accent: _kPayAccent,
+        onAction: () => Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => PaymentScreen(
+              receiptAt: bill.visitedAt,
+              hospitalName: bill.hospitalName,
+              coverage: bill.coverage,
+              serviceCode: bill.serviceCode,
+              totalBaht: bill.totalBaht,
+              coveredBaht: bill.coveredBaht,
+              payableBaht: bill.payableBaht,
+            ),
+          ),
+        ),
+        right: _PendingBillCard(bill: bill),
+      ),
+    );
+
+    // 2) AI — general medication-use advice.
     pages.add(
       _Page(
         isAi: true,
@@ -1390,18 +1430,12 @@ class _TicketShape extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final body = Path()
       ..addRRect(
-        RRect.fromRectAndRadius(
-          Offset.zero & size,
-          const Radius.circular(12),
-        ),
+        RRect.fromRectAndRadius(Offset.zero & size, const Radius.circular(12)),
       );
     final r = _QueueReminderCard._notch / 2;
     final bites = Path()
       ..addOval(
-        Rect.fromCircle(
-          center: Offset(0, _QueueReminderCard._stub),
-          radius: r,
-        ),
+        Rect.fromCircle(center: Offset(0, _QueueReminderCard._stub), radius: r),
       )
       ..addOval(
         Rect.fromCircle(
@@ -1535,6 +1569,165 @@ class _FamilyReminderCard extends StatelessWidget {
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
                   color: Colors.black,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// บิลค้างชำระหลังออกจากโรงพยาบาล — mock จนกว่าจะมี API จริง
+class PendingBill {
+  const PendingBill({
+    required this.hospitalName,
+    required this.visitedAt,
+    required this.coverage,
+    required this.serviceCode,
+    required this.totalBaht,
+    required this.coveredBaht,
+    required this.payableBaht,
+  });
+
+  final String hospitalName;
+  final DateTime visitedAt;
+  final String coverage;
+  final String serviceCode;
+  final int totalBaht;
+  final int coveredBaht;
+  final int payableBaht;
+
+  String get visitedLabel =>
+      '${visitedAt.day}/${visitedAt.month}/${(visitedAt.year + 543) % 100}';
+}
+
+final kPendingBill = PendingBill(
+  hospitalName: 'โรงพยาบาลสมเด็จพระยุพราชบ้านดุง',
+  visitedAt: DateTime(2026, 7, 31, 10, 0, 32),
+  coverage: 'UC (ไม่จ่าย 30 บ.) ในเครือข่าย',
+  serviceCode: 'PG0060001',
+  totalBaht: 10000,
+  coveredBaht: 50,
+  payableBaht: 9950,
+);
+
+String _money(int value) =>
+    '$value'.replaceAllMapped(RegExp(r'(\d)(?=(\d{3})+$)'), (m) => '${m[1]},');
+
+/// การ์ดฝั่งขวาของหน้ารอชำระเงิน — ใบเสร็จย่อของหน้าชำระค่าบริการ
+/// ใช้องค์ประกอบเดียวกับหน้านั้น (ขีดเขียว หัวใบเสร็จ QR ยอดชำระ)
+/// เพื่อให้กดเข้าไปแล้วรู้สึกว่าเป็นหน้าเดียวกัน
+class _PendingBillCard extends StatelessWidget {
+  const _PendingBillCard({required this.bill});
+  final PendingBill bill;
+
+  static const _base = Color(0xFFDDEFE9); // พื้นแบน ไม่ไล่สี
+  static const _muted = Color(0xFF6E8B83);
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          const ColoredBox(color: _base),
+          Padding(
+            padding: const EdgeInsets.all(8),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.08),
+                    blurRadius: 6,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // หัวใบเสร็จย่อ — ขีดเขียวหน้าข้อความ เหมือนหน้าชำระเงิน
+                    Row(
+                      children: [
+                        Container(width: 3, height: 14, color: _kPayAccent),
+                        const SizedBox(width: 5),
+                        // การ์ดแคบ ชื่อจึงต้องย่อได้ ไม่งั้นแถวล้น
+                        const Expanded(
+                          child: Text(
+                            'ใบเสร็จชำระเงิน',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                              fontVariations: [FontVariation('wght', 800)],
+                              color: Color(0xFF1A1A1A),
+                              height: 1.2,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    // QR ลายเดียวกับในใบเสร็จจริง
+                    Expanded(
+                      child: Center(
+                        child: PaymentQrMark(seed: bill.serviceCode, size: 46),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    const Text(
+                      'ยอดชำระ',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                        color: _muted,
+                        height: 1.2,
+                      ),
+                    ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Flexible(
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              _money(bill.payableBaht),
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w900,
+                                fontVariations: [FontVariation('wght', 900)],
+                                color: Color(0xFFFF383C),
+                                height: 1.1,
+                                fontFeatures: [FontFeature.tabularFigures()],
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        const Padding(
+                          padding: EdgeInsets.only(bottom: 2),
+                          child: Text(
+                            'บาท',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF8A8A8A),
+                              height: 1.2,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ),

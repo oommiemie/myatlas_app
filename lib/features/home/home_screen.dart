@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Icons, Scaffold;
 
 import '../../core/theme/app_colors.dart';
-import '../family/care_giver_screen.dart';
 import '../family/family_devices.dart';
 import '../health/data/health_data.dart';
 import '../health/health_screen.dart'
@@ -17,6 +16,7 @@ import 'widgets/home_summary_dashboard.dart';
 import 'widgets/home_votagex_hero.dart';
 import 'widgets/home_water_intake_card.dart';
 import 'widgets/home_workout_streak_card.dart';
+import '../shell/main_shell.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -30,10 +30,7 @@ class _HomeScreenState extends State<HomeScreen>
   final HealthRepository _repo = HealthRepository(seed: 7);
   late final HealthData _healthData = _repo.load();
 
-  final Set<DeviceKind> _userDevices = {
-    DeviceKind.smartwatch,
-    DeviceKind.cgm,
-  };
+  final Set<DeviceKind> _userDevices = {DeviceKind.smartwatch, DeviceKind.cgm};
 
   // Page-load entrance — staggered fade-up, matching the other screens.
   // Initialized inline (and started) so it survives hot reload, which doesn't
@@ -62,10 +59,7 @@ class _HomeScreenState extends State<HomeScreen>
         final t = anim.value;
         return Opacity(
           opacity: t,
-          child: Transform.translate(
-            offset: Offset(0, (1 - t) * 18),
-            child: c,
-          ),
+          child: Transform.translate(offset: Offset(0, (1 - t) * 18), child: c),
         );
       },
       child: child,
@@ -87,8 +81,7 @@ class _HomeScreenState extends State<HomeScreen>
     // Sample workout days — a 6-day streak ending today (shows flames + badge).
     final now2 = DateTime.now();
     final workoutDays = <DateTime>{
-      for (var i = 0; i < 6; i++)
-        DateTime(now2.year, now2.month, now2.day - i),
+      for (var i = 0; i < 6; i++) DateTime(now2.year, now2.month, now2.day - i),
     };
     // Per-day dance results (score, accuracy %) for the donut.
     final workoutResults = <DateTime, (int, int)>{
@@ -138,121 +131,169 @@ class _HomeScreenState extends State<HomeScreen>
                   workoutResults: workoutResults,
                 ),
               ),
-          // Content sheet — stacks over the header with rounded top corners.
-          Container(
-            transform: Matrix4.translationValues(0, -48, 0),
-            clipBehavior: Clip.antiAlias,
-            decoration: const BoxDecoration(
-              color: AppColors.bgPrimary,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-            ),
-            child: Column(
-              children: [
-                // AI advice — sits BEHIND the food-analysis section.
-                _stagger(1, 3, const AiAdviceCard()),
-                // Food-analysis section onward — its own rounded container that
-                // overlaps upward so the AI card peeks out behind it.
-                _stagger(
-                  2,
-                  3,
-                  Transform.translate(
-                  offset: const Offset(0, -10),
-                  child: Container(
-                    decoration: const BoxDecoration(
-                      color: AppColors.bgPrimary,
-                      borderRadius:
-                          BorderRadius.vertical(top: Radius.circular(28)),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Color(0x16000000),
-                          blurRadius: 14,
-                          offset: Offset(0, -4),
-                        ),
-                      ],
-                    ),
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 120),
-                    child: HealthSummarySections(
-              data: _healthData,
-              // Home uses the dashboard grid's compact meal card instead of the
-              // full-width food-analysis section.
-              showNutrition: false,
-              afterActivity: Column(
-                children: [
-                  // Queue lives in the home notification banner (see the
-                  // queue entry in ProfileBanner's alert carousel).
-                  // Dashboard grid (pulled from the Paiboon fork): meal-analysis
-                  // card on the left, smart-watch + family stacked on the right.
-                  HomeSummaryDashboard(
-                    onTap: () => Navigator.of(context).push(
-                      CupertinoPageRoute(
-                        builder: (_) =>
-                            NutritionDetailScreen(data: _healthData),
-                      ),
-                    ),
-                    onScanTap: () => openFoodLens(context),
-                    onFamilyTap: () => Navigator.of(context).push(
-                      CupertinoPageRoute(
-                        builder: (_) => const CareGiverScreen(),
-                      ),
-                    ),
-                    onWatchTap: () => showManageDevicesSheet(
-                      context,
-                      selected: _userDevices,
-                      onChanged: (next) =>
-                          setState(() => _userDevices
-                            ..clear()
-                            ..addAll(next)),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  // Steps + activity-rings pair (ก้าวเดิน / กิจกรรม), row 2 of
-                  // the grid.
-                  HomeActivityPair(data: _healthData),
-                  const SizedBox(height: 16),
-                  // Interactive demo: today not done yet (start button is
-                  // tappable → opens the clip picker), with past workout days,
-                  // a missed day, and upcoming days — tapping around the week
-                  // shows every state (flame/score, rest, start, future).
-                  HomeWorkoutStreakCard(
-                    // 16th (yesterday) intentionally has no workout → rest day.
-                    // day-2..4 are consecutive (streak → Aerobic2). day-6 is a
-                    // lone workout with no neighbours (not a streak → Aerobic1).
-                    workoutDays: {
-                      DateTime(now2.year, now2.month, now2.day - 2),
-                      DateTime(now2.year, now2.month, now2.day - 3),
-                      DateTime(now2.year, now2.month, now2.day - 4),
-                      DateTime(now2.year, now2.month, now2.day - 6),
-                    },
-                    dayResults: {
-                      DateTime(now2.year, now2.month, now2.day - 2): (1260, 93),
-                      DateTime(now2.year, now2.month, now2.day - 3): (1040, 86),
-                      DateTime(now2.year, now2.month, now2.day - 4): (1320, 95),
-                      DateTime(now2.year, now2.month, now2.day - 6): (910, 81),
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  // Water-intake tracker — settable goal, ml per glass, tap to
-                  // stamp glasses.
-                  const HomeWaterIntakeCard(initialGlasses: 3),
-                  const SizedBox(height: 16),
-                  // Sleep summary — score, stage breakdown, sleep debt, bedtime
-                  // consistency. Tapping opens the full sleep detail screen.
-                  HomeSleepCard(
-                    onTap: () => Navigator.of(context).push(
-                      CupertinoPageRoute(
-                        builder: (_) => const SleepDetailScreen(),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-                    ),
-                  ),
+              // Content sheet — stacks over the header with rounded top corners.
+              Container(
+                transform: Matrix4.translationValues(0, -48, 0),
+                clipBehavior: Clip.antiAlias,
+                decoration: const BoxDecoration(
+                  color: AppColors.bgPrimary,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
                 ),
-              ],
-            ),
-          ),
+                child: Column(
+                  children: [
+                    // AI advice — sits BEHIND the food-analysis section.
+                    _stagger(1, 3, const AiAdviceCard()),
+                    // Food-analysis section onward — its own rounded container that
+                    // overlaps upward so the AI card peeks out behind it.
+                    _stagger(
+                      2,
+                      3,
+                      Transform.translate(
+                        offset: const Offset(0, -10),
+                        child: Container(
+                          decoration: const BoxDecoration(
+                            color: AppColors.bgPrimary,
+                            borderRadius: BorderRadius.vertical(
+                              top: Radius.circular(28),
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Color(0x16000000),
+                                blurRadius: 14,
+                                offset: Offset(0, -4),
+                              ),
+                            ],
+                          ),
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 120),
+                          child: HealthSummarySections(
+                            data: _healthData,
+                            // Home uses the dashboard grid's compact meal card instead of the
+                            // full-width food-analysis section.
+                            showNutrition: false,
+                            afterActivity: Column(
+                              children: [
+                                // Queue lives in the home notification banner (see the
+                                // queue entry in ProfileBanner's alert carousel).
+                                // Dashboard grid (pulled from the Paiboon fork): meal-analysis
+                                // card on the left, smart-watch + family stacked on the right.
+                                HomeSummaryDashboard(
+                                  onTap: () => Navigator.of(context).push(
+                                    CupertinoPageRoute(
+                                      builder: (_) => NutritionDetailScreen(
+                                        data: _healthData,
+                                      ),
+                                    ),
+                                  ),
+                                  onScanTap: () => openFoodLens(context),
+                                  // ครอบครัวเป็นแท็บหลัก จึงสลับแท็บ
+                                  // ไม่ push ทับ เพื่อให้ tab bar ยังอยู่
+                                  onFamilyTap: () =>
+                                      MainShell.switchTab(context, 3),
+                                  onWatchTap: () => showManageDevicesSheet(
+                                    context,
+                                    selected: _userDevices,
+                                    onChanged: (next) => setState(
+                                      () => _userDevices
+                                        ..clear()
+                                        ..addAll(next),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                // Steps + activity-rings pair (ก้าวเดิน / กิจกรรม), row 2 of
+                                // the grid.
+                                HomeActivityPair(data: _healthData),
+                                const SizedBox(height: 16),
+                                // Interactive demo: today not done yet (start button is
+                                // tappable → opens the clip picker), with past workout days,
+                                // a missed day, and upcoming days — tapping around the week
+                                // shows every state (flame/score, rest, start, future).
+                                HomeWorkoutStreakCard(
+                                  // 16th (yesterday) intentionally has no workout → rest day.
+                                  // day-2..4 are consecutive (streak → Aerobic2). day-6 is a
+                                  // lone workout with no neighbours (not a streak → Aerobic1).
+                                  // จำลองว่ากำลังมีสตรีค 3 วัน (เมื่อวานย้อนไปสามวันติด)
+                                  // เพื่อดูหน้าตาแคปซูลสตรีคบนหัวหน้าออกกำลังกาย
+                                  workoutDays: {
+                                    DateTime(
+                                      now2.year,
+                                      now2.month,
+                                      now2.day - 1,
+                                    ),
+                                    DateTime(
+                                      now2.year,
+                                      now2.month,
+                                      now2.day - 2,
+                                    ),
+                                    DateTime(
+                                      now2.year,
+                                      now2.month,
+                                      now2.day - 3,
+                                    ),
+                                    DateTime(
+                                      now2.year,
+                                      now2.month,
+                                      now2.day - 6,
+                                    ),
+                                  },
+                                  dayResults: {
+                                    DateTime(
+                                      now2.year,
+                                      now2.month,
+                                      now2.day - 1,
+                                    ): (
+                                      1260,
+                                      93,
+                                    ),
+                                    DateTime(
+                                      now2.year,
+                                      now2.month,
+                                      now2.day - 2,
+                                    ): (
+                                      1040,
+                                      86,
+                                    ),
+                                    DateTime(
+                                      now2.year,
+                                      now2.month,
+                                      now2.day - 3,
+                                    ): (
+                                      1320,
+                                      95,
+                                    ),
+                                    DateTime(
+                                      now2.year,
+                                      now2.month,
+                                      now2.day - 6,
+                                    ): (
+                                      910,
+                                      81,
+                                    ),
+                                  },
+                                ),
+                                const SizedBox(height: 16),
+                                // Water-intake tracker — settable goal, ml per glass, tap to
+                                // stamp glasses.
+                                const HomeWaterIntakeCard(initialGlasses: 3),
+                                const SizedBox(height: 16),
+                                // Sleep summary — score, stage breakdown, sleep debt, bedtime
+                                // consistency. Tapping opens the full sleep detail screen.
+                                HomeSleepCard(
+                                  onTap: () => Navigator.of(context).push(
+                                    CupertinoPageRoute(
+                                      builder: (_) => const SleepDetailScreen(),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               // Empty state: never used yet — the start invitation card.
               // HIDDEN for now (kept on purpose, do not delete). Un-comment &
               // slot it back in (e.g. as another afterActivity) to show.

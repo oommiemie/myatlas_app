@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../me/widgets/profile_banner.dart';
+import '../../shell/main_shell.dart';
+import '../notifications_screen.dart';
 
 /// A calendar appointment shown in the hero. Two kinds are supported: hospital
 /// appointments and home-visit appointments (each gets its own artwork).
@@ -87,9 +89,7 @@ class _HomeVotagexHeroState extends State<HomeVotagexHero> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
-        children: [
-          _buildTodayBlock(),
-        ],
+        children: [_buildTodayBlock()],
       ),
     );
   }
@@ -97,6 +97,29 @@ class _HomeVotagexHeroState extends State<HomeVotagexHero> {
   // Personal-info banner (from the Me page) shown in the header — compact.
   // Watch image + name intentionally hidden from the header (null watchName).
   Widget _buildTodayBlock() {
-    return const ProfileBanner(compact: true);
+    return ProfileBanner(
+      compact: true,
+      unreadNotifications: 1,
+      onNotificationsTap: () => _openNotifications(context),
+    );
+  }
+}
+
+/// เปิดหน้าแจ้งเตือน ถ้าผู้ใช้เลือกรายการที่ปลายทางเป็นแท็บหลัก
+/// ให้สลับแท็บแทนการ push เพื่อให้ tab bar ด้านล่างยังอยู่
+Future<void> _openNotifications(BuildContext context) async {
+  final kind = await Navigator.of(context).push<NotificationKind>(
+    MaterialPageRoute<NotificationKind>(
+      builder: (_) => const NotificationsScreen(),
+    ),
+  );
+  if (!context.mounted || kind == null) return;
+  switch (kind) {
+    case NotificationKind.medicine:
+      MainShell.switchTab(context, 2);
+    case NotificationKind.call:
+      MainShell.switchTab(context, 3);
+    default:
+      break;
   }
 }

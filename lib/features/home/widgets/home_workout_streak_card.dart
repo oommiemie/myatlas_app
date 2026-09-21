@@ -1,6 +1,12 @@
 import 'dart:ui' show ImageFilter;
 
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
+import 'package:flutter/cupertino.dart'
+    show
+        CupertinoButton,
+        CupertinoDatePicker,
+        CupertinoDatePickerMode,
+        CupertinoIcons,
+        showCupertinoModalPopup;
 import 'package:flutter/material.dart';
 
 import '../../../core/services/app_settings_service.dart';
@@ -27,11 +33,30 @@ class HomeWorkoutStreakCard extends StatefulWidget {
   /// selected day's result and updates when another day is tapped.
   final Map<DateTime, (int score, int accuracy)> dayResults;
 
+  /// แสดงเฉพาะแถบปฏิทิน ตัดกรอบการ์ด หัวข้อ และภาพประกอบออก
+  /// ใช้เมื่อยกไปวางเป็นหัวของหน้าอื่น
+  final bool calendarOnly;
+
+  /// ปุ่มที่วางไว้หน้าชื่อเดือน (เช่น ปุ่มย้อนกลับของหน้าจอ) — ใช้กับ
+  /// calendarOnly เท่านั้น เพราะโหมดนี้ชื่อเดือนทำหน้าที่เป็นชื่อหน้าไปด้วย
+  final Widget? leading;
+
+  /// แจ้งหน้าจอที่ครอบอยู่เมื่อผู้ใช้เลือกวันอื่น เพื่อให้สลับเนื้อหาด้านล่างได้
+  final ValueChanged<DateTime>? onDaySelected;
+
+  /// วันที่ให้เลือกค้างไว้ตอนสร้าง — ใช้ตอนเปิดหน้ารายละเอียดให้ตรงกับวัน
+  /// ที่ผู้ใช้เลือกไว้ในหน้าหลัก ถ้าไม่ส่งมาจะใช้วันนี้
+  final DateTime? initialDay;
+
   const HomeWorkoutStreakCard({
     super.key,
     this.workoutDays = const {},
     this.onStartTap,
     this.dayResults = const {},
+    this.calendarOnly = false,
+    this.leading,
+    this.onDaySelected,
+    this.initialDay,
   });
 
   @override
@@ -40,8 +65,8 @@ class HomeWorkoutStreakCard extends StatefulWidget {
 
 class _HomeWorkoutStreakCardState extends State<HomeWorkoutStreakCard> {
   static const _ink = Color(0xFF1A1A2E);
-  static const _flameTop = Color(0xFFFF9500); // orange
-  static const _flameBottom = Color(0xFFFF3B30); // red
+  static const _flameTop = Color(0xFFF7A555); // ส้มอ่อน
+  static const _flameBottom = Color(0xFFFB6618); // ส้มเข้ม
   static const _thWeekLabels = ['จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส', 'อา'];
 
   // Currently selected day (the focused chip) — defaults to today.
@@ -50,8 +75,7 @@ class _HomeWorkoutStreakCardState extends State<HomeWorkoutStreakCard> {
   // Week pager — each page is one week; swiping moves week-by-week with a
   // slide animation. A large base index lets the user page both directions.
   static const int _basePage = 10000;
-  final PageController _weekController =
-      PageController(initialPage: _basePage);
+  late final PageController _weekController;
 
   static const _thMonths = [
     'มกราคม',
@@ -72,7 +96,11 @@ class _HomeWorkoutStreakCardState extends State<HomeWorkoutStreakCard> {
   void initState() {
     super.initState();
     final now = DateTime.now();
-    _selected = DateTime(now.year, now.month, now.day);
+    _selected = widget.initialDay ?? DateTime(now.year, now.month, now.day);
+    // เปิดหน้ามาที่สัปดาห์ของวันที่เลือก ไม่ใช่สัปดาห์ปัจจุบันเสมอไป
+    final monday = _selected.subtract(Duration(days: _selected.weekday - 1));
+    final weeks = monday.difference(_mondayOfCurrentWeek()).inDays ~/ 7;
+    _weekController = PageController(initialPage: _basePage + weeks);
   }
 
   @override
@@ -99,27 +127,23 @@ class _HomeWorkoutStreakCardState extends State<HomeWorkoutStreakCard> {
 
   bool _didWorkout(DateTime d) => widget.workoutDays.any((w) => _same(w, d));
 
-  /// Dance result for [day], or null when there's none.
-  (int score, int accuracy)? _resultFor(DateTime d) {
-    for (final e in widget.dayResults.entries) {
-      if (_same(e.key, d)) return e.value;
-    }
-    return null;
-  }
-
   /// Length of the consecutive workout run that contains [d] (0 if [d] is a
   /// rest day).
   int _consecutiveRun(DateTime d) {
     if (!_didWorkout(d)) return 0;
     var len = 1;
-    for (var p = d.subtract(const Duration(days: 1));
-        _didWorkout(p);
-        p = p.subtract(const Duration(days: 1))) {
+    for (
+      var p = d.subtract(const Duration(days: 1));
+      _didWorkout(p);
+      p = p.subtract(const Duration(days: 1))
+    ) {
       len++;
     }
-    for (var n = d.add(const Duration(days: 1));
-        _didWorkout(n);
-        n = n.add(const Duration(days: 1))) {
+    for (
+      var n = d.add(const Duration(days: 1));
+      _didWorkout(n);
+      n = n.add(const Duration(days: 1))
+    ) {
       len++;
     }
     return len;
@@ -153,6 +177,38 @@ class _HomeWorkoutStreakCardState extends State<HomeWorkoutStreakCard> {
     final today = DateTime(now.year, now.month, now.day);
     final doneToday = _didWorkout(today);
 
+    // โหมดปฏิทินล้วน — คืนเฉพาะแถบปฏิทิน ไม่มีกรอบการ์ดและภาพประกอบ
+    if (widget.calendarOnly) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 6, 16, 10),
+            // ชื่อเดือนอยู่กึ่งกลางแถวจริงๆ ไม่ใช่กึ่งกลางพื้นที่ที่เหลือ
+            // จึงวางซ้อนกัน: แถวปุ่มอยู่ชั้นล่าง ชื่อเดือนลอยกึ่งกลางชั้นบน
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Row(
+                  children: [
+                    if (widget.leading != null) widget.leading!,
+                    const Spacer(),
+                    _streakPill(),
+                  ],
+                ),
+                IgnorePointer(
+                  ignoring: false,
+                  child: Center(child: _monthHeader()),
+                ),
+              ],
+            ),
+          ),
+          _calendarPanel(today),
+        ],
+      );
+    }
+
     // Title reflects the SELECTED day's status.
     final bool selDone = _didWorkout(_selected);
     final bool isToday = _same(_selected, today);
@@ -163,21 +219,20 @@ class _HomeWorkoutStreakCardState extends State<HomeWorkoutStreakCard> {
       title = 'เริ่มออกกำลังกายกันเลย!';
     } else if (isToday) {
       if (!doneToday) {
-        title = 'มาออกกำลังกายของวันนี้กันเถอะ';
+        title = 'มาออกกำลังกายกันเถอะ';
       } else if (streak >= 3) {
-        title = 'ออกกำลังกายต่อเนื่องมา $streak วันแล้ว';
+        title = 'ต่อเนื่องมาแล้ว $streak วัน';
       } else {
-        title = 'วันนี้คุณชนะใจตัวเองได้สำเร็จ';
+        title = 'ชนะใจตัวเองได้สำเร็จ';
       }
     } else if (isFuture) {
       title = 'พักเติมพลังแล้วมาลุยกันใหม่!';
     } else if (selDone) {
       // Past workout day — different title when it's part of a streak.
       if (_isStreakDay(_selected)) {
-        title =
-            'ออกกำลังกายต่อเนื่องมา ${_consecutiveRun(_selected)} วันแล้ว';
+        title = 'ต่อเนื่องมาแล้ว ${_consecutiveRun(_selected)} วัน';
       } else {
-        title = 'วันนี้คุณชนะใจตัวเองได้สำเร็จ';
+        title = 'ชนะใจตัวเองได้สำเร็จ';
       }
     } else {
       // Past day with no workout — missed.
@@ -190,21 +245,20 @@ class _HomeWorkoutStreakCardState extends State<HomeWorkoutStreakCard> {
     // StartAerobic, today → Aerobic1, a rest day → Rest, a workout day that's
     // part of a streak → Aerobic2, a lone workout (no streak) → Aerobic1.
     final bool isRest = !empty && !isToday && !selDone;
-    final bool isAerobic2 = !empty && !isToday && selDone && _isStreakDay(_selected);
+    final bool isAerobic2 =
+        !empty && !isToday && selDone && _isStreakDay(_selected);
+    final bool isStartLike = empty || isRest;
+    // ค่าเดียวกับฝั่ง React (HomeWorkoutStreakCard.tsx บรรทัด 279)
+    final double heroHeight = (isStartLike || isAerobic2) ? 146 : 132;
     final String heroImage = empty
         ? 'assets/startaerobic.png'
         : isToday
-            ? 'assets/Aerobic1.png'
-            : isRest
-                ? 'assets/rest.png'
-                : isAerobic2
-                    ? 'assets/Aerobic2.png'
-                    : 'assets/Aerobic1.png';
-    // startaerobic, rest and Aerobic2 are 16px larger than the default Aerobic1.
-    // All anchor to the same top-right corner inside a fixed-size box so the
-    // crossfade between images doesn't shift the layout.
-    final bool isStartLike = empty || isRest;
-    final double heroHeight = (isStartLike || isAerobic2) ? 166 : 150;
+        ? 'assets/Aerobic1.png'
+        : isRest
+        ? 'assets/rest.png'
+        : isAerobic2
+        ? 'assets/Aerobic2.png'
+        : 'assets/Aerobic1.png';
 
     return Container(
       width: double.infinity,
@@ -222,17 +276,15 @@ class _HomeWorkoutStreakCardState extends State<HomeWorkoutStreakCard> {
       ),
       child: Stack(
         children: [
-          // Decorative aerobic figures — behind the calendar panel (the panel
-          // overlaps them in front); they peek out at the top-right. A
-          // fixed-size box keeps the footprint constant so swapping images only
-          // crossfades (no layout shift/jitter when the selected day changes).
+          // ภาพประกอบอยู่หลังแถบปฏิทิน โผล่ที่มุมขวาบน กล่องขนาดคงที่ทำให้
+          // การสลับภาพเป็นการ crossfade เฉยๆ ไม่ทำให้ layout ขยับ
           Positioned(
             top: -4,
             right: -10,
             child: IgnorePointer(
               child: SizedBox(
-                width: 180,
-                height: 180,
+                width: 160,
+                height: 160,
                 child: AnimatedSwitcher(
                   duration: const Duration(milliseconds: 400),
                   switchInCurve: Curves.easeOut,
@@ -249,10 +301,17 @@ class _HomeWorkoutStreakCardState extends State<HomeWorkoutStreakCard> {
                   child: Align(
                     key: ValueKey(heroImage),
                     alignment: Alignment.topRight,
-                    child: Image.asset(
-                      heroImage,
-                      height: heroHeight,
-                      fit: BoxFit.contain,
+                    // ปล่อยความกว้างตามอัตราส่วนจริงของไฟล์ เทียบเท่า
+                    // width = height * aspect ของฝั่ง React
+                    child: OverflowBox(
+                      alignment: Alignment.topRight,
+                      maxWidth: double.infinity,
+                      maxHeight: double.infinity,
+                      child: Image.asset(
+                        heroImage,
+                        height: heroHeight,
+                        fit: BoxFit.contain,
+                      ),
                     ),
                   ),
                 ),
@@ -264,72 +323,100 @@ class _HomeWorkoutStreakCardState extends State<HomeWorkoutStreakCard> {
             mainAxisSize: MainAxisSize.min,
             children: [
               // Header (padded)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        fontFamily: _famFamily, fontFamilyFallback: _famFallback,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w800,
-                        height: 1.2,
-                        color: _ink,
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: _openDetail,
+                child: Padding(
+                  // เว้นขวา 108 เท่า HEAD_RESERVE ของฝั่ง React กันข้อความชนภาพ
+                  padding: const EdgeInsets.fromLTRB(16, 16, 108, 0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // บรรทัดเดียวเสมอ (15 x 1.2) ความสูงส่วนขาวจึงคงที่
+                      // ไม่ว่าจะเลือกวันไหน การ์ดไม่กระเด้ง
+                      SizedBox(
+                        height: 18,
+                        width: double.infinity,
+                        child: Text(
+                          title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontFamily: _famFamily,
+                            fontFamilyFallback: _famFallback,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800,
+                            height: 1.2,
+                            color: _ink,
+                          ),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      style: TextStyle(
-                        fontFamily: _famFamily, fontFamilyFallback: _famFallback,
-                        fontSize: 12,
-                        color: Color(0xFF5B6B7A),
+                      const SizedBox(height: 2),
+                      Row(
+                        children: [
+                          Text(
+                            subtitle,
+                            style: TextStyle(
+                              fontFamily: _famFamily,
+                              fontFamilyFallback: _famFallback,
+                              fontSize: 12,
+                              color: Color(0xFF5B6B7A),
+                            ),
+                          ),
+                          const SizedBox(width: 2),
+                          // บอกว่าการ์ดนี้เข้าไปดูรายละเอียดต่อได้
+                          const Icon(
+                            CupertinoIcons.chevron_forward,
+                            size: 12,
+                            color: Color(0xFF9AA7B4),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-          const SizedBox(height: 14),
-          if (empty)
-            // No workout yet: calendar panel, blur + gradient overlay, and the
-            // "start" button on top.
-            Stack(
-              children: [
-                _calendarPanel(today),
-                Positioned.fill(
-                  // ClipRRect confines the blur to the calendar panel only
-                  // (otherwise BackdropFilter blurs up to the card's clip).
-                  child: ClipRRect(
-                    borderRadius: const BorderRadius.all(Radius.circular(24)),
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 1.5, sigmaY: 1.5),
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              Colors.white.withValues(alpha: 0.0),
-                              Colors.white.withValues(alpha: 0.6),
-                            ],
+              const SizedBox(height: 14),
+              if (empty)
+                // No workout yet: calendar panel, blur + gradient overlay, and the
+                // "start" button on top.
+                Stack(
+                  children: [
+                    _calendarPanel(today),
+                    Positioned.fill(
+                      // ClipRRect confines the blur to the calendar panel only
+                      // (otherwise BackdropFilter blurs up to the card's clip).
+                      child: ClipRRect(
+                        borderRadius: const BorderRadius.all(
+                          Radius.circular(24),
+                        ),
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 1.5, sigmaY: 1.5),
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  Colors.white.withValues(alpha: 0.0),
+                                  Colors.white.withValues(alpha: 0.6),
+                                ],
+                              ),
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                ),
-                // Button pinned to the bottom, 12px from each edge.
-                Positioned(
-                  left: 12,
-                  right: 12,
-                  bottom: 12,
-                  child: _startButton(),
-                ),
-              ],
-            )
+                    // Button pinned to the bottom, 12px from each edge.
+                    Positioned(
+                      left: 12,
+                      right: 12,
+                      bottom: 12,
+                      child: _startButton(),
+                    ),
+                  ],
+                )
               else
                 _calendarPanel(today),
             ],
@@ -343,169 +430,201 @@ class _HomeWorkoutStreakCardState extends State<HomeWorkoutStreakCard> {
   // When the selected day has no workout the center shows a start prompt:
   // tappable (today + not done) or disabled (a future day); a past day with no
   // workout just reads "พัก".
-  Widget _danceStats(
-    (int score, int accuracy)? result, {
-    bool canStart = false,
-    bool isFuture = false,
-  }) {
-    const size = 66.0;
-    final hasResult = result != null;
-    // No workout → no donut ring, just the exercise icon button (or "พัก").
-    if (!hasResult) {
-      return SizedBox(
-        width: size,
-        height: size,
-        child: Center(
-          child: _restIcon(canStart: canStart, isFuture: isFuture),
-        ),
-      );
+  // Opens the clip picker. Prefers the injected callback (so a host screen can
+  // override routing); otherwise pushes the picker directly so the flow works
+  // even where no callback is wired (e.g. the mockup cards).
+  void _handleStart() => _openDetail();
+
+  /// เปิดหน้ารายละเอียดโดยค้างไว้ที่วันที่กำลังเลือกอยู่ ไม่ว่าจะเป็นวันไหน
+  void _openDetail() {
+    if (widget.onStartTap != null) {
+      widget.onStartTap!();
+      return;
     }
-    return SizedBox(
-      width: size,
-      height: size,
-      child: Stack(
-        alignment: Alignment.center,
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => WorkoutClipPickerScreen(
+          workoutDays: widget.workoutDays,
+          dayResults: widget.dayResults,
+          initialDay: _selected,
+        ),
+      ),
+    );
+  }
+
+  /// สัปดาห์ที่กำลังมองเห็นอยู่ตอนนี้ (ไม่ใช่วันที่เลือก) — ใช้บอกเดือนบนหัว
+  DateTime _visibleWeekStart() {
+    final page = _weekController.hasClients && _weekController.page != null
+        ? _weekController.page!.round()
+        : _basePage;
+    return _weekStartForPage(page);
+  }
+
+  /// หัวเดือน/ปี กดเพื่อกระโดดไปเดือนอื่นได้ เพราะการปัดทีละสัปดาห์
+  /// ใช้ย้อนไกลๆ ไม่ไหว
+  Widget _monthHeader() {
+    // ใช้วันพฤหัสของสัปดาห์เป็นตัวตัดสินเดือน สัปดาห์ที่คาบสองเดือนจะได้
+    // เดือนที่มีวันมากกว่า
+    final d = _visibleWeekStart().add(const Duration(days: 3));
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: _pickMonth,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // Ring sweeps to the accuracy on appearance.
-          TweenAnimationBuilder<double>(
-            tween: Tween(begin: 0, end: result.$2 / 100),
-            duration: const Duration(milliseconds: 600),
-            curve: Curves.easeOutCubic,
-            builder: (_, v, __) => CustomPaint(
-              size: const Size.square(size),
-              painter: _DonutPainter(v),
+          Flexible(
+            child: Text(
+              '${_thMonths[d.month - 1]} ${d.year + 543}',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontFamily: _famFamily,
+                fontFamilyFallback: _famFallback,
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: _ink,
+              ),
             ),
-          ),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Score counts up.
-              TweenAnimationBuilder<double>(
-                tween: Tween(begin: 0, end: result.$1.toDouble()),
-                duration: const Duration(milliseconds: 600),
-                curve: Curves.easeOut,
-                builder: (_, v, __) => Text(
-                  _formatInt(v.round()),
-                  style: TextStyle(
-                    fontFamily: _famFamily, fontFamilyFallback: _famFallback,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w800,
-                    height: 1.0,
-                    color: _ink,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 1),
-              Text(
-                'คะแนน',
-                style: TextStyle(
-                  fontFamily: _famFamily, fontFamilyFallback: _famFallback,
-                  fontSize: 8,
-                  color: Color(0xFFB58A6B),
-                ),
-              ),
-            ],
           ),
         ],
       ),
     );
   }
 
-  // Center content for a day with no workout — a bare exercise icon button.
-  //  • canStart (today, not done) → orange, tappable, routes to the clip picker.
-  //  • isFuture → muted, disabled (the day hasn't arrived).
-  //  • otherwise (past, missed) → a plain "พัก".
-  Widget _restIcon({required bool canStart, required bool isFuture}) {
-    if (!canStart && !isFuture) {
-      // A past day with no workout → a muted "resting" icon in a circle.
-      return Container(
-        width: 66,
-        height: 66,
-        alignment: Alignment.center,
+  /// แคปซูลจำนวนวันที่ออกกำลังกายต่อเนื่อง วางท้ายแถวชื่อเดือน
+  Widget _streakPill() {
+    final streak = _streak();
+    final onStreak = streak > 0;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(100),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ShaderMask(
+            shaderCallback: (b) => LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: onStreak
+                  ? const [_flameTop, _flameBottom]
+                  : const [Color(0xFFC4B3A3), Color(0xFFB7A595)],
+            ).createShader(b),
+            child: const Icon(
+              CupertinoIcons.flame_fill,
+              size: 22,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(width: 5),
+          Text(
+            '$streak',
+            style: TextStyle(
+              fontFamily: _famFamily,
+              fontFamilyFallback: _famFallback,
+              fontSize: 20,
+              fontWeight: FontWeight.w900,
+              // Nunito เป็นฟอนต์แบบแปรผัน ตั้ง fontWeight อย่างเดียวไม่ขยับแกน
+              fontVariations: const [FontVariation('wght', 900)],
+              height: 1.0,
+              color: onStreak ? _ink : const Color(0xFFB7A595),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _pickMonth() async {
+    final visible = _visibleWeekStart().add(const Duration(days: 3));
+    DateTime temp = DateTime(visible.year, visible.month);
+    final now = DateTime.now();
+
+    await showCupertinoModalPopup<void>(
+      context: context,
+      builder: (ctx) => Container(
+        height: 300,
         decoration: const BoxDecoration(
-          shape: BoxShape.circle,
-          color: Color(0xFFF1E4D8),
+          color: Color(0xFFF8F8FA),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
-        child: const Icon(
-          Icons.self_improvement,
-          size: 32,
-          color: Color(0xFFB58A6B),
-        ),
-      );
-    }
-    // A filled circular button so it clearly reads as tappable.
-    return GestureDetector(
-      onTap: canStart ? _handleStart : null,
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        width: 66,
-        height: 66,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: canStart
-              ? const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [_flameTop, _flameBottom],
-                )
-              : null,
-          color: canStart ? null : const Color(0xFFE7DACE),
-          boxShadow: canStart
-              ? [
-                  BoxShadow(
-                    color: _flameBottom.withValues(alpha: 0.4),
-                    blurRadius: 12,
-                    offset: const Offset(0, 5),
-                  ),
-                ]
-              : null,
-        ),
-        child: Icon(
-          Icons.sports_gymnastics,
-          size: 34,
-          color: canStart ? Colors.white : const Color(0xFFB7A595),
+        child: SafeArea(
+          top: false,
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    CupertinoButton(
+                      onPressed: () => Navigator.of(ctx).pop(),
+                      child: const Text('ยกเลิก'),
+                    ),
+                    CupertinoButton(
+                      onPressed: () {
+                        Navigator.of(ctx).pop();
+                        _jumpToMonth(temp);
+                      },
+                      child: const Text('เลือก'),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: CupertinoDatePicker(
+                  mode: CupertinoDatePickerMode.monthYear,
+                  initialDateTime: temp,
+                  minimumDate: DateTime(now.year - 5),
+                  maximumDate: DateTime(now.year + 1, 12),
+                  onDateTimeChanged: (v) => temp = v,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  static String _formatInt(int v) {
-    final s = v.toString();
-    final b = StringBuffer();
-    for (var i = 0; i < s.length; i++) {
-      if (i > 0 && (s.length - i) % 3 == 0) b.write(',');
-      b.write(s[i]);
+  /// เลื่อนแถบสัปดาห์ไปยังเดือนที่เลือก และเลือกวันที่ 1 ของเดือนนั้นให้
+  void _jumpToMonth(DateTime month) {
+    final target = DateTime(month.year, month.month, 1);
+    final monday = target.subtract(Duration(days: target.weekday - 1));
+    final weeks = monday.difference(_mondayOfCurrentWeek()).inDays ~/ 7;
+    setState(() => _selected = target);
+    widget.onDaySelected?.call(target);
+    if (_weekController.hasClients) {
+      _weekController.animateToPage(
+        _basePage + weeks,
+        duration: const Duration(milliseconds: 320),
+        curve: Curves.easeOutCubic,
+      );
     }
-    return b.toString();
-  }
-
-  // Opens the clip picker. Prefers the injected callback (so a host screen can
-  // override routing); otherwise pushes the picker directly so the flow works
-  // even where no callback is wired (e.g. the mockup cards).
-  void _handleStart() {
-    if (widget.onStartTap != null) {
-      widget.onStartTap!();
-      return;
-    }
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const WorkoutClipPickerScreen()),
-    );
   }
 
   Widget _calendarPanel(DateTime today) {
-    final showStats = widget.dayResults.isNotEmpty;
-    // Start is allowed only on today when not yet done. A future day shows the
-    // "เริ่มออกกำลังกาย" prompt but stays disabled (the day hasn't arrived).
-    final canStart = _same(_selected, today) && !_didWorkout(_selected);
-    final isFuture = _selected.isAfter(today);
     return Container(
       width: double.infinity,
-      decoration: const BoxDecoration(
-        color: Color(0xFFFFF4EC), // white with a soft orange tint
-        borderRadius: BorderRadius.all(Radius.circular(24)),
+      decoration: BoxDecoration(
+        // โหมดปฏิทินล้วนวางบนพื้นหน้าจอโดยตรง จึงไม่ต้องมีพื้นสีของตัวเอง
+        color: widget.calendarOnly
+            ? null
+            : const Color(0xFFFFF4EC), // white with a soft orange tint
+        borderRadius: const BorderRadius.all(Radius.circular(24)),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: widget.calendarOnly
+          ? const EdgeInsets.symmetric(vertical: 12)
+          : const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -528,7 +647,9 @@ class _HomeWorkoutStreakCardState extends State<HomeWorkoutStreakCard> {
               ),
             ),
           ),
-          if (showStats) ...[
+          // วงล้อคะแนนของวันที่เลือก แสดงทุกวัน — เฉพาะการ์ดหน้าหลักเท่านั้น
+          // หน้ารายละเอียดให้ปฏิทินกินเต็มความกว้างเหมือนเดิม
+          if (!widget.calendarOnly) ...[
             const SizedBox(width: 8),
             AnimatedSwitcher(
               duration: const Duration(milliseconds: 320),
@@ -541,11 +662,7 @@ class _HomeWorkoutStreakCardState extends State<HomeWorkoutStreakCard> {
               ),
               child: KeyedSubtree(
                 key: ValueKey(_selected),
-                child: _danceStats(
-                  _resultFor(_selected),
-                  canStart: canStart,
-                  isFuture: isFuture,
-                ),
+                child: _danceStats(_resultFor(_selected)),
               ),
             ),
           ],
@@ -554,12 +671,93 @@ class _HomeWorkoutStreakCardState extends State<HomeWorkoutStreakCard> {
     );
   }
 
+  /// Dance result for [day], or null when there's none.
+  (int score, int accuracy)? _resultFor(DateTime d) {
+    for (final e in widget.dayResults.entries) {
+      if (_same(e.key, d)) return e.value;
+    }
+    return null;
+  }
+
+  /// วงล้อคะแนนของวันที่เลือก — แสดงทุกวัน วันที่ไม่ได้ออกกำลังกายจะเป็น
+  /// วงแหวนเปล่าและคะแนน 0 เพื่อให้ตำแหน่งและความสูงของการ์ดคงที่
+  Widget _danceStats((int score, int accuracy)? result) {
+    const size = 66.0;
+    final r = result ?? (0, 0);
+    return SizedBox(
+      width: size,
+      height: size,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // Ring sweeps to the accuracy on appearance.
+          TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0, end: r.$2 / 100),
+            duration: const Duration(milliseconds: 600),
+            curve: Curves.easeOutCubic,
+            builder: (_, v, __) => CustomPaint(
+              size: const Size.square(size),
+              painter: _DonutPainter(v),
+            ),
+          ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Score counts up.
+              TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0, end: r.$1.toDouble()),
+                duration: const Duration(milliseconds: 600),
+                curve: Curves.easeOut,
+                builder: (_, v, __) => Text(
+                  _formatInt(v.round()),
+                  style: TextStyle(
+                    fontFamily: _famFamily,
+                    fontFamilyFallback: _famFallback,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                    height: 1.0,
+                    color: _ink,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 1),
+              Text(
+                'คะแนน',
+                style: TextStyle(
+                  fontFamily: _famFamily,
+                  fontFamilyFallback: _famFallback,
+                  fontSize: 8,
+                  color: Color(0xFFB58A6B),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  static String _formatInt(int v) {
+    final s = v.toString();
+    final b = StringBuffer();
+    for (var i = 0; i < s.length; i++) {
+      if (i > 0 && (s.length - i) % 3 == 0) b.write(',');
+      b.write(s[i]);
+    }
+    return b.toString();
+  }
+
   Widget _weekRow(List<DateTime> week, DateTime today) {
-    return Row(
+    final row = Row(
       crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        for (final day in week) Expanded(child: _dayCell(day, today)),
-      ],
+      children: [for (final day in week) Expanded(child: _dayCell(day, today))],
+    );
+    // โหมดปฏิทินล้วนวาง PageView เต็มความกว้างจอ ระยะขอบจึงต้องอยู่ในหน้า
+    // ไม่ใช่ครอบ PageView ไม่งั้นสัปดาห์ถัดไปจะโผล่มาแบบดูเหมือนโดนตัด
+    if (!widget.calendarOnly) return row;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: row,
     );
   }
 
@@ -649,7 +847,10 @@ class _HomeWorkoutStreakCardState extends State<HomeWorkoutStreakCard> {
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: () => setState(() => _selected = day),
+      onTap: () {
+        setState(() => _selected = day);
+        widget.onDaySelected?.call(day);
+      },
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -657,7 +858,8 @@ class _HomeWorkoutStreakCardState extends State<HomeWorkoutStreakCard> {
           Text(
             _thWeekLabels[day.weekday - 1],
             style: TextStyle(
-              fontFamily: _famFamily, fontFamilyFallback: _famFallback,
+              fontFamily: _famFamily,
+              fontFamilyFallback: _famFallback,
               fontSize: 11,
               color: Color(0xFFB58A6B),
             ),
@@ -685,10 +887,10 @@ class _HomeWorkoutStreakCardState extends State<HomeWorkoutStreakCard> {
                   Text(
                     '${day.day}',
                     style: TextStyle(
-                      fontFamily: _famFamily, fontFamilyFallback: _famFallback,
+                      fontFamily: _famFamily,
+                      fontFamilyFallback: _famFallback,
                       fontSize: 13,
-                      fontWeight:
-                          isFocus ? FontWeight.w800 : FontWeight.w600,
+                      fontWeight: isFocus ? FontWeight.w800 : FontWeight.w600,
                       color: isFocus ? Colors.white : _ink,
                     ),
                   ),
@@ -733,7 +935,8 @@ class _HomeWorkoutStreakCardState extends State<HomeWorkoutStreakCard> {
             Text(
               'เริ่มเต้นเลย',
               style: TextStyle(
-                fontFamily: _famFamily, fontFamilyFallback: _famFallback,
+                fontFamily: _famFamily,
+                fontFamilyFallback: _famFallback,
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
                 color: Colors.white,
@@ -748,7 +951,10 @@ class _HomeWorkoutStreakCardState extends State<HomeWorkoutStreakCard> {
 
 /// Small dashed-outline circle shown on days with no workout.
 class _DashedCircle extends StatelessWidget {
-  const _DashedCircle({required this.size, this.color = const Color(0xFFE3B59C)});
+  const _DashedCircle({
+    required this.size,
+    this.color = const Color(0xFFE3B59C),
+  });
   final double size;
   final Color color;
 
@@ -813,7 +1019,7 @@ class _CompletedRingState extends State<_CompletedRing>
 
   @override
   Widget build(BuildContext context) {
-    const orange = Color(0xFFFF5A2C);
+    const orange = Color(0xFFFB6618);
     return SizedBox(
       width: widget.size,
       height: widget.size,
@@ -821,15 +1027,18 @@ class _CompletedRingState extends State<_CompletedRing>
         animation: _c,
         builder: (_, __) {
           // Ring fills over the first ~70%, the check fades/scales in after.
-          final ringP =
-              Curves.easeOut.transform((_c.value / 0.7).clamp(0.0, 1.0));
+          final ringP = Curves.easeOut.transform(
+            (_c.value / 0.7).clamp(0.0, 1.0),
+          );
           final checkP = ((_c.value - 0.62) / 0.38).clamp(0.0, 1.0);
           return Stack(
             alignment: Alignment.center,
             children: [
               const DecoratedBox(
-                decoration:
-                    BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                ),
                 child: SizedBox.expand(),
               ),
               CustomPaint(
@@ -846,13 +1055,19 @@ class _CompletedRingState extends State<_CompletedRing>
                           shaderCallback: (b) => const LinearGradient(
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
-                            colors: [Color(0xFFFF9500), Color(0xFFFF3B30)],
+                            colors: [Color(0xFFF7A555), Color(0xFFFB6618)],
                           ).createShader(b),
-                          child: Icon(CupertinoIcons.flame_fill,
-                              size: widget.size * 0.62, color: Colors.white),
+                          child: Icon(
+                            CupertinoIcons.flame_fill,
+                            size: widget.size * 0.62,
+                            color: Colors.white,
+                          ),
                         )
-                      : Icon(Icons.check_rounded,
-                          size: widget.size * 0.62, color: orange),
+                      : Icon(
+                          Icons.check_rounded,
+                          size: widget.size * 0.62,
+                          color: orange,
+                        ),
                 ),
               ),
             ],
@@ -864,6 +1079,40 @@ class _CompletedRingState extends State<_CompletedRing>
 }
 
 /// Donut: light track + orange progress arc (accuracy %).
+class _RingPainter extends CustomPainter {
+  _RingPainter(this.progress);
+  final double progress;
+
+  static const double _twoPi = 6.283185307179586;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = size.width / 2 - 1.4;
+    final track = Paint()
+      ..color = const Color(0xFFFFE0CC)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.4;
+    canvas.drawCircle(center, radius, track);
+
+    final arc = Paint()
+      ..color = const Color(0xFFFB6618)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.4
+      ..strokeCap = StrokeCap.round;
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius),
+      -_twoPi / 4, // start at top
+      _twoPi * progress,
+      false,
+      arc,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _RingPainter old) => old.progress != progress;
+}
+
 class _DonutPainter extends CustomPainter {
   _DonutPainter(this.progress);
   final double progress;
@@ -882,7 +1131,7 @@ class _DonutPainter extends CustomPainter {
 
     final arc = Paint()
       ..shader = const LinearGradient(
-        colors: [Color(0xFFFF9500), Color(0xFFFF3B30)],
+        colors: [Color(0xFFF7A555), Color(0xFFFB6618)],
       ).createShader(Rect.fromCircle(center: center, radius: radius))
       ..style = PaintingStyle.stroke
       ..strokeWidth = 6
@@ -898,38 +1147,4 @@ class _DonutPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _DonutPainter old) => old.progress != progress;
-}
-
-class _RingPainter extends CustomPainter {
-  _RingPainter(this.progress);
-  final double progress;
-
-  static const double _twoPi = 6.283185307179586;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.width / 2 - 1.4;
-    final track = Paint()
-      ..color = const Color(0xFFFFE0CC)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.4;
-    canvas.drawCircle(center, radius, track);
-
-    final arc = Paint()
-      ..color = const Color(0xFFFF5A2C)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.4
-      ..strokeCap = StrokeCap.round;
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius),
-      -_twoPi / 4, // start at top
-      _twoPi * progress,
-      false,
-      arc,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant _RingPainter old) => old.progress != progress;
 }

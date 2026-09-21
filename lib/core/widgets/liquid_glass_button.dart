@@ -18,6 +18,7 @@ class LiquidGlassButton extends StatelessWidget {
     this.size = 40,
     this.iconSize,
     this.haptic = HapticKind.selection,
+    this.shadowStrength = 1,
   });
 
   final IconData icon;
@@ -30,6 +31,9 @@ class LiquidGlassButton extends StatelessWidget {
   final double size;
   final double? iconSize;
   final HapticKind haptic;
+
+  /// ย่อเงาของปุ่มลงเมื่อวางบนการ์ดที่มีเงาอยู่แล้ว (1 = ค่าปกติ)
+  final double shadowStrength;
 
   @override
   Widget build(BuildContext context) {
@@ -48,10 +52,11 @@ class LiquidGlassButton extends StatelessWidget {
           // than a bloom, and fits inside clipped headers without being cut.
           boxShadow: [
             BoxShadow(
-              color: (tint ?? CupertinoColors.black)
-                  .withValues(alpha: hasTint ? 0.35 : 0.10),
-              blurRadius: hasTint ? 18 : 8,
-              offset: Offset(0, hasTint ? 8 : 2),
+              color: (tint ?? CupertinoColors.black).withValues(
+                alpha: (hasTint ? 0.35 : 0.10) * shadowStrength,
+              ),
+              blurRadius: (hasTint ? 18 : 8) * shadowStrength,
+              offset: Offset(0, (hasTint ? 8 : 2) * shadowStrength),
             ),
           ],
         ),
@@ -100,8 +105,9 @@ class LiquidGlassButton extends StatelessWidget {
                         center: const Alignment(-0.55, -0.95),
                         radius: 1.3,
                         colors: [
-                          CupertinoColors.white
-                              .withValues(alpha: hasTint ? 0.45 : 0.5),
+                          CupertinoColors.white.withValues(
+                            alpha: hasTint ? 0.45 : 0.5,
+                          ),
                           CupertinoColors.white.withValues(alpha: 0),
                         ],
                       ),
@@ -126,10 +132,26 @@ class LiquidGlassButton extends StatelessWidget {
 }
 
 const List<double> _glassSaturateMatrix = <double>[
-  1.4722, -0.4290, -0.0432, 0, 0,
-  -0.1278, 1.1710, -0.0432, 0, 0,
-  -0.1278, -0.4290, 1.5568, 0, 0,
-  0, 0, 0, 1, 0,
+  1.4722,
+  -0.4290,
+  -0.0432,
+  0,
+  0,
+  -0.1278,
+  1.1710,
+  -0.0432,
+  0,
+  0,
+  -0.1278,
+  -0.4290,
+  1.5568,
+  0,
+  0,
+  0,
+  0,
+  0,
+  1,
+  0,
 ];
 
 class _CircleRimPainter extends CustomPainter {

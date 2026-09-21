@@ -1,0 +1,246 @@
+{
+  "$description": "MyAtlas design tokens — motion",
+  "motion": {
+    "duration": {
+      "instant": {
+        "$value": 0,
+        "$type": "duration"
+      },
+      "micro": {
+        "$value": 120,
+        "$type": "duration",
+        "$description": "ตอบสนองการกด — press, ripple, checkbox"
+      },
+      "fast": {
+        "$value": 180,
+        "$type": "duration",
+        "$description": "สลับ toggle, เลือก chip"
+      },
+      "normal": {
+        "$value": 240,
+        "$type": "duration",
+        "$description": "ค่ามาตรฐาน: fade, เลื่อนสั้นๆ — ครอบคลุม 220/260 ที่ใช้อยู่"
+      },
+      "slow": {
+        "$value": 320,
+        "$type": "duration",
+        "$description": "การ์ดขยาย, สลับเนื้อหาในที่เดิม"
+      },
+      "sheet": {
+        "$value": 400,
+        "$type": "duration",
+        "$description": "เปลี่ยนหน้า, bottom sheet — ครอบคลุม 380/420 ที่ใช้อยู่"
+      },
+      "ambient": {
+        "$value": 900,
+        "$type": "duration",
+        "$description": "แอนิเมชันตกแต่ง/เข้าหน้าแบบไล่ทีละชิ้น"
+      }
+    },
+    "easing": {
+      "standard": {
+        "$value": [
+          0.33,
+          1.0,
+          0.68,
+          1.0
+        ],
+        "$type": "cubicBezier",
+        "$description": "easeOutCubic — ค่าเริ่มต้นของแอป ใช้จริง 99 จุด"
+      },
+      "decelerate": {
+        "$value": [
+          0.0,
+          0.0,
+          0.58,
+          1.0
+        ],
+        "$type": "cubicBezier",
+        "$description": "easeOut — ของเข้ามาในจอ"
+      },
+      "accelerate": {
+        "$value": [
+          0.32,
+          0.0,
+          0.67,
+          0.0
+        ],
+        "$type": "cubicBezier",
+        "$description": "easeInCubic — ของออกจากจอ"
+      },
+      "emphasized": {
+        "$value": [
+          0.18,
+          1.0,
+          0.04,
+          1.0
+        ],
+        "$type": "cubicBezier",
+        "$description": "fastEaseInToSlowEaseOut — เปลี่ยนหน้า/เปิด sheet"
+      },
+      "expressive": {
+        "$value": [
+          0.22,
+          1.0,
+          0.36,
+          1.0
+        ],
+        "$type": "cubicBezier",
+        "$description": "easeOutQuint — เคลื่อนไหวไกลๆ ให้ดูนุ่ม"
+      },
+      "overshoot": {
+        "$value": [
+          0.34,
+          1.56,
+          0.64,
+          1.0
+        ],
+        "$type": "cubicBezier",
+        "$description": "easeOutBack — ป็อปอัปเด้งเกินแล้วกลับ"
+      },
+      "linear": {
+        "$value": [
+          0.0,
+          0.0,
+          1.0,
+          1.0
+        ],
+        "$type": "cubicBezier",
+        "$description": "progress, สปินเนอร์เท่านั้น"
+      }
+    },
+    "spring": {
+      "default": {
+        "$value": {
+          "damping": 20,
+          "stiffness": 180,
+          "mass": 1
+        },
+        "$type": "other",
+        "$description": "การเคลื่อนที่ทั่วไปแบบมีน้ำหนัก"
+      },
+      "gentle": {
+        "$value": {
+          "damping": 24,
+          "stiffness": 120,
+          "mass": 1
+        },
+        "$type": "other",
+        "$description": "นุ่ม ไม่เด้ง"
+      },
+      "bouncy": {
+        "$value": {
+          "damping": 12,
+          "stiffness": 200,
+          "mass": 1
+        },
+        "$type": "other",
+        "$description": "ป็อปอัปรับรางวัล — แทน elasticOut/easeOutBack"
+      },
+      "stiff": {
+        "$value": {
+          "damping": 26,
+          "stiffness": 300,
+          "mass": 1
+        },
+        "$type": "other",
+        "$description": "ตอบสนองทันที เช่น drag แล้วปล่อย"
+      }
+    },
+    "pattern": {
+      "press": {
+        "$value": {
+          "transform": "scale",
+          "from": 1,
+          "to": 0.97,
+          "duration": "{motion.duration.micro}",
+          "easing": "{motion.easing.standard}"
+        },
+        "$type": "other",
+        "$description": "ฟีดแบ็กตอนกด — เทียบเท่า PressEffect ใน Flutter"
+      },
+      "fadeIn": {
+        "$value": {
+          "property": "opacity",
+          "from": 0,
+          "to": 1,
+          "duration": "{motion.duration.normal}",
+          "easing": "{motion.easing.decelerate}"
+        },
+        "$type": "other"
+      },
+      "slideUp": {
+        "$value": {
+          "property": "translateY",
+          "from": 16,
+          "to": 0,
+          "duration": "{motion.duration.normal}",
+          "easing": "{motion.easing.standard}"
+        },
+        "$type": "other",
+        "$description": "เนื้อหาเลื่อนขึ้นพร้อม fade"
+      },
+      "sheetEnter": {
+        "$value": {
+          "property": "translateY",
+          "from": "100%",
+          "to": 0,
+          "duration": "{motion.duration.sheet}",
+          "easing": "{motion.easing.emphasized}"
+        },
+        "$type": "other"
+      },
+      "sheetExit": {
+        "$value": {
+          "property": "translateY",
+          "from": 0,
+          "to": "100%",
+          "duration": "{motion.duration.slow}",
+          "easing": "{motion.easing.accelerate}"
+        },
+        "$type": "other",
+        "$description": "ออกเร็วกว่าเข้าเสมอ"
+      },
+      "popIn": {
+        "$value": {
+          "transform": "scale",
+          "from": 0.8,
+          "to": 1,
+          "spring": "{motion.spring.bouncy}"
+        },
+        "$type": "other",
+        "$description": "ป็อปอัปกลางจอ"
+      },
+      "stagger": {
+        "$value": {
+          "delayPerItem": 60,
+          "maxItems": 6,
+          "duration": "{motion.duration.ambient}",
+          "easing": "{motion.easing.standard}"
+        },
+        "$type": "other",
+        "$description": "เข้าหน้าแบบไล่ทีละชิ้น — ตรงกับ _stagger ที่ใช้อยู่"
+      },
+      "skeleton": {
+        "$value": {
+          "loop": true,
+          "duration": 1200,
+          "easing": "{motion.easing.standard}"
+        },
+        "$type": "other",
+        "$description": "ชิมเมอร์ตอนโหลด"
+      }
+    }
+  },
+  "$extensions": {
+    "com.myatlas.rules": {
+      "exitFasterThanEnter": "ของเข้าใช้ decelerate ของออกใช้ accelerate และออกต้องเร็วกว่าเข้าเสมอ เพราะผู้ใช้ตัดสินใจไปแล้ว",
+      "distanceDrivesDuration": "ระยะทางไกล = นานขึ้น ไม่ใช่ทุกอย่างใช้ค่าเดียว",
+      "reduceMotion": "ต้องเช็ค AccessibilityInfo.isReduceMotionEnabled() ถ้าเปิดอยู่ให้เหลือแค่ fade และตัด duration ทั้งหมดเป็น instant — เป็นข้อกำหนด WCAG 2.2 (2.3.3 Animation from Interactions)",
+      "flutterCurveMapping": "Flutter Curves ไม่ใช่ cubic-bezier ตัวเดียวกับ CSS — ตารางแปลงอยู่ใน easing แต่ละตัวแล้ว",
+      "elasticOutHasNoBezier": "Curves.elasticOut แปลงเป็น bezier ไม่ได้ ให้ใช้ spring.bouncy แทน",
+      "nativeDriver": "RN Animated ที่ useNativeDriver:true รองรับแค่ transform กับ opacity — อย่างอื่น (สี ความสูง) ต้องใช้ Reanimated ไม่งั้นจะกระตุก",
+      "recommendedLib": "ใช้ react-native-reanimated v3 เป็นหลัก ค่า spring ในโทเคนนี้ใส่ withSpring() ได้ตรง และ cubicBezier ใส่ Easing.bezier() ได้ตรง"
+    }
+  }
+}
