@@ -183,7 +183,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 16),
         decoration: BoxDecoration(
           color: selected
-              ? _linkBlue
+              ? AppColors.primary600
               : CupertinoColors.black.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(100),
         ),
@@ -286,189 +286,200 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           color: CupertinoColors.white,
           borderRadius: BorderRadius.circular(24),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Stack(
           children: [
-            Row(
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: 24,
-                  height: 24,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: tone.color.withValues(alpha: 0.2),
-                  ),
-                  child: Icon(tone.icon, size: 13, color: tone.color),
+                Row(
+                  children: [
+                    Container(
+                      width: 24,
+                      height: 24,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: tone.color.withValues(alpha: 0.2),
+                      ),
+                      child: Icon(tone.icon, size: 13, color: tone.color),
+                    ),
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        tone.label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontFamily: _fontThai,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          height: 1.4,
+                          letterSpacing: 0.275,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    ),
+                    // จุดแดง = ยังไม่อ่าน
+                    if (n.unread) ...[
+                      const SizedBox(width: 4),
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Color(0xFFFF383C),
+                        ),
+                      ),
+                    ],
+                    // เว้นที่ให้ป้ายเวลาที่ปักอยู่มุมขวาบน
+                    const Spacer(),
+                    const SizedBox(width: 96),
+                  ],
                 ),
-                const SizedBox(width: 8),
-                Flexible(
-                  child: Text(
-                    tone.label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                if (n.message.isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  Text(
+                    n.message,
                     style: const TextStyle(
                       fontFamily: _fontThai,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      height: 1.4,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      height: 1.45,
                       letterSpacing: 0.275,
                       color: AppColors.textPrimary,
                     ),
                   ),
-                ),
-                // จุดแดง = ยังไม่อ่าน
-                if (n.unread) ...[
-                  const SizedBox(width: 4),
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Color(0xFFFF383C),
-                    ),
+                ],
+                if (n.tags.isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [for (final t in n.tags) _tag(t)],
                   ),
                 ],
-                const Spacer(),
-                Text(
-                  n.timeLabel,
-                  style: const TextStyle(
-                    fontFamily: _fontThai,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    height: 1.4,
-                    letterSpacing: 0.275,
-                    color: AppColors.textTertiary,
-                  ),
-                ),
-              ],
-            ),
-            if (n.message.isNotEmpty) ...[
-              const SizedBox(height: 10),
-              Text(
-                n.message,
-                style: const TextStyle(
-                  fontFamily: _fontThai,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  height: 1.45,
-                  letterSpacing: 0.275,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            ],
-            if (n.tags.isNotEmpty) ...[
-              const SizedBox(height: 10),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [for (final t in n.tags) _tag(t)],
-              ),
-            ],
-            if (n.details.isNotEmpty) ...[
-              const SizedBox(height: 10),
-              for (final d in n.details)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Row(
+                if (n.details.isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  for (final d in n.details)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Row(
+                        children: [
+                          Opacity(
+                            opacity: 0.8,
+                            child: Icon(
+                              d.icon,
+                              size: 13,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Flexible(
+                            child: Text(
+                              d.text,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontFamily: _fontThai,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                height: 1.43,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+                if (n.callerName != null) ...[
+                  const SizedBox(height: 10),
+                  Row(
                     children: [
-                      Opacity(
-                        opacity: 0.8,
-                        child: Icon(
-                          d.icon,
-                          size: 13,
-                          color: AppColors.textPrimary,
+                      Container(
+                        width: 48,
+                        height: 48,
+                        clipBehavior: Clip.antiAlias,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [AppColors.primary600, Color(0xFF166C53)],
+                          ),
                         ),
+                        child: n.avatarAsset == null
+                            ? const Icon(
+                                CupertinoIcons.person_fill,
+                                size: 22,
+                                color: CupertinoColors.white,
+                              )
+                            : Image.asset(n.avatarAsset!, fit: BoxFit.cover),
                       ),
                       const SizedBox(width: 8),
-                      Flexible(
-                        child: Text(
-                          d.text,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontFamily: _fontThai,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            height: 1.43,
-                            color: AppColors.textPrimary,
-                          ),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              n.callerName!,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontFamily: _fontThai,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                height: 1.43,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Row(
+                              children: [
+                                const Icon(
+                                  CupertinoIcons.phone_arrow_down_left,
+                                  size: 13,
+                                  color: AppColors.textPrimary,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  n.callLabel ?? 'โทรหาคุณ',
+                                  style: const TextStyle(
+                                    fontFamily: _fontThai,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                    height: 1.4,
+                                    letterSpacing: 0.275,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
-                ),
-            ],
-            if (n.callerName != null) ...[
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  Container(
-                    width: 48,
-                    height: 48,
-                    clipBehavior: Clip.antiAlias,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [AppColors.primary600, Color(0xFF166C53)],
-                      ),
-                    ),
-                    child: n.avatarAsset == null
-                        ? const Icon(
-                            CupertinoIcons.person_fill,
-                            size: 22,
-                            color: CupertinoColors.white,
-                          )
-                        : Image.asset(n.avatarAsset!, fit: BoxFit.cover),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          n.callerName!,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontFamily: _fontThai,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            height: 1.43,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Row(
-                          children: [
-                            const Icon(
-                              CupertinoIcons.phone_arrow_down_left,
-                              size: 13,
-                              color: AppColors.textPrimary,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              n.callLabel ?? 'โทรหาคุณ',
-                              style: const TextStyle(
-                                fontFamily: _fontThai,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                                height: 1.4,
-                                letterSpacing: 0.275,
-                                color: AppColors.textPrimary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
                 ],
+              ],
+            ),
+            // เวลาปักมุมขวาบนของการ์ด ทุกใบจึงอยู่แนวเดียวกัน
+            Positioned(
+              top: 0,
+              right: 0,
+              child: Text(
+                n.timeLabel,
+                style: const TextStyle(
+                  fontFamily: _fontThai,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  height: 1.4,
+                  letterSpacing: 0.275,
+                  color: AppColors.textTertiary,
+                ),
               ),
-            ],
+            ),
           ],
         ),
       ),
@@ -531,7 +542,6 @@ class _Tone {
 }
 
 const _fontThai = 'IBM Plex Sans Thai Looped';
-const _linkBlue = Color(0xFF2463EB);
 
 /// ข้อมูลจำลองจนกว่าจะมี API แจ้งเตือนจริง
 const kMockNotifications = <NotificationItem>[
