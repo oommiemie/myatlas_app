@@ -279,8 +279,7 @@ class _TabRow extends StatefulWidget {
   State<_TabRow> createState() => _TabRowState();
 }
 
-class _TabRowState extends State<_TabRow>
-    with SingleTickerProviderStateMixin {
+class _TabRowState extends State<_TabRow> with SingleTickerProviderStateMixin {
   late final AnimationController _ctrl;
   late int _prev;
   late List<double> _activeWidths;
@@ -331,11 +330,7 @@ class _TabRowState extends State<_TabRow>
         textDirection: TextDirection.ltr,
         maxLines: 1,
       )..layout();
-      return _activeHPad * 2 +
-          _activeIconSize +
-          _activeLabelGap +
-          tp.width +
-          2;
+      return _activeHPad * 2 + _activeIconSize + _activeLabelGap + tp.width + 2;
     }).toList();
   }
 
@@ -381,11 +376,7 @@ class _TabRowState extends State<_TabRow>
     }
 
     final width = inactiveW + (activeW - inactiveW) * activeness;
-    final bg = Color.lerp(
-      const Color(0xFFF2F2F7),
-      widget.color,
-      activeness,
-    )!;
+    final bg = Color.lerp(const Color(0xFFF2F2F7), widget.color, activeness)!;
     final fg = Color.lerp(
       const Color(0xFF6D756E),
       CupertinoColors.white,
@@ -413,8 +404,7 @@ class _TabRowState extends State<_TabRow>
             boxShadow: activeness > 0.05
                 ? [
                     BoxShadow(
-                      color: widget.color
-                          .withValues(alpha: 0.35 * activeness),
+                      color: widget.color.withValues(alpha: 0.35 * activeness),
                       blurRadius: 10 * activeness,
                       offset: Offset(0, 4 * activeness),
                     ),
@@ -436,8 +426,9 @@ class _TabRowState extends State<_TabRow>
                       child: Text(
                         widget.tabs[i].label,
                         style: TextStyle(
-                          color: CupertinoColors.white
-                              .withValues(alpha: activeness),
+                          color: CupertinoColors.white.withValues(
+                            alpha: activeness,
+                          ),
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                         ),
@@ -777,7 +768,10 @@ class _MedicationCard extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 3,
+                ),
                 decoration: BoxDecoration(
                   color: const Color(0xFFF2F2F7),
                   borderRadius: BorderRadius.circular(100),
@@ -1031,10 +1025,7 @@ class _EmptyCard extends StatelessWidget {
       child: Text(
         message,
         textAlign: TextAlign.center,
-        style: const TextStyle(
-          color: Color(0xFF6D756E),
-          fontSize: 13,
-        ),
+        style: const TextStyle(color: Color(0xFF6D756E), fontSize: 13),
       ),
     );
   }

@@ -3,8 +3,10 @@ import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart' show HapticFeedback;
-import 'package:flutter/material.dart'
-    show Icons, ScaffoldMessenger, SnackBar, SnackBarBehavior;
+import 'package:flutter/material.dart' show Icons;
+
+import 'workout_player_screen.dart';
+import 'widgets/youtube_clip_view.dart' show youtubeThumbnail;
 
 /// A single aerobic dance clip the user can pick to work out to.
 class _WorkoutClip {
@@ -16,6 +18,7 @@ class _WorkoutClip {
     required this.colors,
     required this.icon,
     required this.image,
+    required this.youtubeId,
     this.score = 100,
     this.accuracy = 90,
   });
@@ -29,6 +32,9 @@ class _WorkoutClip {
 
   /// ภาพประกอบคลิป — ใช้ภาพ 3D ที่มีในโปรเจ็กต์ไปก่อนจนกว่าจะมีภาพปกจริง
   final String image;
+
+  /// รหัสคลิป YouTube ที่ใช้เล่นจริง (ตรวจแล้วว่าเจ้าของเปิดให้ฝังได้)
+  final String youtubeId;
 
   /// คะแนนและความแม่นยำล่าสุดของคลิปนี้ — mock จนกว่าจะมีข้อมูลจริง
   final int score;
@@ -50,6 +56,7 @@ class _WorkoutClip {
 const _clips = <_WorkoutClip>[
   _WorkoutClip(
     title: 'แอโรบิกพื้นฐาน วอร์มอัพ',
+    youtubeId: '_87z446O0DU',
     level: 'เริ่มต้น',
     minutes: 15,
     kcal: 120,
@@ -61,6 +68,7 @@ const _clips = <_WorkoutClip>[
   ),
   _WorkoutClip(
     title: 'เต้นจังหวะสนุก ขยับทั้งตัว',
+    youtubeId: 'ATH5n3W4Z6s',
     level: 'ปานกลาง',
     minutes: 20,
     kcal: 180,
@@ -72,6 +80,7 @@ const _clips = <_WorkoutClip>[
   ),
   _WorkoutClip(
     title: 'คาร์ดิโอเข้มข้น เผาผลาญ',
+    youtubeId: '2316Ux_Fks0',
     level: 'ขั้นสูง',
     minutes: 30,
     kcal: 280,
@@ -83,6 +92,7 @@ const _clips = <_WorkoutClip>[
   ),
   _WorkoutClip(
     title: 'แดนซ์ป็อป สุดมันส์',
+    youtubeId: 'XKOFvn2AXeQ',
     level: 'ปานกลาง',
     minutes: 25,
     kcal: 220,
@@ -94,6 +104,7 @@ const _clips = <_WorkoutClip>[
   ),
   _WorkoutClip(
     title: 'ยืดเส้นคูลดาวน์ ผ่อนคลาย',
+    youtubeId: 'XiFM5attgVk',
     level: 'เริ่มต้น',
     minutes: 10,
     kcal: 60,
@@ -204,6 +215,9 @@ class _WorkoutClipPickerScreenState extends State<WorkoutClipPickerScreen> {
   late DateTime _pageBase;
   late PageController _pageCtrl;
 
+  /// ระยะเลื่อนของหน้า — ใช้ค่อย ๆ ขึ้นพื้นหลังของแถบหัวที่ติดอยู่ด้านบน
+  final ValueNotifier<double> _scrollOffset = ValueNotifier<double>(0);
+
   @override
   void initState() {
     super.initState();
@@ -217,6 +231,7 @@ class _WorkoutClipPickerScreenState extends State<WorkoutClipPickerScreen> {
   void dispose() {
     _recommendCtrl?.dispose();
     _pageCtrl.dispose();
+    _scrollOffset.dispose();
     super.dispose();
   }
 
@@ -294,19 +309,85 @@ class _WorkoutClipPickerScreenState extends State<WorkoutClipPickerScreen> {
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       backgroundColor: _bgPrimary,
-      child: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(
-          parent: AlwaysScrollableScrollPhysics(),
-        ),
-        child: Column(
-          children: [
-            _hero(context),
-            // แผ่นเนื้อหาซ้อนขึ้นทับหัวเล็กน้อยตามดีไซน์
-            Transform.translate(
-              offset: const Offset(0, -24),
-              child: _infoContainer(context),
+      child: Stack(
+        children: [
+          NotificationListener<ScrollNotification>(
+            onNotification: (n) {
+              // เฉพาะการเลื่อนหน้าหลัก ไม่นับปฏิทิน/แถบคลิปที่เลื่อนแนวนอน
+              if (n.depth == 0 &&
+                  (n is ScrollUpdateNotification ||
+                      n is ScrollStartNotification)) {
+                _scrollOffset.value = n.metrics.pixels;
+              }
+              return false;
+            },
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(
+                parent: AlwaysScrollableScrollPhysics(),
+              ),
+              child: Column(
+                children: [
+                  _hero(context),
+                  // แผ่นเนื้อหาซ้อนขึ้นทับหัวเล็กน้อยตามดีไซน์
+                  Transform.translate(
+                    offset: const Offset(0, -24),
+                    child: _infoContainer(context),
+                  ),
+                ],
+              ),
             ),
-          ],
+          ),
+          // แถบหัว (ปุ่มย้อนกลับ + ชื่อหน้า) ติดอยู่ด้านบนเหมือนหน้าอื่น
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: ValueListenableBuilder<double>(
+              valueListenable: _scrollOffset,
+              builder: (_, offset, __) => _stickyBar(context, offset),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// แถบหัวที่ติดด้านบน — ตอนอยู่บนสุดโปร่งใสเห็นหัวสีส้มด้านหลัง
+  /// เลื่อนลงแล้วค่อย ๆ ขึ้นพื้นส้มเบลอ (ระยะ 140 เท่าหน้าอื่น) ตัวหนังสือยังอ่านออก
+  Widget _stickyBar(BuildContext context, double offset) {
+    final top = MediaQuery.paddingOf(context).top;
+    final progress = (offset / 140).clamp(0.0, 1.0);
+    return ClipRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 22 * progress, sigmaY: 22 * progress),
+        child: Container(
+          color: _heroTop.withValues(alpha: 0.92 * progress),
+          padding: EdgeInsets.fromLTRB(16, top + 8, 16, 8),
+          child: SizedBox(
+            height: 44,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                const Text(
+                  'ออกกำลังกาย',
+                  style: TextStyle(
+                    fontFamily: _fontThai,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: CupertinoColors.white,
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: _GlassCircle(
+                    icon: CupertinoIcons.chevron_back,
+                    onTap: () => Navigator.of(context).maybePop(),
+                    onLight: true,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -330,35 +411,8 @@ class _WorkoutClipPickerScreenState extends State<WorkoutClipPickerScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(height: top + 8),
-              // แถบบน: ปุ่มย้อนกลับ + ชื่อหน้า
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: SizedBox(
-                  height: 44,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      const Text(
-                        'ออกกำลังกาย',
-                        style: TextStyle(
-                          fontFamily: _fontThai,
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
-                          color: CupertinoColors.white,
-                        ),
-                      ),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: _GlassCircle(
-                          icon: CupertinoIcons.chevron_back,
-                          onTap: () => Navigator.of(context).maybePop(),
-                          onLight: true,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              // ที่ว่างของแถบหัว — ตัวแถบจริงติดอยู่ด้านบนใน _stickyBar
+              const SizedBox(height: 44),
               const SizedBox(height: 8),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -1045,7 +1099,7 @@ class _WorkoutClipPickerScreenState extends State<WorkoutClipPickerScreen> {
             fit: StackFit.expand,
             children: [
               const ColoredBox(color: _clipTeal),
-              Image.asset(clip.image, fit: BoxFit.cover),
+              _ClipCover(clip: clip),
               const Align(
                 alignment: Alignment.bottomCenter,
                 child: FractionallySizedBox(
@@ -1500,9 +1554,7 @@ class _ClipCard extends StatelessWidget {
               const ColoredBox(color: _clipTeal),
               // ภาพปกคลิป ครอปเต็มใบ
               Positioned.fill(
-                child: IgnorePointer(
-                  child: Image.asset(clip.image, fit: BoxFit.cover),
-                ),
+                child: IgnorePointer(child: _ClipCover(clip: clip)),
               ),
               // ไล่สีดำจางขึ้นจากขอบล่าง ให้ตัวหนังสืออ่านออก
               const Align(
@@ -1724,22 +1776,22 @@ class _ClipCard extends StatelessWidget {
         ),
         ConstrainedBox(
           constraints: BoxConstraints(minWidth: minWidth),
+          // แผงคะแนนเป็น Row ที่ไม่จำกัดความกว้าง จึงห้ามใช้ Flexible ตรงนี้
+          // (Flutter จะ assert "non-zero flex but unbounded width")
           child: Row(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Flexible(
-                child: Text(
-                  value,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                    fontVariations: const [FontVariation('wght', 800)],
-                    height: 1.3,
-                    color: color,
-                    fontFeatures: const [FontFeature.tabularFigures()],
-                  ),
+              Text(
+                value,
+                maxLines: 1,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                  fontVariations: const [FontVariation('wght', 800)],
+                  height: 1.3,
+                  color: color,
+                  fontFeatures: const [FontFeature.tabularFigures()],
                 ),
               ),
               if (unit != null) ...[
@@ -1796,9 +1848,7 @@ class _ClipReadyScreenState extends State<_ClipReadyScreen> {
                     children: [
                       const ColoredBox(color: _clipTeal),
                       Positioned.fill(
-                        child: IgnorePointer(
-                          child: Image.asset(clip.image, fit: BoxFit.cover),
-                        ),
+                        child: IgnorePointer(child: _ClipCover(clip: clip)),
                       ),
                       // ไล่สีเขียวเข้มขึ้นจากล่าง ชุดเดียวกับการ์ดคลิป
                       const Align(
@@ -1871,8 +1921,6 @@ class _ClipReadyScreenState extends State<_ClipReadyScreen> {
                                 ],
                               ),
                               const SizedBox(height: 16),
-                              _chips(clip),
-                              const SizedBox(height: 16),
                               Text(
                                 clip.description,
                                 style: TextStyle(
@@ -1911,7 +1959,7 @@ class _ClipReadyScreenState extends State<_ClipReadyScreen> {
                             separatorBuilder: (_, _) =>
                                 const SizedBox(width: 12),
                             itemBuilder: (_, i) =>
-                                _previewCard(clip.previews[i], clip.image),
+                                _previewCard(clip.previews[i], clip),
                           ),
                         ),
                       ],
@@ -2066,36 +2114,8 @@ class _ClipReadyScreenState extends State<_ClipReadyScreen> {
     );
   }
 
-  Widget _chips(_WorkoutClip clip) {
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: [_chip(clip.level), _chip('${clip.kcal} แคลอรี่')],
-    );
-  }
-
-  Widget _chip(String text) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-      decoration: BoxDecoration(
-        color: _bgPrimary,
-        borderRadius: BorderRadius.circular(100),
-        border: Border.all(color: _hairline),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          fontFamily: _fontThai,
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          color: CupertinoColors.black.withValues(alpha: 0.8),
-        ),
-      ),
-    );
-  }
-
   /// การ์ดตัวอย่างคลิป ใช้ภาษาภาพเดียวกับการ์ดคลิปในหน้าออกกำลังกาย
-  Widget _previewCard(String caption, String image) {
+  Widget _previewCard(String caption, _WorkoutClip clip) {
     return SizedBox(
       width: 160,
       child: ClipRRect(
@@ -2104,7 +2124,7 @@ class _ClipReadyScreenState extends State<_ClipReadyScreen> {
           fit: StackFit.expand,
           children: [
             const ColoredBox(color: _clipTeal),
-            Image.asset(image, fit: BoxFit.cover),
+            _ClipCover(clip: clip),
             const Align(
               alignment: Alignment.bottomCenter,
               child: FractionallySizedBox(
@@ -2172,10 +2192,19 @@ class _ClipReadyScreenState extends State<_ClipReadyScreen> {
   }
 
   void _start(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('กำลังเริ่มคลิป… (ตัวอย่างการเชื่อมต่อ)'),
-        behavior: SnackBarBehavior.floating,
+    final clip = widget.clip;
+    Navigator.of(context).push(
+      CupertinoPageRoute<void>(
+        builder: (_) => WorkoutPlayerScreen(
+          title: clip.title,
+          subtitle: 'คลิปเต้น · ${clip.minutes} นาที',
+          coverImage: clip.image,
+          coverUrl: youtubeThumbnail(clip.youtubeId),
+          youtubeId: clip.youtubeId,
+          minutes: clip.minutes,
+          score: clip.score,
+          accuracy: clip.accuracy,
+        ),
       ),
     );
   }
@@ -2373,4 +2402,23 @@ class _ScoreGauge extends CustomPainter {
       old.vertical != vertical ||
       old.trackColor != trackColor ||
       old.innerShift != innerShift;
+}
+
+/// ภาพปกคลิป — ใช้หน้าปกจริงจาก YouTube ระหว่างโหลดหรือโหลดไม่ได้
+/// จะแสดงภาพสำรองในแอปแทน จึงไม่มีช่วงที่เห็นกรอบว่าง
+class _ClipCover extends StatelessWidget {
+  const _ClipCover({required this.clip});
+  final _WorkoutClip clip;
+
+  @override
+  Widget build(BuildContext context) {
+    final fallback = Image.asset(clip.image, fit: BoxFit.cover);
+    return Image.network(
+      youtubeThumbnail(clip.youtubeId),
+      fit: BoxFit.cover,
+      loadingBuilder: (context, child, progress) =>
+          progress == null ? child : fallback,
+      errorBuilder: (_, _, _) => fallback,
+    );
+  }
 }

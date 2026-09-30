@@ -137,10 +137,7 @@ class _AboutAppScreenState extends State<AboutAppScreen>
             ),
           ),
           // Frosted glass footer panel
-          const Align(
-            alignment: Alignment.bottomCenter,
-            child: _AboutFooter(),
-          ),
+          const Align(alignment: Alignment.bottomCenter, child: _AboutFooter()),
         ],
       ),
     );
@@ -224,22 +221,22 @@ class _TwinkleStars extends StatelessWidget {
 
   static const _stars =
       <({double x, double y, double size, double phase, Color color})>[
-    (x: 0.08, y: 0.10, size: 2.5, phase: 0.00, color: Color(0xFFFACC15)),
-    (x: 0.22, y: 0.06, size: 3.5, phase: 0.15, color: Color(0xFF1D8B6B)),
-    (x: 0.42, y: 0.09, size: 2.0, phase: 0.30, color: Color(0xFFEC4899)),
-    (x: 0.70, y: 0.08, size: 3.0, phase: 0.45, color: Color(0xFF2563EB)),
-    (x: 0.88, y: 0.14, size: 2.5, phase: 0.10, color: Color(0xFFFACC15)),
-    (x: 0.05, y: 0.32, size: 2.0, phase: 0.60, color: Color(0xFF1D8B6B)),
-    (x: 0.95, y: 0.28, size: 2.5, phase: 0.75, color: Color(0xFFA855F7)),
-    (x: 0.15, y: 0.48, size: 3.5, phase: 0.25, color: Color(0xFFEC4899)),
-    (x: 0.85, y: 0.50, size: 3.0, phase: 0.55, color: Color(0xFFFACC15)),
-    (x: 0.03, y: 0.62, size: 2.5, phase: 0.85, color: Color(0xFF2563EB)),
-    (x: 0.97, y: 0.68, size: 2.0, phase: 0.40, color: Color(0xFF1D8B6B)),
-    (x: 0.25, y: 0.75, size: 2.5, phase: 0.65, color: Color(0xFFFACC15)),
-    (x: 0.50, y: 0.05, size: 2.0, phase: 0.90, color: Color(0xFF0EA5E9)),
-    (x: 0.60, y: 0.44, size: 2.0, phase: 0.20, color: Color(0xFFFACC15)),
-    (x: 0.38, y: 0.58, size: 2.0, phase: 0.70, color: Color(0xFF1D8B6B)),
-  ];
+        (x: 0.08, y: 0.10, size: 2.5, phase: 0.00, color: Color(0xFFFACC15)),
+        (x: 0.22, y: 0.06, size: 3.5, phase: 0.15, color: Color(0xFF1D8B6B)),
+        (x: 0.42, y: 0.09, size: 2.0, phase: 0.30, color: Color(0xFFEC4899)),
+        (x: 0.70, y: 0.08, size: 3.0, phase: 0.45, color: Color(0xFF2563EB)),
+        (x: 0.88, y: 0.14, size: 2.5, phase: 0.10, color: Color(0xFFFACC15)),
+        (x: 0.05, y: 0.32, size: 2.0, phase: 0.60, color: Color(0xFF1D8B6B)),
+        (x: 0.95, y: 0.28, size: 2.5, phase: 0.75, color: Color(0xFFA855F7)),
+        (x: 0.15, y: 0.48, size: 3.5, phase: 0.25, color: Color(0xFFEC4899)),
+        (x: 0.85, y: 0.50, size: 3.0, phase: 0.55, color: Color(0xFFFACC15)),
+        (x: 0.03, y: 0.62, size: 2.5, phase: 0.85, color: Color(0xFF2563EB)),
+        (x: 0.97, y: 0.68, size: 2.0, phase: 0.40, color: Color(0xFF1D8B6B)),
+        (x: 0.25, y: 0.75, size: 2.5, phase: 0.65, color: Color(0xFFFACC15)),
+        (x: 0.50, y: 0.05, size: 2.0, phase: 0.90, color: Color(0xFF0EA5E9)),
+        (x: 0.60, y: 0.44, size: 2.0, phase: 0.20, color: Color(0xFFFACC15)),
+        (x: 0.38, y: 0.58, size: 2.0, phase: 0.70, color: Color(0xFF1D8B6B)),
+      ];
 
   @override
   Widget build(BuildContext context) {
@@ -252,10 +249,10 @@ class _TwinkleStars extends StatelessWidget {
                 left: s.x * c.maxWidth - s.size,
                 top: s.y * c.maxHeight - s.size,
                 child: Opacity(
-                  opacity: 0.4 +
+                  opacity:
+                      0.4 +
                       0.6 *
-                          ((math.sin((phase + s.phase) * 2 * math.pi) + 1) /
-                              2),
+                          ((math.sin((phase + s.phase) * 2 * math.pi) + 1) / 2),
                   child: Container(
                     width: s.size * 2,
                     height: s.size * 2,
@@ -316,10 +313,7 @@ class _OrbitalRings extends StatelessWidget {
         alignment: Alignment.center,
         children: [
           for (int i = 0; i < 6; i++)
-            _GradientRing(
-              size: 720 - i * 80.0,
-              opacity: 0.55 - i * 0.06,
-            ),
+            _GradientRing(size: 720 - i * 80.0, opacity: 0.55 - i * 0.06),
         ],
       ),
     );
@@ -456,7 +450,6 @@ class _HeroBadge extends StatelessWidget {
   }
 }
 
-
 class _AboutFooter extends StatelessWidget {
   const _AboutFooter();
 
@@ -516,7 +509,9 @@ class _AboutFooter extends StatelessWidget {
                   const SizedBox(height: 16),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 18, vertical: 8),
+                      horizontal: 18,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
@@ -533,7 +528,9 @@ class _AboutFooter extends StatelessWidget {
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF1D8B6B).withValues(alpha: 0.18),
+                          color: const Color(
+                            0xFF1D8B6B,
+                          ).withValues(alpha: 0.18),
                           blurRadius: 12,
                           offset: const Offset(0, 4),
                         ),

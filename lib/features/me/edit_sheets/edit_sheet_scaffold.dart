@@ -31,15 +31,15 @@ class EditSheetScaffold extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.only(top: MediaQuery.paddingOf(context).top + 10),
       child: ClipRRect(
-        borderRadius:
-            const BorderRadius.vertical(top: Radius.circular(38)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(38)),
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 28, sigmaY: 28),
           child: Container(
             decoration: BoxDecoration(
               color: const Color(0xFFF8F8FA).withValues(alpha: 0.92),
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(38)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(38),
+              ),
               border: Border(
                 top: BorderSide(
                   color: CupertinoColors.white.withValues(alpha: 0.35),
@@ -53,71 +53,71 @@ class EditSheetScaffold extends StatelessWidget {
                 mainAxisSize: MainAxisSize.max,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                  child: Row(
-                    children: [
-                      LiquidGlassButton(
-                        icon: CupertinoIcons.xmark,
-                        iconColor: const Color(0xFF1A1A1A),
-                        onTap: () => Navigator.of(context).pop(),
-                      ),
-                      Expanded(
-                        child: Center(
-                          child: Padding(
-                            padding: const EdgeInsets.only(bottom: 2),
-                            child: Text(
-                              title,
-                              style: const TextStyle(
-                                color: Color(0xFF1A1A1A),
-                                fontSize: 18,
-                                fontWeight: FontWeight.w700,
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                    child: Row(
+                      children: [
+                        LiquidGlassButton(
+                          icon: CupertinoIcons.xmark,
+                          iconColor: const Color(0xFF1A1A1A),
+                          onTap: () => Navigator.of(context).pop(),
+                        ),
+                        Expanded(
+                          child: Center(
+                            child: Padding(
+                              padding: const EdgeInsets.only(bottom: 2),
+                              child: Text(
+                                title,
+                                style: const TextStyle(
+                                  color: Color(0xFF1A1A1A),
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                      LiquidGlassButton(
-                        icon: CupertinoIcons.check_mark,
-                        iconColor: onSave != null
-                            ? CupertinoColors.white
-                            : const Color(0xFFBDBDBD),
-                        tint: onSave != null ? const Color(0xFF1D8B6B) : null,
-                        onTap: onSave == null
-                            ? null
-                            : () {
-                                HapticFeedback.mediumImpact();
-                                onSave!();
-                              },
-                      ),
-                    ],
+                        LiquidGlassButton(
+                          icon: CupertinoIcons.check_mark,
+                          iconColor: onSave != null
+                              ? CupertinoColors.white
+                              : const Color(0xFFBDBDBD),
+                          tint: onSave != null ? const Color(0xFF1D8B6B) : null,
+                          onTap: onSave == null
+                              ? null
+                              : () {
+                                  HapticFeedback.mediumImpact();
+                                  onSave!();
+                                },
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: 24),
-                Container(
-                  width: 80,
-                  height: 80,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: iconColor,
-                    boxShadow: [
-                      BoxShadow(
-                        color: iconColor.withValues(alpha: 0.35),
-                        blurRadius: 18,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
+                  const SizedBox(height: 24),
+                  Container(
+                    width: 80,
+                    height: 80,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: iconColor,
+                      boxShadow: [
+                        BoxShadow(
+                          color: iconColor.withValues(alpha: 0.35),
+                          blurRadius: 18,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
+                    ),
+                    child: Icon(icon, color: CupertinoColors.white, size: 38),
                   ),
-                  child: Icon(icon, color: CupertinoColors.white, size: 38),
-                ),
-                const SizedBox(height: 28),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                    child: child,
+                  const SizedBox(height: 28),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                      child: child,
+                    ),
                   ),
-                ),
                 ],
               ),
             ),

@@ -387,7 +387,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: CupertinoColors.white.withValues(alpha: 0.6),
+        color: CupertinoColors.white.withValues(alpha: 0.4),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: const Color(0xFFD7D7D7), width: 0.5),
       ),

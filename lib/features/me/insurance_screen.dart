@@ -104,10 +104,7 @@ class _InsuranceScreenState extends State<InsuranceScreen>
         final t = anim.value;
         return Opacity(
           opacity: t,
-          child: Transform.translate(
-            offset: Offset(0, (1 - t) * 18),
-            child: c,
-          ),
+          child: Transform.translate(offset: Offset(0, (1 - t) * 18), child: c),
         );
       },
       child: child,
@@ -160,8 +157,7 @@ class _InsuranceScreenState extends State<InsuranceScreen>
                         ),
                         padding: const EdgeInsets.fromLTRB(16, 16, 16, 40),
                         itemCount: items.length,
-                        separatorBuilder: (_, __) =>
-                            const SizedBox(height: 16),
+                        separatorBuilder: (_, __) => const SizedBox(height: 16),
                         itemBuilder: (context, i) => _stagger(
                           i,
                           items.length,
@@ -310,44 +306,44 @@ class _SymbolDot extends StatelessWidget {
       alignment: Alignment.center,
       child: switch (icon) {
         _DotIcon.plus => const Icon(
-            CupertinoIcons.add,
-            size: 8,
-            color: CupertinoColors.white,
-          ),
+          CupertinoIcons.add,
+          size: 8,
+          color: CupertinoColors.white,
+        ),
         _DotIcon.letterN => const Text(
-            'N',
-            style: TextStyle(
-              color: CupertinoColors.white,
-              fontSize: 10,
-              fontWeight: FontWeight.w700,
-              height: 1,
-            ),
+          'N',
+          style: TextStyle(
+            color: CupertinoColors.white,
+            fontSize: 10,
+            fontWeight: FontWeight.w700,
+            height: 1,
           ),
+        ),
         _DotIcon.info => const Text(
-            'i',
-            style: TextStyle(
-              color: CupertinoColors.white,
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              fontStyle: FontStyle.italic,
-              height: 1,
-            ),
+          'i',
+          style: TextStyle(
+            color: CupertinoColors.white,
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+            fontStyle: FontStyle.italic,
+            height: 1,
           ),
+        ),
         _DotIcon.briefcase => const Icon(
-            CupertinoIcons.briefcase_fill,
-            size: 7,
-            color: CupertinoColors.white,
-          ),
+          CupertinoIcons.briefcase_fill,
+          size: 7,
+          color: CupertinoColors.white,
+        ),
         _DotIcon.crossCase => const Icon(
-            CupertinoIcons.bandage_fill,
-            size: 7,
-            color: CupertinoColors.white,
-          ),
+          CupertinoIcons.bandage_fill,
+          size: 7,
+          color: CupertinoColors.white,
+        ),
         _DotIcon.calendar => const Icon(
-            CupertinoIcons.calendar,
-            size: 7,
-            color: CupertinoColors.white,
-          ),
+          CupertinoIcons.calendar,
+          size: 7,
+          color: CupertinoColors.white,
+        ),
       },
     );
   }

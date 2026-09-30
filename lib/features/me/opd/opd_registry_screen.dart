@@ -57,23 +57,26 @@ class _OpdRegistryScreenState extends State<OpdRegistryScreen>
   Future<void> _addEntry() async {
     final result = await Navigator.of(context, rootNavigator: true)
         .push<OpdEntry>(
-      PageRouteBuilder<OpdEntry>(
-        opaque: false,
-        barrierColor: CupertinoColors.black.withValues(alpha: 0.35),
-        barrierDismissible: true,
-        barrierLabel: 'opd-create',
-        transitionDuration: const Duration(milliseconds: 380),
-        reverseTransitionDuration: const Duration(milliseconds: 280),
-        pageBuilder: (ctx, anim, sec) => const OpdCreateFlow(),
-        transitionsBuilder: (ctx, anim, sec, child) {
-          final slide = Tween<Offset>(
-            begin: const Offset(0, 1),
-            end: Offset.zero,
-          ).animate(CurvedAnimation(parent: anim, curve: Curves.easeOutCubic));
-          return SlideTransition(position: slide, child: child);
-        },
-      ),
-    );
+          PageRouteBuilder<OpdEntry>(
+            opaque: false,
+            barrierColor: CupertinoColors.black.withValues(alpha: 0.35),
+            barrierDismissible: true,
+            barrierLabel: 'opd-create',
+            transitionDuration: const Duration(milliseconds: 380),
+            reverseTransitionDuration: const Duration(milliseconds: 280),
+            pageBuilder: (ctx, anim, sec) => const OpdCreateFlow(),
+            transitionsBuilder: (ctx, anim, sec, child) {
+              final slide =
+                  Tween<Offset>(
+                    begin: const Offset(0, 1),
+                    end: Offset.zero,
+                  ).animate(
+                    CurvedAnimation(parent: anim, curve: Curves.easeOutCubic),
+                  );
+              return SlideTransition(position: slide, child: child);
+            },
+          ),
+        );
     if (result != null) {
       OpdStore.instance.add(result);
       setState(() {});
@@ -96,115 +99,130 @@ class _OpdRegistryScreenState extends State<OpdRegistryScreen>
           SafeArea(
             bottom: false,
             child: Column(
-            children: [
-              const SizedBox(
-                height: HealthDetailAppBar.safeAreaContentHeight,
-              ),
-              Expanded(
-                child: Container(
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFF4F8F5),
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(24),
-                      topRight: Radius.circular(24),
+              children: [
+                const SizedBox(
+                  height: HealthDetailAppBar.safeAreaContentHeight,
+                ),
+                Expanded(
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFF4F8F5),
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(24),
+                        topRight: Radius.circular(24),
+                      ),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: ValueListenableBuilder<List<OpdEntry>>(
+                      valueListenable: OpdStore.instance.entries,
+                      builder: (_, entries, __) {
+                        final active = entries
+                            .where((e) => e.status == OpdStatus.active)
+                            .toList();
+                        final history = entries
+                            .where((e) => e.status != OpdStatus.active)
+                            .toList();
+                        return NotificationListener<ScrollNotification>(
+                          onNotification: (n) {
+                            if (n is ScrollUpdateNotification ||
+                                n is ScrollStartNotification) {
+                              _scrollOffset.value = n.metrics.pixels;
+                            }
+                            return false;
+                          },
+                          child: ListView(
+                            physics: const BouncingScrollPhysics(
+                              parent: AlwaysScrollableScrollPhysics(),
+                            ),
+                            padding: const EdgeInsets.fromLTRB(0, 8, 0, 40),
+                            children: [
+                              if (active.isEmpty)
+                                _stagger(
+                                  0,
+                                  3,
+                                  Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                      16,
+                                      8,
+                                      16,
+                                      12,
+                                    ),
+                                    child: _HeroCtaCard(onTap: _addEntry),
+                                  ),
+                                )
+                              else
+                                _stagger(
+                                  0,
+                                  3,
+                                  Padding(
+                                    padding: const EdgeInsets.all(16),
+                                    child: _ActiveCard(entry: active.first),
+                                  ),
+                                ),
+                              if (active.isEmpty)
+                                _stagger(
+                                  1,
+                                  3,
+                                  const Padding(
+                                    padding: EdgeInsets.fromLTRB(16, 4, 16, 16),
+                                    child: _StepsStrip(),
+                                  ),
+                                ),
+                              _stagger(
+                                2,
+                                3,
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(
+                                    16,
+                                    0,
+                                    16,
+                                    8,
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      const Padding(
+                                        padding: EdgeInsets.fromLTRB(
+                                          4,
+                                          4,
+                                          0,
+                                          10,
+                                        ),
+                                        child: Text(
+                                          'ประวัติ',
+                                          style: TextStyle(
+                                            color: Color(0xFF1A1A1A),
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w700,
+                                            letterSpacing: 0.2,
+                                          ),
+                                        ),
+                                      ),
+                                      if (history.isEmpty)
+                                        const _EmptyHistoryCard()
+                                      else
+                                        for (
+                                          int i = 0;
+                                          i < history.length;
+                                          i++
+                                        ) ...[
+                                          _HistoryCard(entry: history[i]),
+                                          if (i != history.length - 1)
+                                            const SizedBox(height: 12),
+                                        ],
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
                     ),
                   ),
-                  clipBehavior: Clip.antiAlias,
-                  child: ValueListenableBuilder<List<OpdEntry>>(
-                    valueListenable: OpdStore.instance.entries,
-                    builder: (_, entries, __) {
-                      final active = entries
-                          .where((e) => e.status == OpdStatus.active)
-                          .toList();
-                      final history = entries
-                          .where((e) => e.status != OpdStatus.active)
-                          .toList();
-                      return NotificationListener<ScrollNotification>(
-                        onNotification: (n) {
-                          if (n is ScrollUpdateNotification ||
-                              n is ScrollStartNotification) {
-                            _scrollOffset.value = n.metrics.pixels;
-                          }
-                          return false;
-                        },
-                        child: ListView(
-                        physics: const BouncingScrollPhysics(
-                          parent: AlwaysScrollableScrollPhysics(),
-                        ),
-                        padding: const EdgeInsets.fromLTRB(0, 8, 0, 40),
-                        children: [
-                          if (active.isEmpty)
-                            _stagger(
-                              0,
-                              3,
-                              Padding(
-                                padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-                                child: _HeroCtaCard(onTap: _addEntry),
-                              ),
-                            )
-                          else
-                            _stagger(
-                              0,
-                              3,
-                              Padding(
-                                padding: const EdgeInsets.all(16),
-                                child: _ActiveCard(entry: active.first),
-                              ),
-                            ),
-                          if (active.isEmpty)
-                            _stagger(
-                              1,
-                              3,
-                              const Padding(
-                                padding:
-                                    EdgeInsets.fromLTRB(16, 4, 16, 16),
-                                child: _StepsStrip(),
-                              ),
-                            ),
-                          _stagger(
-                            2,
-                            3,
-                            Padding(
-                              padding:
-                                  const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Padding(
-                                    padding:
-                                        EdgeInsets.fromLTRB(4, 4, 0, 10),
-                                    child: Text(
-                                      'ประวัติ',
-                                      style: TextStyle(
-                                        color: Color(0xFF1A1A1A),
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w700,
-                                        letterSpacing: 0.2,
-                                      ),
-                                    ),
-                                  ),
-                                  if (history.isEmpty)
-                                    const _EmptyHistoryCard()
-                                  else
-                                    for (int i = 0;
-                                        i < history.length;
-                                        i++) ...[
-                                      _HistoryCard(entry: history[i]),
-                                      if (i != history.length - 1)
-                                        const SizedBox(height: 12),
-                                    ],
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                        ),
-                      );
-                    },
-                  ),
                 ),
-              ),
-            ],
+              ],
             ),
           ),
           Positioned(
@@ -293,7 +311,9 @@ class _HeroCtaCard extends StatelessWidget {
                   children: [
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 4),
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: CupertinoColors.white.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(100),
@@ -342,8 +362,9 @@ class _HeroCtaCard extends StatelessWidget {
                           Text(
                             'คัดกรองด้วยตัวเอง\nรับ QR Code ยื่นที่โรงพยาบาลได้เลย',
                             style: TextStyle(
-                              color: CupertinoColors.white
-                                  .withValues(alpha: 0.85),
+                              color: CupertinoColors.white.withValues(
+                                alpha: 0.85,
+                              ),
                               fontSize: 13,
                               height: 1.45,
                             ),
@@ -375,7 +396,9 @@ class _HeroCtaCard extends StatelessWidget {
                 const SizedBox(height: 16),
                 Container(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 14, vertical: 10),
+                    horizontal: 14,
+                    vertical: 10,
+                  ),
                   decoration: BoxDecoration(
                     color: CupertinoColors.white,
                     borderRadius: BorderRadius.circular(100),
@@ -566,8 +589,18 @@ class _ActiveCard extends StatelessWidget {
 
   String _fmtDate(DateTime d) {
     const months = [
-      'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
-      'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม',
+      'มกราคม',
+      'กุมภาพันธ์',
+      'มีนาคม',
+      'เมษายน',
+      'พฤษภาคม',
+      'มิถุนายน',
+      'กรกฎาคม',
+      'สิงหาคม',
+      'กันยายน',
+      'ตุลาคม',
+      'พฤศจิกายน',
+      'ธันวาคม',
     ];
     return '${d.day} ${months[d.month - 1]} ${d.year + 543}';
   }
@@ -636,11 +669,7 @@ class _ActiveCard extends StatelessWidget {
               ),
             ],
           ),
-          Positioned(
-            top: 16,
-            right: 12,
-            child: _QrThumbnail(),
-          ),
+          Positioned(top: 16, right: 12, child: _QrThumbnail()),
         ],
       ),
     );
@@ -649,7 +678,11 @@ class _ActiveCard extends StatelessWidget {
   Widget _row(IconData icon, String text) {
     return Row(
       children: [
-        Icon(icon, size: 14, color: CupertinoColors.white.withValues(alpha: 0.8)),
+        Icon(
+          icon,
+          size: 14,
+          color: CupertinoColors.white.withValues(alpha: 0.8),
+        ),
         const SizedBox(width: 8),
         Flexible(
           child: Text(
@@ -692,10 +725,7 @@ class _QrThumbnail extends StatelessWidget {
               child: CustomPaint(painter: _QrStylizedPainter()),
             ),
           ),
-          Container(
-            height: 1,
-            color: const Color(0xFFE5E5E5),
-          ),
+          Container(height: 1, color: const Color(0xFFE5E5E5)),
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Text(
@@ -725,12 +755,7 @@ class _QrStylizedPainter extends CustomPainter {
       );
       canvas.drawRRect(
         RRect.fromRectAndRadius(
-          Rect.fromLTWH(
-            origin.dx + dot,
-            origin.dy + dot,
-            dot * 5,
-            dot * 5,
-          ),
+          Rect.fromLTWH(origin.dx + dot, origin.dy + dot, dot * 5, dot * 5),
           Radius.circular(dot * 0.7),
         ),
         Paint()..color = CupertinoColors.white,
@@ -755,8 +780,26 @@ class _QrStylizedPainter extends CustomPainter {
 
     // Random-ish dot pattern
     const seed = <int>[
-      0x1a, 0x2e, 0x4f, 0x73, 0x88, 0xa5, 0xc2, 0xd9, 0xe6, 0xf2,
-      0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xf0, 0x12, 0x34, 0x56,
+      0x1a,
+      0x2e,
+      0x4f,
+      0x73,
+      0x88,
+      0xa5,
+      0xc2,
+      0xd9,
+      0xe6,
+      0xf2,
+      0x34,
+      0x56,
+      0x78,
+      0x9a,
+      0xbc,
+      0xde,
+      0xf0,
+      0x12,
+      0x34,
+      0x56,
     ];
     for (int y = 0; y < 18; y++) {
       for (int x = 0; x < 18; x++) {
@@ -787,8 +830,18 @@ class _HistoryCard extends StatelessWidget {
 
   String _fmtDate(DateTime d) {
     const months = [
-      'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
-      'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม',
+      'มกราคม',
+      'กุมภาพันธ์',
+      'มีนาคม',
+      'เมษายน',
+      'พฤษภาคม',
+      'มิถุนายน',
+      'กรกฎาคม',
+      'สิงหาคม',
+      'กันยายน',
+      'ตุลาคม',
+      'พฤศจิกายน',
+      'ธันวาคม',
     ];
     return '${d.day} ${months[d.month - 1]} ${d.year + 543}';
   }
@@ -827,10 +880,7 @@ class _HistoryCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _row(
-                    CupertinoIcons.square_grid_3x2_fill,
-                    'CID ${entry.cid}',
-                  ),
+                  _row(CupertinoIcons.square_grid_3x2_fill, 'CID ${entry.cid}'),
                   const SizedBox(height: 12),
                   _row(CupertinoIcons.calendar, _fmtDate(entry.registeredAt)),
                   const SizedBox(height: 12),

@@ -38,9 +38,11 @@ dependencies:
   cupertino_icons: ^1.0.9
   google_fonts: ^8.0.2
   image_picker: ^1.1.2
+  camera: ^0.11.0+2
   flutter_svg: ^2.0.10+1
   url_launcher: ^6.3.1
   webview_flutter: 4.10.0
+  webview_flutter_wkwebview: 3.22.1
   geolocator: ^13.0.2
   geocoding: ^3.0.0
   flutter_3d_controller: ^2.3.0
@@ -123,6 +125,7 @@ flutter:
     - assets/images/me/
     - assets/images/allergy/
     - assets/images/assessment/
+    - assets/images/insurance/
     - assets/svg/
     - assets/3d/
 

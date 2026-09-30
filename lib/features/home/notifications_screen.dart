@@ -2,15 +2,17 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Icons;
 
 import '../../core/theme/app_colors.dart';
+import '../../core/widgets/app_toast.dart';
 import '../../core/widgets/liquid_glass_button.dart';
 import '../../core/widgets/press_effect.dart';
 import '../appointment/appointment_screen.dart';
 import '../appointment/payment_screen.dart';
 import '../health/data/health_data.dart';
+import '../me/insurance_requests.dart';
 import '../nutrition/nutrition_detail_screen.dart';
 
 /// ประเภทการแจ้งเตือน ใช้ทั้งกรองด้วยชิปด้านบนและเลือกสี/ไอคอนของการ์ด
-enum NotificationKind { medicine, meal, appointment, call, payment }
+enum NotificationKind { medicine, meal, appointment, call, payment, insurance }
 
 /// รายการย่อยใต้เนื้อหา เช่น ชื่อแพทย์ โรงพยาบาล หรือเหตุผลของนัด
 class NotificationDetail {
@@ -30,6 +32,7 @@ class NotificationItem {
     this.avatarAsset,
     this.callerName,
     this.callLabel,
+    this.requestRef,
   });
 
   final NotificationKind kind;
@@ -47,6 +50,9 @@ class NotificationItem {
   final String? avatarAsset;
   final String? callerName;
   final String? callLabel;
+
+  /// เลขอ้างอิงคำขอประกันจากตู้บริการ — ใช้เปิดหน้ารายละเอียดคำขอ
+  final String? requestRef;
 }
 
 /// หน้ารวมการแจ้งเตือน (Figma 209:18527)
@@ -63,6 +69,11 @@ class NotificationsScreen extends StatefulWidget {
 class _NotificationsScreenState extends State<NotificationsScreen> {
   /// null = ทั้งหมด
   NotificationKind? _filter;
+
+  /// แจ้งเตือนที่ผู้ใช้แตะเปิดแล้วในหน้านี้ — TODO(integration): บันทึกสถานะอ่านกับ API
+  final Set<NotificationItem> _opened = {};
+
+  bool _isUnread(NotificationItem n) => n.unread && !_opened.contains(n);
 
   List<NotificationItem> get _items => widget.items ?? kMockNotifications;
 
@@ -149,6 +160,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   Icons.receipt_long_rounded,
                   'ค่าบริการ',
                 ),
+                const SizedBox(width: 10),
+                _filterChip(
+                  NotificationKind.insurance,
+                  Icons.health_and_safety_rounded,
+                  'ประกัน',
+                ),
               ],
             ),
           ),
@@ -173,7 +190,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   /// ชิปกรอง — ตัวที่เลือกกางออกโชว์ชื่อหมวด ตัวอื่นย่อเหลือเฉพาะไอคอน
   Widget _filterChip(NotificationKind? kind, IconData icon, String label) {
     final selected = _filter == kind;
-    return PressEffect(
+    // จำนวนที่ยังไม่อ่านในหมวดนี้ (ชิป "ทั้งหมด" นับทุกหมวด)
+    final unread = _items
+        .where((n) => _isUnread(n) && (kind == null || n.kind == kind))
+        .length;
+    final chip = PressEffect(
       onTap: () => setState(() => _filter = kind),
       rippleShape: BoxShape.rectangle,
       child: AnimatedContainer(
@@ -218,6 +239,44 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             ),
           ],
         ),
+      ),
+    );
+    if (unread == 0) return Center(child: chip);
+    // วงตัวเลขเกาะมุมขวาบนของชิป (ครึ่งหนึ่งล้นขอบออกไป)
+    // Center ให้ชิปอยู่กลางแถวสูง 50 จึงมีที่ว่างด้านบนให้วงไม่ถูกตัด
+    return Center(
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          chip,
+          Positioned(
+            top: -4,
+            right: -4,
+            child: IgnorePointer(
+              child: Container(
+                constraints: const BoxConstraints(minWidth: 16),
+                height: 16,
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFF383C),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: CupertinoColors.white, width: 1.5),
+                ),
+                child: Text(
+                  unread > 99 ? '99+' : '$unread',
+                  style: const TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    fontVariations: [FontVariation('wght', 700)],
+                    height: 1,
+                    color: CupertinoColors.white,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -270,217 +329,230 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         Navigator.of(
           context,
         ).push(CupertinoPageRoute<void>(builder: (_) => const PaymentScreen()));
+      case NotificationKind.insurance:
+        final request = n.requestRef == null
+            ? null
+            : InsuranceRequestScreen.find(n.requestRef!);
+        if (request == null) {
+          // พ้นระยะเก็บแล้ว — รายละเอียดถูกลบออกจากแอป
+          AppToast.info(context, 'รายการนี้หมดระยะเวลาแสดงผลแล้ว');
+          return;
+        }
+        Navigator.of(context).push(
+          CupertinoPageRoute<void>(
+            builder: (_) => InsuranceRequestScreen(request: request),
+          ),
+        );
     }
   }
 
   /// การ์ดแจ้งเตือนหนึ่งใบ — หัวแถว (ไอคอน ประเภท เวลา) แล้วตามด้วยเนื้อหา
   Widget _card(NotificationItem n) {
     final tone = _toneFor(n.kind);
+    // ยังไม่อ่าน = การ์ดขาวทึบ เนื้อหาเข้มเต็ม · อ่านแล้ว = การ์ดโปร่งและเนื้อหาจางลง
+    final unread = _isUnread(n);
     return PressEffect(
-      onTap: () => _open(n),
+      onTap: () {
+        setState(() => _opened.add(n));
+        _open(n);
+      },
       rippleShape: BoxShape.rectangle,
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOutCubic,
         width: double.infinity,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: CupertinoColors.white,
+          color: CupertinoColors.white.withValues(alpha: unread ? 1 : 0.5),
           borderRadius: BorderRadius.circular(24),
         ),
-        child: Stack(
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      width: 24,
-                      height: 24,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: tone.color.withValues(alpha: 0.2),
-                      ),
-                      child: Icon(tone.icon, size: 13, color: tone.color),
-                    ),
-                    const SizedBox(width: 8),
-                    Flexible(
-                      child: Text(
-                        tone.label,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontFamily: _fontThai,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          height: 1.4,
-                          letterSpacing: 0.275,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                    ),
-                    // จุดแดง = ยังไม่อ่าน
-                    if (n.unread) ...[
-                      const SizedBox(width: 4),
-                      Container(
-                        width: 8,
-                        height: 8,
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Color(0xFFFF383C),
-                        ),
-                      ),
-                    ],
-                    // เว้นที่ให้ป้ายเวลาที่ปักอยู่มุมขวาบน
-                    const Spacer(),
-                    const SizedBox(width: 96),
-                  ],
-                ),
-                if (n.message.isNotEmpty) ...[
-                  const SizedBox(height: 10),
-                  Text(
-                    n.message,
-                    style: const TextStyle(
-                      fontFamily: _fontThai,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      height: 1.45,
-                      letterSpacing: 0.275,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                ],
-                if (n.tags.isNotEmpty) ...[
-                  const SizedBox(height: 10),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [for (final t in n.tags) _tag(t)],
-                  ),
-                ],
-                if (n.details.isNotEmpty) ...[
-                  const SizedBox(height: 10),
-                  for (final d in n.details)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: Row(
-                        children: [
-                          Opacity(
-                            opacity: 0.8,
-                            child: Icon(
-                              d.icon,
-                              size: 13,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Flexible(
-                            child: Text(
-                              d.text,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontFamily: _fontThai,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                height: 1.43,
-                                color: AppColors.textPrimary,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                ],
-                if (n.callerName != null) ...[
-                  const SizedBox(height: 10),
+        child: AnimatedOpacity(
+          duration: const Duration(milliseconds: 250),
+          opacity: unread ? 1 : 0.6,
+          child: Stack(
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Row(
                     children: [
                       Container(
-                        width: 48,
-                        height: 48,
-                        clipBehavior: Clip.antiAlias,
-                        decoration: const BoxDecoration(
+                        width: 24,
+                        height: 24,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [AppColors.primary600, Color(0xFF166C53)],
-                          ),
+                          color: tone.color.withValues(alpha: 0.2),
                         ),
-                        child: n.avatarAsset == null
-                            ? const Icon(
-                                CupertinoIcons.person_fill,
-                                size: 22,
-                                color: CupertinoColors.white,
-                              )
-                            : Image.asset(n.avatarAsset!, fit: BoxFit.cover),
+                        child: Icon(tone.icon, size: 13, color: tone.color),
                       ),
                       const SizedBox(width: 8),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
+                      Flexible(
+                        child: Text(
+                          tone.label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontFamily: _fontThai,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            height: 1.4,
+                            letterSpacing: 0.275,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ),
+                      // เว้นที่ให้ป้ายเวลาที่ปักอยู่มุมขวาบน
+                      const Spacer(),
+                      const SizedBox(width: 96),
+                    ],
+                  ),
+                  if (n.message.isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    Text(
+                      n.message,
+                      style: const TextStyle(
+                        fontFamily: _fontThai,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        height: 1.45,
+                        letterSpacing: 0.275,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                  ],
+                  if (n.tags.isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [for (final t in n.tags) _tag(t)],
+                    ),
+                  ],
+                  if (n.details.isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    for (final d in n.details)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Row(
                           children: [
-                            Text(
-                              n.callerName!,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontFamily: _fontThai,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                height: 1.43,
+                            Opacity(
+                              opacity: 0.8,
+                              child: Icon(
+                                d.icon,
+                                size: 13,
                                 color: AppColors.textPrimary,
                               ),
                             ),
-                            const SizedBox(height: 6),
-                            Row(
-                              children: [
-                                const Icon(
-                                  CupertinoIcons.phone_arrow_down_left,
-                                  size: 13,
+                            const SizedBox(width: 8),
+                            Flexible(
+                              child: Text(
+                                d.text,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontFamily: _fontThai,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                  height: 1.43,
                                   color: AppColors.textPrimary,
                                 ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  n.callLabel ?? 'โทรหาคุณ',
-                                  style: const TextStyle(
-                                    fontFamily: _fontThai,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                    height: 1.4,
-                                    letterSpacing: 0.275,
-                                    color: AppColors.textPrimary,
-                                  ),
-                                ),
-                              ],
+                              ),
                             ),
                           ],
                         ),
                       ),
-                    ],
-                  ),
+                  ],
+                  if (n.callerName != null) ...[
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Container(
+                          width: 48,
+                          height: 48,
+                          clipBehavior: Clip.antiAlias,
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [AppColors.primary600, Color(0xFF166C53)],
+                            ),
+                          ),
+                          child: n.avatarAsset == null
+                              ? const Icon(
+                                  CupertinoIcons.person_fill,
+                                  size: 22,
+                                  color: CupertinoColors.white,
+                                )
+                              : Image.asset(n.avatarAsset!, fit: BoxFit.cover),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                n.callerName!,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontFamily: _fontThai,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  height: 1.43,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Row(
+                                children: [
+                                  const Icon(
+                                    CupertinoIcons.phone_arrow_down_left,
+                                    size: 13,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    n.callLabel ?? 'โทรหาคุณ',
+                                    style: const TextStyle(
+                                      fontFamily: _fontThai,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                      height: 1.4,
+                                      letterSpacing: 0.275,
+                                      color: AppColors.textPrimary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
-              ],
-            ),
-            // เวลาปักมุมขวาบนของการ์ด ทุกใบจึงอยู่แนวเดียวกัน
-            Positioned(
-              top: 0,
-              right: 0,
-              child: Text(
-                n.timeLabel,
-                style: const TextStyle(
-                  fontFamily: _fontThai,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  height: 1.4,
-                  letterSpacing: 0.275,
-                  color: AppColors.textTertiary,
+              ),
+              // เวลาปักมุมขวาบนของการ์ด ทุกใบจึงอยู่แนวเดียวกัน
+              Positioned(
+                top: 0,
+                right: 0,
+                child: Text(
+                  n.timeLabel,
+                  style: const TextStyle(
+                    fontFamily: _fontThai,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    height: 1.4,
+                    letterSpacing: 0.275,
+                    color: AppColors.textTertiary,
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -531,6 +603,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       Icons.receipt_long_rounded,
       Color(0xFFD97706),
     ),
+    NotificationKind.insurance => const _Tone(
+      'แจ้งเตือนประกัน',
+      Icons.health_and_safety_rounded,
+      Color(0xFF0064BD),
+    ),
   };
 }
 
@@ -545,6 +622,41 @@ const _fontThai = 'IBM Plex Sans Thai Looped';
 
 /// ข้อมูลจำลองจนกว่าจะมี API แจ้งเตือนจริง
 const kMockNotifications = <NotificationItem>[
+  // คำขอประกันที่ยินยอมส่งจากตู้บริการ — ข้อความตามสถานะบนตู้ Kiosk
+  NotificationItem(
+    kind: NotificationKind.insurance,
+    requestRef: 'INS-2569-000123',
+    timeLabel: '10:30 น.',
+    message:
+        'บริษัทแจ้งผลพิจารณา Health Plus แล้ว '
+        'แตะเพื่อดูคำแนะนำแบบประกันและข้อเสนอ',
+    unread: true,
+    details: [
+      NotificationDetail(
+        Icons.business_rounded,
+        'บริษัท เมืองไทยประกันชีวิต จำกัด (มหาชน)',
+      ),
+      NotificationDetail(
+        CupertinoIcons.info_circle_fill,
+        'เลขอ้างอิง INS-2569-000123',
+      ),
+    ],
+  ),
+  NotificationItem(
+    kind: NotificationKind.insurance,
+    requestRef: 'INS-2569-000131',
+    timeLabel: '09:12 น.',
+    message:
+        'ส่งข้อมูลให้บริษัทประกันแล้ว กำลังดำเนินการ '
+        'ไม่ต้องรอที่ตู้ ระบบจะแจ้งผลให้ทราบ',
+    details: [
+      NotificationDetail(Icons.business_rounded, 'บริษัท เอไอเอ จำกัด'),
+      NotificationDetail(
+        CupertinoIcons.info_circle_fill,
+        'เลขอ้างอิง INS-2569-000131',
+      ),
+    ],
+  ),
   NotificationItem(
     kind: NotificationKind.payment,
     timeLabel: '31 ก.ค. 69',
@@ -558,6 +670,22 @@ const kMockNotifications = <NotificationItem>[
       NotificationDetail(
         CupertinoIcons.info_circle_fill,
         'รหัสบริการ PG0060001',
+      ),
+    ],
+  ),
+  NotificationItem(
+    kind: NotificationKind.insurance,
+    requestRef: 'INS-2569-000123',
+    timeLabel: '26 ก.ย. 69',
+    message: 'บริษัทได้รับข้อมูลของคุณแล้ว รอผลพิจารณา Health Plus',
+    details: [
+      NotificationDetail(
+        Icons.business_rounded,
+        'บริษัท เมืองไทยประกันชีวิต จำกัด (มหาชน)',
+      ),
+      NotificationDetail(
+        CupertinoIcons.info_circle_fill,
+        'เลขอ้างอิง INS-2569-000123',
       ),
     ],
   ),
@@ -598,6 +726,22 @@ const kMockNotifications = <NotificationItem>[
       NotificationDetail(Icons.medical_services_rounded, 'นพ.วิชัย สุขใจ'),
       NotificationDetail(Icons.local_hospital_rounded, 'โรงพยาบาลเสรีโฟล'),
       NotificationDetail(CupertinoIcons.info_circle_fill, 'คุณมีนัดตรวจสุขภาพ'),
+    ],
+  ),
+  NotificationItem(
+    kind: NotificationKind.insurance,
+    requestRef: 'INS-2569-000071',
+    timeLabel: '10 ส.ค. 69',
+    message: 'บริษัทแจ้งผลพิจารณา OPD Care แล้ว แตะเพื่อดูคำแนะนำและข้อเสนอ',
+    details: [
+      NotificationDetail(
+        Icons.business_rounded,
+        'บริษัท เมืองไทยประกันชีวิต จำกัด (มหาชน)',
+      ),
+      NotificationDetail(
+        CupertinoIcons.info_circle_fill,
+        'เลขอ้างอิง INS-2569-000071',
+      ),
     ],
   ),
 ];

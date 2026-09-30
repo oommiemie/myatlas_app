@@ -115,10 +115,7 @@ class _ReportIssueScreenState extends State<ReportIssueScreen>
         final t = anim.value;
         return Opacity(
           opacity: t,
-          child: Transform.translate(
-            offset: Offset(0, (1 - t) * 14),
-            child: c,
-          ),
+          child: Transform.translate(offset: Offset(0, (1 - t) * 14), child: c),
         );
       },
       child: child,
@@ -182,8 +179,9 @@ class _ReportIssueScreenState extends State<ReportIssueScreen>
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFFEA580C)
-                                  .withValues(alpha: 0.30),
+                              color: const Color(
+                                0xFFEA580C,
+                              ).withValues(alpha: 0.30),
                               blurRadius: 18,
                               offset: const Offset(0, 8),
                             ),
@@ -279,10 +277,7 @@ class _ReportIssueScreenState extends State<ReportIssueScreen>
             left: 0,
             right: 0,
             bottom: 0,
-            child: _SubmitBar(
-              enabled: _canSubmit,
-              onSubmit: _submit,
-            ),
+            child: _SubmitBar(enabled: _canSubmit, onSubmit: _submit),
           ),
         ],
       ),
@@ -403,10 +398,7 @@ class DottedBorder extends StatelessWidget {
   Widget build(BuildContext context) {
     return CustomPaint(
       painter: _DottedBorderPainter(),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: child,
-      ),
+      child: ClipRRect(borderRadius: BorderRadius.circular(24), child: child),
     );
   }
 }
@@ -451,9 +443,7 @@ class _PhotoTile extends StatelessWidget {
       borderRadius: BorderRadius.circular(24),
       child: Stack(
         children: [
-          Positioned.fill(
-            child: Image.file(File(path), fit: BoxFit.cover),
-          ),
+          Positioned.fill(child: Image.file(File(path), fit: BoxFit.cover)),
           Positioned(
             top: 6,
             right: 6,
@@ -597,8 +587,7 @@ class _PinnedTopBar extends StatelessWidget {
             ),
             child: Container(
               height: barHeight,
-              color:
-                  const Color(0xFFF4F8F5).withValues(alpha: 0.80 * progress),
+              color: const Color(0xFFF4F8F5).withValues(alpha: 0.80 * progress),
             ),
           ),
         ),

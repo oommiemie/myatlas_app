@@ -48,14 +48,14 @@ class _PinSetupScreenState extends State<PinSetupScreen>
   }
 
   String get _title => switch (_step) {
-        _PinStep.set => 'กำหนดรหัส PIN',
-        _PinStep.confirm => 'ยืนยันรหัส PIN',
-      };
+    _PinStep.set => 'กำหนดรหัส PIN',
+    _PinStep.confirm => 'ยืนยันรหัส PIN',
+  };
 
   String get _subtitle => switch (_step) {
-        _PinStep.set => 'กรุณาตั้งรหัส PIN ${widget.pinLength} หลัก',
-        _PinStep.confirm => 'กรอกรหัสอีกครั้งเพื่อยืนยัน',
-      };
+    _PinStep.set => 'กรุณาตั้งรหัส PIN ${widget.pinLength} หลัก',
+    _PinStep.confirm => 'กรอกรหัสอีกครั้งเพื่อยืนยัน',
+  };
 
   void _handleDigit(String d) {
     if (_input.length >= widget.pinLength) return;
@@ -138,8 +138,7 @@ class _PinSetupScreenState extends State<PinSetupScreen>
                       ),
                       const SizedBox(height: 8),
                       Padding(
-                        padding:
-                            const EdgeInsets.symmetric(horizontal: 40),
+                        padding: const EdgeInsets.symmetric(horizontal: 40),
                         child: Text(
                           _subtitle,
                           textAlign: TextAlign.center,
@@ -444,10 +443,7 @@ class _NumberPad extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget digit(String d) => _PadButton(
-          label: d,
-          onTap: () => onDigit(d),
-        );
+    Widget digit(String d) => _PadButton(label: d, onTap: () => onDigit(d));
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -629,10 +625,26 @@ class _PadButton extends StatelessWidget {
 }
 
 const List<double> _padGlassMatrix = <double>[
-  1.4722, -0.4290, -0.0432, 0, 0,
-  -0.1278, 1.1710, -0.0432, 0, 0,
-  -0.1278, -0.4290, 1.5568, 0, 0,
-  0, 0, 0, 1, 0,
+  1.4722,
+  -0.4290,
+  -0.0432,
+  0,
+  0,
+  -0.1278,
+  1.1710,
+  -0.0432,
+  0,
+  0,
+  -0.1278,
+  -0.4290,
+  1.5568,
+  0,
+  0,
+  0,
+  0,
+  0,
+  1,
+  0,
 ];
 
 class _PadRimPainter extends CustomPainter {

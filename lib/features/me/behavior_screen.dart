@@ -34,13 +34,12 @@ class _BehaviorScreenState extends State<BehaviorScreen>
     (value: Duration(hours: 1), label: '1 ชั่วโมง'),
   ];
 
-  String get _reminderLabel =>
-      _reminderOptions
-          .firstWhere(
-            (o) => o.value == _reminderBefore,
-            orElse: () => _reminderOptions.first,
-          )
-          .label;
+  String get _reminderLabel => _reminderOptions
+      .firstWhere(
+        (o) => o.value == _reminderBefore,
+        orElse: () => _reminderOptions.first,
+      )
+      .label;
 
   Future<void> _pickReminder() async {
     Duration temp = _reminderBefore;
@@ -75,8 +74,9 @@ class _BehaviorScreenState extends State<BehaviorScreen>
                           width: 36,
                           height: 5,
                           decoration: BoxDecoration(
-                            color: const Color(0xFF1A1A1A)
-                                .withValues(alpha: 0.25),
+                            color: const Color(
+                              0xFF1A1A1A,
+                            ).withValues(alpha: 0.25),
                             borderRadius: BorderRadius.circular(100),
                           ),
                         ),
@@ -128,14 +128,17 @@ class _BehaviorScreenState extends State<BehaviorScreen>
                           clipBehavior: Clip.antiAlias,
                           child: Column(
                             children: [
-                              for (int i = 0;
-                                  i < _reminderOptions.length;
-                                  i++) ...[
+                              for (
+                                int i = 0;
+                                i < _reminderOptions.length;
+                                i++
+                              ) ...[
                                 PressEffect(
                                   onTap: () {
                                     HapticFeedback.selectionClick();
-                                    setInner(() =>
-                                        temp = _reminderOptions[i].value);
+                                    setInner(
+                                      () => temp = _reminderOptions[i].value,
+                                    );
                                   },
                                   haptic: HapticKind.none,
                                   scale: 0.99,
@@ -161,9 +164,10 @@ class _BehaviorScreenState extends State<BehaviorScreen>
                                         ),
                                         AnimatedSwitcher(
                                           duration: const Duration(
-                                              milliseconds: 180),
-                                          child: temp ==
-                                                  _reminderOptions[i].value
+                                            milliseconds: 180,
+                                          ),
+                                          child:
+                                              temp == _reminderOptions[i].value
                                               ? const Icon(
                                                   CupertinoIcons.check_mark,
                                                   key: ValueKey('on'),
@@ -241,7 +245,9 @@ class _BehaviorScreenState extends State<BehaviorScreen>
                         width: 36,
                         height: 5,
                         decoration: BoxDecoration(
-                          color: const Color(0xFF1A1A1A).withValues(alpha: 0.25),
+                          color: const Color(
+                            0xFF1A1A1A,
+                          ).withValues(alpha: 0.25),
                           borderRadius: BorderRadius.circular(100),
                         ),
                       ),
@@ -335,10 +341,7 @@ class _BehaviorScreenState extends State<BehaviorScreen>
         final t = anim.value;
         return Opacity(
           opacity: t,
-          child: Transform.translate(
-            offset: Offset(0, (1 - t) * 18),
-            child: c,
-          ),
+          child: Transform.translate(offset: Offset(0, (1 - t) * 18), child: c),
         );
       },
       child: child,
@@ -361,119 +364,122 @@ class _BehaviorScreenState extends State<BehaviorScreen>
           SafeArea(
             bottom: false,
             child: Column(
-            children: [
-              const SizedBox(height: HealthDetailAppBar.safeAreaContentHeight),
-              Expanded(
-                child: Container(
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFF4F8F5),
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(24),
-                      topRight: Radius.circular(24),
-                    ),
-                  ),
-                  clipBehavior: Clip.antiAlias,
-                  child: NotificationListener<ScrollNotification>(
-                    onNotification: (n) {
-                      if (n is ScrollUpdateNotification ||
-                          n is ScrollStartNotification) {
-                        _scrollOffset.value = n.metrics.pixels;
-                      }
-                      return false;
-                    },
-                    child: ListView(
-                    physics: const BouncingScrollPhysics(
-                      parent: AlwaysScrollableScrollPhysics(),
-                    ),
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 40),
-                    children: [
-                    _stagger(
-                      0,
-                      3,
-                      _IntroCard(
-                        morning: _morning,
-                        noon: _noon,
-                        evening: _evening,
-                        night: _night,
-                        format: _fmt,
-                        onEditMorning: () => _pickTime(
-                          label: 'มื้อเช้า',
-                          initial: _morning,
-                          onSet: (v) => setState(() => _morning = v),
-                        ),
-                        onEditNoon: () => _pickTime(
-                          label: 'มื้อกลางวัน',
-                          initial: _noon,
-                          onSet: (v) => setState(() => _noon = v),
-                        ),
-                        onEditEvening: () => _pickTime(
-                          label: 'มื้อเย็น',
-                          initial: _evening,
-                          onSet: (v) => setState(() => _evening = v),
-                        ),
-                        onEditNight: () => _pickTime(
-                          label: 'เวลานอน',
-                          initial: _night,
-                          onSet: (v) => setState(() => _night = v),
-                        ),
+              children: [
+                const SizedBox(
+                  height: HealthDetailAppBar.safeAreaContentHeight,
+                ),
+                Expanded(
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFF4F8F5),
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(24),
+                        topRight: Radius.circular(24),
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    _stagger(
-                      1,
-                      3,
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
-                        child: Text(
-                          'กำหนด',
-                          style: const TextStyle(
-                            color: Color(0xFF1A1A1A),
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
+                    clipBehavior: Clip.antiAlias,
+                    child: NotificationListener<ScrollNotification>(
+                      onNotification: (n) {
+                        if (n is ScrollUpdateNotification ||
+                            n is ScrollStartNotification) {
+                          _scrollOffset.value = n.metrics.pixels;
+                        }
+                        return false;
+                      },
+                      child: ListView(
+                        physics: const BouncingScrollPhysics(
+                          parent: AlwaysScrollableScrollPhysics(),
+                        ),
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 40),
+                        children: [
+                          _stagger(
+                            0,
+                            3,
+                            _IntroCard(
+                              morning: _morning,
+                              noon: _noon,
+                              evening: _evening,
+                              night: _night,
+                              format: _fmt,
+                              onEditMorning: () => _pickTime(
+                                label: 'มื้อเช้า',
+                                initial: _morning,
+                                onSet: (v) => setState(() => _morning = v),
+                              ),
+                              onEditNoon: () => _pickTime(
+                                label: 'มื้อกลางวัน',
+                                initial: _noon,
+                                onSet: (v) => setState(() => _noon = v),
+                              ),
+                              onEditEvening: () => _pickTime(
+                                label: 'มื้อเย็น',
+                                initial: _evening,
+                                onSet: (v) => setState(() => _evening = v),
+                              ),
+                              onEditNight: () => _pickTime(
+                                label: 'เวลานอน',
+                                initial: _night,
+                                onSet: (v) => setState(() => _night = v),
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                    ),
-                    _stagger(
-                      2,
-                      3,
-                      Container(
-                        decoration: BoxDecoration(
-                          color: CupertinoColors.white,
-                          borderRadius: BorderRadius.circular(24),
-                        ),
-                        clipBehavior: Clip.antiAlias,
-                        child: Column(
-                          children: [
-                            _SettingRow(
-                              iconColor: const Color(0xFF1D8B6B),
-                              icon: CupertinoIcons.capsule_fill,
-                              label: 'เตือนให้ทานก่อน',
-                              value: _reminderLabel,
-                              onTap: _pickReminder,
+                          const SizedBox(height: 8),
+                          _stagger(
+                            1,
+                            3,
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
+                              child: Text(
+                                'กำหนด',
+                                style: const TextStyle(
+                                  color: Color(0xFF1A1A1A),
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
                             ),
+                          ),
+                          _stagger(
+                            2,
+                            3,
                             Container(
-                              height: 1,
-                              color: const Color(0xFFE5E5E5),
+                              decoration: BoxDecoration(
+                                color: CupertinoColors.white,
+                                borderRadius: BorderRadius.circular(24),
+                              ),
+                              clipBehavior: Clip.antiAlias,
+                              child: Column(
+                                children: [
+                                  _SettingRow(
+                                    iconColor: const Color(0xFF1D8B6B),
+                                    icon: CupertinoIcons.capsule_fill,
+                                    label: 'เตือนให้ทานก่อน',
+                                    value: _reminderLabel,
+                                    onTap: _pickReminder,
+                                  ),
+                                  Container(
+                                    height: 1,
+                                    color: const Color(0xFFE5E5E5),
+                                  ),
+                                  _ToggleRow(
+                                    iconColor: const Color(0xFF2563EB),
+                                    icon: CupertinoIcons
+                                        .square_fill_line_vertical_square_fill,
+                                    label: 'ติดตามโภชนาการ',
+                                    value: _trackNutrition,
+                                    onChanged: (v) =>
+                                        setState(() => _trackNutrition = v),
+                                  ),
+                                ],
+                              ),
                             ),
-                            _ToggleRow(
-                              iconColor: const Color(0xFF2563EB),
-                              icon: CupertinoIcons.square_fill_line_vertical_square_fill,
-                              label: 'ติดตามโภชนาการ',
-                              value: _trackNutrition,
-                              onChanged: (v) =>
-                                  setState(() => _trackNutrition = v),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                    ),
-                    ],
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
             ),
           ),
           Positioned(
@@ -696,19 +702,19 @@ class _Quadrant extends StatelessWidget {
   final _OrbStyle orb;
 
   BorderRadius get _radius => switch (corner) {
-        _QuadrantCorner.topLeft => const BorderRadius.only(
-            topLeft: Radius.circular(1000),
-          ),
-        _QuadrantCorner.topRight => const BorderRadius.only(
-            topRight: Radius.circular(1000),
-          ),
-        _QuadrantCorner.bottomLeft => const BorderRadius.only(
-            bottomLeft: Radius.circular(1000),
-          ),
-        _QuadrantCorner.bottomRight => const BorderRadius.only(
-            bottomRight: Radius.circular(1000),
-          ),
-      };
+    _QuadrantCorner.topLeft => const BorderRadius.only(
+      topLeft: Radius.circular(1000),
+    ),
+    _QuadrantCorner.topRight => const BorderRadius.only(
+      topRight: Radius.circular(1000),
+    ),
+    _QuadrantCorner.bottomLeft => const BorderRadius.only(
+      bottomLeft: Radius.circular(1000),
+    ),
+    _QuadrantCorner.bottomRight => const BorderRadius.only(
+      bottomRight: Radius.circular(1000),
+    ),
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -794,11 +800,7 @@ class _OrbDecorationState extends State<_OrbDecoration>
               offset: Offset(0, translateY),
               child: Transform.scale(
                 scale: scale,
-                child: SizedBox(
-                  width: 70,
-                  height: 70,
-                  child: _buildOrb(),
-                ),
+                child: SizedBox(width: 70, height: 70, child: _buildOrb()),
               ),
             ),
           );
@@ -845,16 +847,10 @@ class _OrbDecorationState extends State<_OrbDecoration>
   }) {
     return Container(
       padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: outer,
-      ),
+      decoration: BoxDecoration(shape: BoxShape.circle, color: outer),
       child: Container(
         padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: mid,
-        ),
+        decoration: BoxDecoration(shape: BoxShape.circle, color: mid),
         child: crescent
             ? ClipOval(
                 child: Stack(
@@ -883,10 +879,7 @@ class _OrbDecorationState extends State<_OrbDecoration>
                 ),
               )
             : DecoratedBox(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: inner,
-                ),
+                decoration: BoxDecoration(shape: BoxShape.circle, color: inner),
               ),
       ),
     );
@@ -957,8 +950,7 @@ class _NightStarsState extends State<_NightStars>
                         color: CupertinoColors.white,
                         boxShadow: [
                           BoxShadow(
-                            color: CupertinoColors.white
-                                .withValues(alpha: 0.6),
+                            color: CupertinoColors.white.withValues(alpha: 0.6),
                             blurRadius: s.size * 2,
                           ),
                         ],
@@ -1003,43 +995,43 @@ class _TimePill extends StatelessWidget {
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 22, sigmaY: 22),
             child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(100),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  CupertinoColors.black.withValues(alpha: 0.30),
-                  CupertinoColors.black.withValues(alpha: 0.38),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(100),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    CupertinoColors.black.withValues(alpha: 0.30),
+                    CupertinoColors.black.withValues(alpha: 0.38),
+                  ],
+                ),
+                border: Border.all(
+                  color: CupertinoColors.white.withValues(alpha: 0.18),
+                  width: 0.6,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    CupertinoIcons.clock,
+                    size: 14,
+                    color: CupertinoColors.white,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    text,
+                    style: const TextStyle(
+                      color: CupertinoColors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      height: 1,
+                    ),
+                  ),
                 ],
               ),
-              border: Border.all(
-                color: CupertinoColors.white.withValues(alpha: 0.18),
-                width: 0.6,
-              ),
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(
-                  CupertinoIcons.clock,
-                  size: 14,
-                  color: CupertinoColors.white,
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  text,
-                  style: const TextStyle(
-                    color: CupertinoColors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    height: 1,
-                  ),
-                ),
-              ],
-            ),
-          ),
           ),
         ),
       ),
@@ -1140,10 +1132,7 @@ class _ToggleRow extends StatelessWidget {
           Container(
             width: 24,
             height: 24,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: iconColor,
-            ),
+            decoration: BoxDecoration(shape: BoxShape.circle, color: iconColor),
             alignment: Alignment.center,
             child: Icon(icon, color: CupertinoColors.white, size: 12),
           ),

@@ -12,6 +12,7 @@ import 'behavior_screen.dart';
 import 'chronic_disease_screen.dart';
 import 'dental_screen.dart';
 import 'insurance_screen.dart';
+import 'life_insurance_screen.dart';
 import 'invite_screen.dart';
 import 'opd/opd_registry_screen.dart';
 import 'settings_screen.dart';
@@ -59,10 +60,7 @@ class _MeScreenState extends State<MeScreen>
         final t = anim.value;
         return Opacity(
           opacity: t,
-          child: Transform.translate(
-            offset: Offset(0, (1 - t) * 18),
-            child: c,
-          ),
+          child: Transform.translate(offset: Offset(0, (1 - t) * 18), child: c),
         );
       },
       child: child,
@@ -85,9 +83,7 @@ class _MeScreenState extends State<MeScreen>
             action: LiquidGlassButton(
               icon: CupertinoIcons.gear,
               onTap: () => Navigator.of(context).push(
-                CupertinoPageRoute(
-                  builder: (_) => const SettingsScreen(),
-                ),
+                CupertinoPageRoute(builder: (_) => const SettingsScreen()),
               ),
               size: 36,
               iconSize: 18,
@@ -255,6 +251,17 @@ class _MeScreenState extends State<MeScreen>
                           ),
                         ),
                       ),
+                      _MenuEntry(
+                        iconColor: const Color(0xFF0064BD),
+                        icon: CupertinoIcons.shield_lefthalf_fill,
+                        title: 'ประกันชีวิต',
+                        subtitle: 'แพ็กเกจประกันที่เหมาะกับคุณ',
+                        onTap: () => Navigator.of(context).push(
+                          CupertinoPageRoute(
+                            builder: (_) => const LifeInsuranceScreen(),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -302,10 +309,9 @@ class _MenuSection extends StatelessWidget {
         children: [
           Text(
             title,
-            style: AppTypography.headline(const Color(0xFF1A1A1A)).copyWith(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-            ),
+            style: AppTypography.headline(
+              const Color(0xFF1A1A1A),
+            ).copyWith(fontSize: 16, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 8),
           for (int i = 0; i < items.length; i++) ...[

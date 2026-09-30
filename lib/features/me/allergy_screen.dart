@@ -106,10 +106,7 @@ class _AllergyScreenState extends State<AllergyScreen>
         final t = anim.value;
         return Opacity(
           opacity: t,
-          child: Transform.translate(
-            offset: Offset(0, (1 - t) * 18),
-            child: c,
-          ),
+          child: Transform.translate(offset: Offset(0, (1 - t) * 18), child: c),
         );
       },
       child: child,
@@ -134,7 +131,9 @@ class _AllergyScreenState extends State<AllergyScreen>
             bottom: false,
             child: Column(
               children: [
-                const SizedBox(height: HealthDetailAppBar.safeAreaContentHeight),
+                const SizedBox(
+                  height: HealthDetailAppBar.safeAreaContentHeight,
+                ),
                 Expanded(
                   child: Container(
                     width: double.infinity,
@@ -160,56 +159,56 @@ class _AllergyScreenState extends State<AllergyScreen>
                         ),
                         padding: const EdgeInsets.only(bottom: 40),
                         children: [
-                      Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: _SegmentedTabs(
-                          selected: _tab,
-                          onChange: (i) {
-                            HapticFeedback.selectionClick();
-                            setState(() => _tab = i);
-                            _enter
-                              ..reset()
-                              ..forward();
-                          },
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 280),
-                          switchInCurve: Curves.easeOutCubic,
-                          switchOutCurve: Curves.easeInCubic,
-                          transitionBuilder: (child, anim) {
-                            final slide = Tween<Offset>(
-                              begin: Offset(_tab == 0 ? -0.08 : 0.08, 0),
-                              end: Offset.zero,
-                            ).animate(anim);
-                            return FadeTransition(
-                              opacity: anim,
-                              child: SlideTransition(
-                                position: slide,
-                                child: child,
-                              ),
-                            );
-                          },
-                          layoutBuilder: (current, _) =>
-                              current ?? const SizedBox.shrink(),
-                          child: Column(
-                            key: ValueKey<int>(_tab),
-                            children: [
-                              for (int i = 0; i < items.length; i++) ...[
-                                _stagger(
-                                  i,
-                                  items.length,
-                                  _AllergyCard(entry: items[i]),
-                                ),
-                                if (i != items.length - 1)
-                                  const SizedBox(height: 8),
-                              ],
-                            ],
+                          Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: _SegmentedTabs(
+                              selected: _tab,
+                              onChange: (i) {
+                                HapticFeedback.selectionClick();
+                                setState(() => _tab = i);
+                                _enter
+                                  ..reset()
+                                  ..forward();
+                              },
+                            ),
                           ),
-                        ),
-                      ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 280),
+                              switchInCurve: Curves.easeOutCubic,
+                              switchOutCurve: Curves.easeInCubic,
+                              transitionBuilder: (child, anim) {
+                                final slide = Tween<Offset>(
+                                  begin: Offset(_tab == 0 ? -0.08 : 0.08, 0),
+                                  end: Offset.zero,
+                                ).animate(anim);
+                                return FadeTransition(
+                                  opacity: anim,
+                                  child: SlideTransition(
+                                    position: slide,
+                                    child: child,
+                                  ),
+                                );
+                              },
+                              layoutBuilder: (current, _) =>
+                                  current ?? const SizedBox.shrink(),
+                              child: Column(
+                                key: ValueKey<int>(_tab),
+                                children: [
+                                  for (int i = 0; i < items.length; i++) ...[
+                                    _stagger(
+                                      i,
+                                      items.length,
+                                      _AllergyCard(entry: items[i]),
+                                    ),
+                                    if (i != items.length - 1)
+                                      const SizedBox(height: 8),
+                                  ],
+                                ],
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -323,9 +322,7 @@ class _TabPill extends StatelessWidget {
             duration: const Duration(milliseconds: 220),
             curve: Curves.easeOut,
             style: TextStyle(
-              color: active
-                  ? const Color(0xFF0088FF)
-                  : const Color(0xFF1A1A1A),
+              color: active ? const Color(0xFF0088FF) : const Color(0xFF1A1A1A),
               fontSize: 15,
               fontWeight: active ? FontWeight.w700 : FontWeight.w500,
               letterSpacing: -0.23,

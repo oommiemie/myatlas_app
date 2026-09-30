@@ -47,10 +47,7 @@ class _TreatmentScreenState extends State<TreatmentScreen>
         final t = anim.value;
         return Opacity(
           opacity: t,
-          child: Transform.translate(
-            offset: Offset(0, (1 - t) * 18),
-            child: c,
-          ),
+          child: Transform.translate(offset: Offset(0, (1 - t) * 18), child: c),
         );
       },
       child: child,
@@ -60,7 +57,8 @@ class _TreatmentScreenState extends State<TreatmentScreen>
   @override
   Widget build(BuildContext context) {
     // Group by month.
-    final items = [...sampleTreatments]..sort((a, b) => b.date.compareTo(a.date));
+    final items = [...sampleTreatments]
+      ..sort((a, b) => b.date.compareTo(a.date));
     final groups = <String, List<Treatment>>{};
     for (final t in items) {
       final key = formatLongMonth(t.date);
@@ -114,8 +112,7 @@ class _TreatmentScreenState extends State<TreatmentScreen>
                         children: [
                           for (final group in groups.entries) ...[
                             Padding(
-                              padding:
-                                  const EdgeInsets.fromLTRB(4, 4, 0, 12),
+                              padding: const EdgeInsets.fromLTRB(4, 4, 0, 12),
                               child: Text(
                                 group.key,
                                 style: const TextStyle(
@@ -238,8 +235,10 @@ class _TimelineRow extends StatelessWidget {
                 dim: 0.96,
                 borderRadius: BorderRadius.circular(16),
                 child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
                   decoration: BoxDecoration(
                     color: CupertinoColors.white,
                     borderRadius: BorderRadius.circular(16),

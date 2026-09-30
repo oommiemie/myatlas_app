@@ -48,18 +48,14 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen>
         final t = anim.value;
         return Opacity(
           opacity: t,
-          child: Transform.translate(
-            offset: Offset(0, (1 - t) * 14),
-            child: c,
-          ),
+          child: Transform.translate(offset: Offset(0, (1 - t) * 14), child: c),
         );
       },
       child: child,
     );
   }
 
-  static const _sections =
-      <({IconData icon, Color color, String title, String body})>[
+  static const _sections = <({IconData icon, Color color, String title, String body})>[
     (
       icon: CupertinoIcons.exclamationmark_shield_fill,
       color: Color(0xFFF59E0B),
@@ -184,8 +180,9 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen>
                                   alpha: 0.7,
                                 ),
                                 border: Border.all(
-                                  color: CupertinoColors.white
-                                      .withValues(alpha: 0.8),
+                                  color: CupertinoColors.white.withValues(
+                                    alpha: 0.8,
+                                  ),
                                 ),
                               ),
                             ),
@@ -262,7 +259,11 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen>
                     _sections.length + 2,
                     Padding(
                       padding: EdgeInsets.fromLTRB(
-                          16, 0, 16, i == _sections.length - 1 ? 0 : 10),
+                        16,
+                        0,
+                        16,
+                        i == _sections.length - 1 ? 0 : 10,
+                      ),
                       child: _PolicyCard(
                         icon: _sections[i].icon,
                         iconColor: _sections[i].color,
@@ -430,8 +431,7 @@ class _PinnedTopBar extends StatelessWidget {
             ),
             child: Container(
               height: barHeight,
-              color:
-                  const Color(0xFFF4F8F5).withValues(alpha: 0.80 * progress),
+              color: const Color(0xFFF4F8F5).withValues(alpha: 0.80 * progress),
             ),
           ),
         ),

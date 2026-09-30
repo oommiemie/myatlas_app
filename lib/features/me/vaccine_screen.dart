@@ -19,12 +19,32 @@ class VaccineRecord {
 }
 
 const _thMonthsShort = <String>[
-  'ม.ค', 'ก.พ', 'มี.ค', 'เม.ย', 'พ.ค', 'มิ.ย',
-  'ก.ค', 'ส.ค', 'ก.ย', 'ต.ค', 'พ.ย', 'ธ.ค',
+  'ม.ค',
+  'ก.พ',
+  'มี.ค',
+  'เม.ย',
+  'พ.ค',
+  'มิ.ย',
+  'ก.ค',
+  'ส.ค',
+  'ก.ย',
+  'ต.ค',
+  'พ.ย',
+  'ธ.ค',
 ];
 const _thMonthsLong = <String>[
-  'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
-  'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม',
+  'มกราคม',
+  'กุมภาพันธ์',
+  'มีนาคม',
+  'เมษายน',
+  'พฤษภาคม',
+  'มิถุนายน',
+  'กรกฎาคม',
+  'สิงหาคม',
+  'กันยายน',
+  'ตุลาคม',
+  'พฤศจิกายน',
+  'ธันวาคม',
 ];
 
 String _formatShortMonth(DateTime d) => _thMonthsShort[d.month - 1];
@@ -104,10 +124,7 @@ class _VaccineScreenState extends State<VaccineScreen>
         final t = anim.value;
         return Opacity(
           opacity: t,
-          child: Transform.translate(
-            offset: Offset(0, (1 - t) * 18),
-            child: c,
-          ),
+          child: Transform.translate(offset: Offset(0, (1 - t) * 18), child: c),
         );
       },
       child: child,
@@ -171,8 +188,7 @@ class _VaccineScreenState extends State<VaccineScreen>
                         children: [
                           for (final group in groups.entries) ...[
                             Padding(
-                              padding:
-                                  const EdgeInsets.fromLTRB(4, 4, 0, 8),
+                              padding: const EdgeInsets.fromLTRB(4, 4, 0, 8),
                               child: Text(
                                 group.key,
                                 style: const TextStyle(
@@ -419,15 +435,9 @@ class _InfoRow extends StatelessWidget {
 enum _SymbolKind { syringe, letter, plus }
 
 class _SymbolDot extends StatelessWidget {
-  const _SymbolDot.syringe()
-      : kind = _SymbolKind.syringe,
-        letter = null;
-  const _SymbolDot.letter(String l)
-      : kind = _SymbolKind.letter,
-        letter = l;
-  const _SymbolDot.plus()
-      : kind = _SymbolKind.plus,
-        letter = null;
+  const _SymbolDot.syringe() : kind = _SymbolKind.syringe, letter = null;
+  const _SymbolDot.letter(String l) : kind = _SymbolKind.letter, letter = l;
+  const _SymbolDot.plus() : kind = _SymbolKind.plus, letter = null;
 
   final _SymbolKind kind;
   final String? letter;
@@ -444,28 +454,28 @@ class _SymbolDot extends StatelessWidget {
       alignment: Alignment.center,
       child: switch (kind) {
         _SymbolKind.syringe => SvgPicture.asset(
-            'assets/images/me/syringe.svg',
-            width: 6.5,
-            height: 6.5,
-            colorFilter: const ColorFilter.mode(
-              CupertinoColors.white,
-              BlendMode.srcIn,
-            ),
+          'assets/images/me/syringe.svg',
+          width: 6.5,
+          height: 6.5,
+          colorFilter: const ColorFilter.mode(
+            CupertinoColors.white,
+            BlendMode.srcIn,
           ),
+        ),
         _SymbolKind.letter => Text(
-            letter!,
-            style: const TextStyle(
-              color: CupertinoColors.white,
-              fontSize: 10,
-              fontWeight: FontWeight.w700,
-              height: 1,
-            ),
-          ),
-        _SymbolKind.plus => const Icon(
-            CupertinoIcons.add,
-            size: 8,
+          letter!,
+          style: const TextStyle(
             color: CupertinoColors.white,
+            fontSize: 10,
+            fontWeight: FontWeight.w700,
+            height: 1,
           ),
+        ),
+        _SymbolKind.plus => const Icon(
+          CupertinoIcons.add,
+          size: 8,
+          color: CupertinoColors.white,
+        ),
       },
     );
   }

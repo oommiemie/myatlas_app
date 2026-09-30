@@ -11,6 +11,8 @@ import 'features/family/mini_call_overlay.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  // ทั้งแอปใช้แนวตั้ง ยกเว้นหน้าเล่นคลิปออกกำลังกายที่ปลดให้หมุนเอง
+  SystemChrome.setPreferredOrientations(const [DeviceOrientation.portraitUp]);
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
   runApp(const MyAtlasApp());
 }

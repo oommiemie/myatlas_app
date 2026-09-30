@@ -46,7 +46,7 @@
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>แอปต้องการใช้กล้องเพื่อถ่ายภาพอาหารสำหรับวิเคราะห์โภชนาการ</string>
+	<string>แอปต้องการใช้กล้องเพื่อถ่ายภาพอาหารและจับท่าทางระหว่างออกกำลังกาย</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>แอปต้องการเข้าถึงคลังภาพเพื่อเลือกภาพอาหารสำหรับวิเคราะห์โภชนาการ</string>
 	<key>NSLocationWhenInUseUsageDescription</key>

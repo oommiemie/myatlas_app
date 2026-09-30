@@ -185,8 +185,7 @@ class _EditDateSheetState extends State<_EditDateSheet> {
       title: widget.title,
       iconColor: widget.iconColor,
       icon: widget.icon,
-      onSave:
-          _canSave ? () => Navigator.of(context).pop(_value) : null,
+      onSave: _canSave ? () => Navigator.of(context).pop(_value) : null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -201,17 +200,11 @@ class _EditDateSheetState extends State<_EditDateSheet> {
           ),
           const SizedBox(height: 6),
           Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 14,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
               color: CupertinoColors.white,
               borderRadius: BorderRadius.circular(100),
-              border: Border.all(
-                color: const Color(0xFFE5E5E5),
-                width: 1,
-              ),
+              border: Border.all(color: const Color(0xFFE5E5E5), width: 1),
             ),
             child: Row(
               children: [
@@ -324,9 +317,7 @@ class _EditRadioSheetState extends State<_EditRadioSheet> {
       title: widget.title,
       iconColor: widget.iconColor,
       icon: widget.icon,
-      onSave: _canSave
-          ? () => Navigator.of(context).pop(_selected)
-          : null,
+      onSave: _canSave ? () => Navigator.of(context).pop(_selected) : null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -442,9 +433,7 @@ class _RadioDot extends StatelessWidget {
         shape: BoxShape.circle,
         color: selected ? const Color(0xFF17C964) : const Color(0xFFF4F4F5),
         border: Border.all(
-          color: selected
-              ? const Color(0xFF17C964)
-              : const Color(0xFFD4D4D8),
+          color: selected ? const Color(0xFF17C964) : const Color(0xFFD4D4D8),
           width: 1.5,
         ),
       ),
@@ -490,13 +479,22 @@ class _IosCalendarState extends State<_IosCalendar> {
   void initState() {
     super.initState();
     _selected = widget.initialDate;
-    _visibleMonth =
-        DateTime(widget.initialDate.year, widget.initialDate.month);
+    _visibleMonth = DateTime(widget.initialDate.year, widget.initialDate.month);
   }
 
   static const _months = <String>[
-    'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
-    'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม',
+    'มกราคม',
+    'กุมภาพันธ์',
+    'มีนาคม',
+    'เมษายน',
+    'พฤษภาคม',
+    'มิถุนายน',
+    'กรกฎาคม',
+    'สิงหาคม',
+    'กันยายน',
+    'ตุลาคม',
+    'พฤศจิกายน',
+    'ธันวาคม',
   ];
   static const _weekdays = <String>['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'];
 
@@ -512,24 +510,24 @@ class _IosCalendarState extends State<_IosCalendar> {
 
   bool get _canNext {
     final next = DateTime(_visibleMonth.year, _visibleMonth.month + 1);
-    return !next.isAfter(
-      DateTime(widget.lastDate.year, widget.lastDate.month),
-    );
+    return !next.isAfter(DateTime(widget.lastDate.year, widget.lastDate.month));
   }
 
   void _changeMonth(int delta) {
     HapticFeedback.selectionClick();
     setState(() {
-      _visibleMonth =
-          DateTime(_visibleMonth.year, _visibleMonth.month + delta);
+      _visibleMonth = DateTime(_visibleMonth.year, _visibleMonth.month + delta);
     });
   }
 
   List<DateTime?> _monthCells() {
     final first = DateTime(_visibleMonth.year, _visibleMonth.month, 1);
     final leading = first.weekday % 7; // Sunday = 0
-    final lastDay =
-        DateTime(_visibleMonth.year, _visibleMonth.month + 1, 0).day;
+    final lastDay = DateTime(
+      _visibleMonth.year,
+      _visibleMonth.month + 1,
+      0,
+    ).day;
     final cells = <DateTime?>[
       for (int i = 0; i < leading; i++) null,
       for (int d = 1; d <= lastDay; d++)
@@ -598,9 +596,7 @@ class _IosCalendarState extends State<_IosCalendar> {
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
             child: Column(
               children: [
-                for (int row = 0;
-                    row < _monthCells().length ~/ 7;
-                    row++)
+                for (int row = 0; row < _monthCells().length ~/ 7; row++)
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 2),
                     child: Row(
@@ -611,16 +607,16 @@ class _IosCalendarState extends State<_IosCalendar> {
                               date: _monthCells()[row * 7 + col],
                               isSelected:
                                   _monthCells()[row * 7 + col] != null &&
-                                      _sameDay(
-                                        _monthCells()[row * 7 + col]!,
-                                        _selected,
-                                      ),
+                                  _sameDay(
+                                    _monthCells()[row * 7 + col]!,
+                                    _selected,
+                                  ),
                               isToday:
                                   _monthCells()[row * 7 + col] != null &&
-                                      _sameDay(
-                                        _monthCells()[row * 7 + col]!,
-                                        today,
-                                      ),
+                                  _sameDay(
+                                    _monthCells()[row * 7 + col]!,
+                                    today,
+                                  ),
                               onTap: (d) {
                                 HapticFeedback.selectionClick();
                                 setState(() => _selected = d);
@@ -692,15 +688,9 @@ class _Header extends StatelessWidget {
           ),
           const Spacer(),
           if (!yearMode) ...[
-            _ArrowBtn(
-              icon: CupertinoIcons.chevron_back,
-              onTap: onPrev,
-            ),
+            _ArrowBtn(icon: CupertinoIcons.chevron_back, onTap: onPrev),
             const SizedBox(width: 4),
-            _ArrowBtn(
-              icon: CupertinoIcons.chevron_forward,
-              onTap: onNext,
-            ),
+            _ArrowBtn(icon: CupertinoIcons.chevron_forward, onTap: onNext),
           ],
         ],
       ),
@@ -775,10 +765,7 @@ class _DayCell extends StatelessWidget {
             width: 34,
             height: 34,
             alignment: Alignment.center,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: bg,
-            ),
+            decoration: BoxDecoration(shape: BoxShape.circle, color: bg),
             child: Text(
               '${date!.day}',
               style: TextStyle(
@@ -810,9 +797,7 @@ class _YearGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final years = [
-      for (int y = lastYear; y >= firstYear; y--) y,
-    ];
+    final years = [for (int y = lastYear; y >= firstYear; y--) y];
     return SizedBox(
       height: 220,
       child: GridView.count(

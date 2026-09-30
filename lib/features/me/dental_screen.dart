@@ -2,17 +2,24 @@ import 'package:flutter/cupertino.dart';
 
 import '../health/widgets/health_detail_app_bar.dart';
 
-enum DentalType { cleaning, filling, extraction, checkup, rootcanal, orthodontic }
+enum DentalType {
+  cleaning,
+  filling,
+  extraction,
+  checkup,
+  rootcanal,
+  orthodontic,
+}
 
 extension _DentalTypeTheme on DentalType {
   String get label => switch (this) {
-        DentalType.cleaning => 'ขูดหินปูน',
-        DentalType.filling => 'อุดฟัน',
-        DentalType.extraction => 'ถอนฟัน',
-        DentalType.checkup => 'ตรวจสุขภาพช่องปาก',
-        DentalType.rootcanal => 'รักษารากฟัน',
-        DentalType.orthodontic => 'จัดฟัน',
-      };
+    DentalType.cleaning => 'ขูดหินปูน',
+    DentalType.filling => 'อุดฟัน',
+    DentalType.extraction => 'ถอนฟัน',
+    DentalType.checkup => 'ตรวจสุขภาพช่องปาก',
+    DentalType.rootcanal => 'รักษารากฟัน',
+    DentalType.orthodontic => 'จัดฟัน',
+  };
 }
 
 class DentalRecord {
@@ -33,12 +40,32 @@ class DentalRecord {
 }
 
 const _thMonthsShort = <String>[
-  'ม.ค', 'ก.พ', 'มี.ค', 'เม.ย', 'พ.ค', 'มิ.ย',
-  'ก.ค', 'ส.ค', 'ก.ย', 'ต.ค', 'พ.ย', 'ธ.ค',
+  'ม.ค',
+  'ก.พ',
+  'มี.ค',
+  'เม.ย',
+  'พ.ค',
+  'มิ.ย',
+  'ก.ค',
+  'ส.ค',
+  'ก.ย',
+  'ต.ค',
+  'พ.ย',
+  'ธ.ค',
 ];
 const _thMonthsLong = <String>[
-  'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
-  'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม',
+  'มกราคม',
+  'กุมภาพันธ์',
+  'มีนาคม',
+  'เมษายน',
+  'พฤษภาคม',
+  'มิถุนายน',
+  'กรกฎาคม',
+  'สิงหาคม',
+  'กันยายน',
+  'ตุลาคม',
+  'พฤศจิกายน',
+  'ธันวาคม',
 ];
 
 String _formatShortMonth(DateTime d) => _thMonthsShort[d.month - 1];
@@ -130,10 +157,7 @@ class _DentalScreenState extends State<DentalScreen>
         final t = anim.value;
         return Opacity(
           opacity: t,
-          child: Transform.translate(
-            offset: Offset(0, (1 - t) * 18),
-            child: c,
-          ),
+          child: Transform.translate(offset: Offset(0, (1 - t) * 18), child: c),
         );
       },
       child: child,
@@ -142,8 +166,7 @@ class _DentalScreenState extends State<DentalScreen>
 
   @override
   Widget build(BuildContext context) {
-    final items = [..._sampleDentals]
-      ..sort((a, b) => b.date.compareTo(a.date));
+    final items = [..._sampleDentals]..sort((a, b) => b.date.compareTo(a.date));
     final groups = <String, List<DentalRecord>>{};
     for (final r in items) {
       final key = _formatLongMonth(r.date);
@@ -197,8 +220,7 @@ class _DentalScreenState extends State<DentalScreen>
                         children: [
                           for (final group in groups.entries) ...[
                             Padding(
-                              padding:
-                                  const EdgeInsets.fromLTRB(4, 4, 0, 8),
+                              padding: const EdgeInsets.fromLTRB(4, 4, 0, 8),
                               child: Text(
                                 group.key,
                                 style: const TextStyle(
@@ -354,41 +376,41 @@ class _DentalCard extends StatelessWidget {
               ),
             ),
           ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: CupertinoColors.black.withValues(alpha: 0.02),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _InfoRow(
-                        icon: CupertinoIcons.person_fill,
-                        text: record.dentist,
-                      ),
-                      const SizedBox(height: 8),
-                      _InfoRow(
-                        icon: CupertinoIcons.building_2_fill,
-                        text: record.clinic,
-                      ),
-                      const SizedBox(height: 8),
-                      _InfoRow(
-                        icon: CupertinoIcons.location_solid,
-                        text: record.toothPosition,
-                      ),
-                      const SizedBox(height: 8),
-                      _InfoRow(
-                        icon: CupertinoIcons.info_circle_fill,
-                        text: record.note,
-                      ),
-                    ],
-                  ),
-                ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: CupertinoColors.black.withValues(alpha: 0.02),
+                borderRadius: BorderRadius.circular(16),
               ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _InfoRow(
+                    icon: CupertinoIcons.person_fill,
+                    text: record.dentist,
+                  ),
+                  const SizedBox(height: 8),
+                  _InfoRow(
+                    icon: CupertinoIcons.building_2_fill,
+                    text: record.clinic,
+                  ),
+                  const SizedBox(height: 8),
+                  _InfoRow(
+                    icon: CupertinoIcons.location_solid,
+                    text: record.toothPosition,
+                  ),
+                  const SizedBox(height: 8),
+                  _InfoRow(
+                    icon: CupertinoIcons.info_circle_fill,
+                    text: record.note,
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );

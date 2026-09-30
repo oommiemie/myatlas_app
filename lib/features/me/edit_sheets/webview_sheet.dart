@@ -99,9 +99,7 @@ class _WebViewSheetState extends State<_WebViewSheet> {
                       Expanded(
                         child: Center(
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
                             child: Text(
                               _host.isEmpty ? widget.title : _host,
                               style: const TextStyle(
@@ -132,9 +130,7 @@ class _WebViewSheetState extends State<_WebViewSheet> {
                         duration: const Duration(milliseconds: 180),
                         widthFactor: _progress,
                         heightFactor: 1,
-                        child: const ColoredBox(
-                          color: Color(0xFF1D8B6B),
-                        ),
+                        child: const ColoredBox(color: Color(0xFF1D8B6B)),
                       ),
                     ),
                   ),

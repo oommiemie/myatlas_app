@@ -6,15 +6,15 @@ enum ChronicStatus { treating, watching, controlled }
 
 extension _ChronicStatusTheme on ChronicStatus {
   String get label => switch (this) {
-        ChronicStatus.treating => 'กำลังรักษา',
-        ChronicStatus.watching => 'เฝ้าระวัง',
-        ChronicStatus.controlled => 'ควบคุมได้',
-      };
+    ChronicStatus.treating => 'กำลังรักษา',
+    ChronicStatus.watching => 'เฝ้าระวัง',
+    ChronicStatus.controlled => 'ควบคุมได้',
+  };
   Color get color => switch (this) {
-        ChronicStatus.treating => const Color(0xFF17C964),
-        ChronicStatus.watching => const Color(0xFFEA580C),
-        ChronicStatus.controlled => const Color(0xFFEAB308),
-      };
+    ChronicStatus.treating => const Color(0xFF17C964),
+    ChronicStatus.watching => const Color(0xFFEA580C),
+    ChronicStatus.controlled => const Color(0xFFEAB308),
+  };
 }
 
 class ChronicDisease {
@@ -98,10 +98,7 @@ class _ChronicDiseaseScreenState extends State<ChronicDiseaseScreen>
         final t = anim.value;
         return Opacity(
           opacity: t,
-          child: Transform.translate(
-            offset: Offset(0, (1 - t) * 18),
-            child: c,
-          ),
+          child: Transform.translate(offset: Offset(0, (1 - t) * 18), child: c),
         );
       },
       child: child,
@@ -239,10 +236,7 @@ class _DiseaseCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _InfoRow(
-                    icon: CupertinoIcons.calendar,
-                    text: disease.date,
-                  ),
+                  _InfoRow(icon: CupertinoIcons.calendar, text: disease.date),
                   const SizedBox(height: 8),
                   _InfoRow(
                     icon: CupertinoIcons.heart_circle_fill,
@@ -309,9 +303,7 @@ class _StatusPill extends StatelessWidget {
       decoration: BoxDecoration(
         color: status.color.withValues(alpha: 0.16),
         borderRadius: BorderRadius.circular(100),
-        border: Border.all(
-          color: CupertinoColors.white.withValues(alpha: 0.1),
-        ),
+        border: Border.all(color: CupertinoColors.white.withValues(alpha: 0.1)),
       ),
       child: Text(
         status.label,

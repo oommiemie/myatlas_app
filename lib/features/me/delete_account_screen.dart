@@ -78,10 +78,7 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen>
         final t = anim.value;
         return Opacity(
           opacity: t,
-          child: Transform.translate(
-            offset: Offset(0, (1 - t) * 14),
-            child: c,
-          ),
+          child: Transform.translate(offset: Offset(0, (1 - t) * 14), child: c),
         );
       },
       child: child,
@@ -177,8 +174,9 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen>
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFFB91C1C)
-                                  .withValues(alpha: 0.35),
+                              color: const Color(
+                                0xFFB91C1C,
+                              ).withValues(alpha: 0.35),
                               blurRadius: 18,
                               offset: const Offset(0, 8),
                             ),
@@ -270,8 +268,9 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen>
                                   padding: const EdgeInsets.only(top: 2),
                                   child: Icon(
                                     _consequences[i].icon,
-                                    color: const Color(0xFFEF4444)
-                                        .withValues(alpha: 0.75),
+                                    color: const Color(
+                                      0xFFEF4444,
+                                    ).withValues(alpha: 0.75),
                                     size: 14,
                                   ),
                                 ),
@@ -312,8 +311,7 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Padding(
-                            padding:
-                                EdgeInsets.fromLTRB(16, 16, 16, 8),
+                            padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
                             child: Text(
                               'เหตุผลในการลบบัญชี (ไม่บังคับ)',
                               style: TextStyle(
@@ -325,13 +323,16 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen>
                           ),
                           for (int i = 0; i < _reasons.length; i++) ...[
                             PressEffect(
-                              onTap: () => setState(() => _reason = _reasons[i]),
+                              onTap: () =>
+                                  setState(() => _reason = _reasons[i]),
                               haptic: HapticKind.selection,
                               scale: 0.99,
                               dim: 0.96,
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 16, vertical: 14),
+                                  horizontal: 16,
+                                  vertical: 14,
+                                ),
                                 color: CupertinoColors.white,
                                 child: Row(
                                   children: [
@@ -346,8 +347,9 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen>
                                       ),
                                     ),
                                     AnimatedContainer(
-                                      duration:
-                                          const Duration(milliseconds: 180),
+                                      duration: const Duration(
+                                        milliseconds: 180,
+                                      ),
                                       width: 20,
                                       height: 20,
                                       decoration: BoxDecoration(
@@ -358,8 +360,9 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen>
                                         border: Border.all(
                                           color: _reason == _reasons[i]
                                               ? const Color(0xFFEF4444)
-                                              : const Color(0xFF1A1A1A)
-                                                  .withValues(alpha: 0.22),
+                                              : const Color(
+                                                  0xFF1A1A1A,
+                                                ).withValues(alpha: 0.22),
                                           width: 1.5,
                                         ),
                                       ),
@@ -429,8 +432,9 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen>
                                 border: Border.all(
                                   color: _confirmed
                                       ? const Color(0xFFEF4444)
-                                      : const Color(0xFF1A1A1A)
-                                          .withValues(alpha: 0.25),
+                                      : const Color(
+                                          0xFF1A1A1A,
+                                        ).withValues(alpha: 0.25),
                                   width: 1.5,
                                 ),
                               ),
@@ -481,10 +485,7 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen>
             left: 0,
             right: 0,
             bottom: 0,
-            child: _SubmitBar(
-              enabled: _confirmed,
-              onSubmit: _confirmDelete,
-            ),
+            child: _SubmitBar(enabled: _confirmed, onSubmit: _confirmDelete),
           ),
         ],
       ),
@@ -542,8 +543,9 @@ class _SubmitBar extends StatelessWidget {
                     boxShadow: enabled
                         ? [
                             BoxShadow(
-                              color: const Color(0xFFB91C1C)
-                                  .withValues(alpha: 0.35),
+                              color: const Color(
+                                0xFFB91C1C,
+                              ).withValues(alpha: 0.35),
                               blurRadius: 14,
                               offset: const Offset(0, 8),
                             ),
@@ -595,8 +597,7 @@ class _PinnedTopBar extends StatelessWidget {
             ),
             child: Container(
               height: barHeight,
-              color:
-                  const Color(0xFFF4F8F5).withValues(alpha: 0.80 * progress),
+              color: const Color(0xFFF4F8F5).withValues(alpha: 0.80 * progress),
             ),
           ),
         ),

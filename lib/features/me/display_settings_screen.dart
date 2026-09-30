@@ -23,12 +23,12 @@ class _DisplaySettingsScreenState extends State<DisplaySettingsScreen>
   final _settings = AppSettingsService.instance;
 
   List<String> _fontSizeLabelsFor(BuildContext c) => [
-        tr(c, 'เล็กมาก', 'Very Small'),
-        tr(c, 'เล็ก', 'Small'),
-        tr(c, 'กลาง', 'Medium'),
-        tr(c, 'ใหญ่', 'Large'),
-        tr(c, 'ใหญ่มาก', 'Very Large'),
-      ];
+    tr(c, 'เล็กมาก', 'Very Small'),
+    tr(c, 'เล็ก', 'Small'),
+    tr(c, 'กลาง', 'Medium'),
+    tr(c, 'ใหญ่', 'Large'),
+    tr(c, 'ใหญ่มาก', 'Very Large'),
+  ];
 
   @override
   void initState() {
@@ -60,10 +60,7 @@ class _DisplaySettingsScreenState extends State<DisplaySettingsScreen>
         final t = anim.value;
         return Opacity(
           opacity: t,
-          child: Transform.translate(
-            offset: Offset(0, (1 - t) * 18),
-            child: c,
-          ),
+          child: Transform.translate(offset: Offset(0, (1 - t) * 18), child: c),
         );
       },
       child: child,
@@ -76,8 +73,7 @@ class _DisplaySettingsScreenState extends State<DisplaySettingsScreen>
   String get _fontLabel => _settings.fontSpec.label;
 
   Future<void> _pickFont() async {
-    final labels =
-        AppFont.values.map((f) => kAppFontSpecs[f]!.label).toList();
+    final labels = AppFont.values.map((f) => kAppFontSpecs[f]!.label).toList();
     final choice = await showAppOptionSheet(
       context: context,
       title: tr(context, 'แบบอักษร', 'Font'),
@@ -363,8 +359,7 @@ class _PinnedTopBar extends StatelessWidget {
             ),
             child: Container(
               height: barHeight,
-              color:
-                  const Color(0xFFF4F8F5).withValues(alpha: 0.80 * progress),
+              color: const Color(0xFFF4F8F5).withValues(alpha: 0.80 * progress),
             ),
           ),
         ),
@@ -482,15 +477,11 @@ class _FontSizeSlider extends StatelessWidget {
                 return GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   onTapDown: (d) {
-                    final idx = (d.localPosition.dx / segW)
-                        .round()
-                        .clamp(0, 4);
+                    final idx = (d.localPosition.dx / segW).round().clamp(0, 4);
                     onChanged(idx);
                   },
                   onHorizontalDragUpdate: (d) {
-                    final idx = (d.localPosition.dx / segW)
-                        .round()
-                        .clamp(0, 4);
+                    final idx = (d.localPosition.dx / segW).round().clamp(0, 4);
                     onChanged(idx);
                   },
                   child: Stack(
@@ -546,14 +537,16 @@ class _FontSizeSlider extends StatelessWidget {
                             borderRadius: BorderRadius.circular(100),
                             boxShadow: [
                               BoxShadow(
-                                color: CupertinoColors.black
-                                    .withValues(alpha: 0.12),
+                                color: CupertinoColors.black.withValues(
+                                  alpha: 0.12,
+                                ),
                                 blurRadius: 4,
                                 offset: const Offset(0, 0.5),
                               ),
                               BoxShadow(
-                                color: CupertinoColors.black
-                                    .withValues(alpha: 0.12),
+                                color: CupertinoColors.black.withValues(
+                                  alpha: 0.12,
+                                ),
                                 blurRadius: 13,
                                 offset: const Offset(0, 6),
                               ),
@@ -581,4 +574,3 @@ class _FontSizeSlider extends StatelessWidget {
     );
   }
 }
-

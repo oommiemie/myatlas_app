@@ -57,10 +57,7 @@ class _SettingsScreenState extends State<SettingsScreen>
         final t = anim.value;
         return Opacity(
           opacity: t,
-          child: Transform.translate(
-            offset: Offset(0, (1 - t) * 18),
-            child: c,
-          ),
+          child: Transform.translate(offset: Offset(0, (1 - t) * 18), child: c),
         );
       },
       child: child,
@@ -101,7 +98,9 @@ class _SettingsScreenState extends State<SettingsScreen>
                         width: 36,
                         height: 5,
                         decoration: BoxDecoration(
-                          color: const Color(0xFF1A1A1A).withValues(alpha: 0.25),
+                          color: const Color(
+                            0xFF1A1A1A,
+                          ).withValues(alpha: 0.25),
                           borderRadius: BorderRadius.circular(100),
                         ),
                       ),
@@ -119,8 +118,9 @@ class _SettingsScreenState extends State<SettingsScreen>
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color:
-                                const Color(0xFFB91C1C).withValues(alpha: 0.35),
+                            color: const Color(
+                              0xFFB91C1C,
+                            ).withValues(alpha: 0.35),
                             blurRadius: 18,
                             offset: const Offset(0, 8),
                           ),
@@ -259,118 +259,130 @@ class _SettingsScreenState extends State<SettingsScreen>
                 bottom: 40,
               ),
               children: [
-                    _stagger(
-                      0,
-                      5,
-                      _Section(
-                        title: tr(context, 'ความปลอดภัย', 'Security'),
-                        rows: [
-                          _SettingRow(
-                            iconColor: const Color(0xFF1D8B6B),
-                            icon: CupertinoIcons.lock_fill,
-                            label: tr(context, 'ตั้งค่า PIN', 'Set PIN'),
-                            onTap: () => Navigator.of(context).push(
-                              CupertinoPageRoute<String>(
-                                builder: (_) => const PinSetupScreen(),
-                              ),
-                            ),
+                _stagger(
+                  0,
+                  5,
+                  _Section(
+                    title: tr(context, 'ความปลอดภัย', 'Security'),
+                    rows: [
+                      _SettingRow(
+                        iconColor: const Color(0xFF1D8B6B),
+                        icon: CupertinoIcons.lock_fill,
+                        label: tr(context, 'ตั้งค่า PIN', 'Set PIN'),
+                        onTap: () => Navigator.of(context).push(
+                          CupertinoPageRoute<String>(
+                            builder: (_) => const PinSetupScreen(),
                           ),
-                        ],
+                        ),
                       ),
-                    ),
-                    _stagger(
-                      1,
-                      4,
-                      _Section(
-                        title: tr(context, 'แอพและอุปกรณ์', 'Apps & Devices'),
-                        rows: [
-                          _SettingRow(
-                            iconColor: const Color(0xFF7C3AED),
-                            icon: CupertinoIcons.circle_lefthalf_fill,
-                            label: tr(context, 'การแสดงผล', 'Display'),
-                            onTap: () => Navigator.of(context).push(
-                              CupertinoPageRoute(
-                                builder: (_) => const DisplaySettingsScreen(),
-                              ),
-                            ),
+                    ],
+                  ),
+                ),
+                _stagger(
+                  1,
+                  4,
+                  _Section(
+                    title: tr(context, 'แอพและอุปกรณ์', 'Apps & Devices'),
+                    rows: [
+                      _SettingRow(
+                        iconColor: const Color(0xFF7C3AED),
+                        icon: CupertinoIcons.circle_lefthalf_fill,
+                        label: tr(context, 'การแสดงผล', 'Display'),
+                        onTap: () => Navigator.of(context).push(
+                          CupertinoPageRoute(
+                            builder: (_) => const DisplaySettingsScreen(),
                           ),
-                          _SettingRow(
-                            iconColor: const Color(0xFF2563EB),
-                            icon: CupertinoIcons.device_phone_portrait,
-                            label: tr(context, 'การเชื่อมต่ออุปกรณ์',
-                                'Connected Devices'),
-                            onTap: () {},
-                          ),
-                          _SettingRow(
-                            iconColor: const Color(0xFF0EA5E9),
-                            icon: CupertinoIcons.checkmark_shield_fill,
-                            label: tr(context, 'นโยบายความเป็นส่วนตัว',
-                                'Privacy Policy'),
-                            onTap: () => Navigator.of(context).push(
-                              CupertinoPageRoute(
-                                builder: (_) => const PrivacyPolicyScreen(),
-                              ),
-                            ),
-                          ),
-                          _SettingRow(
-                            iconColor: const Color(0xFF6B7280),
-                            icon: CupertinoIcons.app_fill,
-                            label: tr(
-                                context, 'เกี่ยวกับแอปพลิเคชั่น', 'About App'),
-                            onTap: () => Navigator.of(context).push(
-                              CupertinoPageRoute(
-                                builder: (_) => const AboutAppScreen(),
-                              ),
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
-                    ),
-                    _stagger(
-                      2,
-                      4,
-                      _Section(
-                        title: tr(context, 'ช่วยเหลือ', 'Help'),
-                        rows: [
-                          _SettingRow(
-                            iconColor: const Color(0xFFF59E0B),
-                            icon: CupertinoIcons.exclamationmark_bubble_fill,
-                            label: tr(context, 'รายงานปัญหาการใช้งาน',
-                                'Report Issue'),
-                            onTap: () => Navigator.of(context).push(
-                              CupertinoPageRoute(
-                                builder: (_) => const ReportIssueScreen(),
-                              ),
-                            ),
-                          ),
-                        ],
+                      _SettingRow(
+                        iconColor: const Color(0xFF2563EB),
+                        icon: CupertinoIcons.device_phone_portrait,
+                        label: tr(
+                          context,
+                          'การเชื่อมต่ออุปกรณ์',
+                          'Connected Devices',
+                        ),
+                        onTap: () {},
                       ),
-                    ),
-                    _stagger(
-                      3,
-                      4,
-                      _Section(
-                        title: tr(context, 'เข้าสู่ระบบ', 'Account'),
-                        rows: [
-                          _SettingRow(
-                            iconColor: const Color(0xFF9333EA),
-                            icon: CupertinoIcons.person_badge_minus_fill,
-                            label: tr(context, 'ลบบัญชี', 'Delete Account'),
-                            onTap: () => Navigator.of(context).push(
-                              CupertinoPageRoute(
-                                builder: (_) => const DeleteAccountScreen(),
-                              ),
-                            ),
+                      _SettingRow(
+                        iconColor: const Color(0xFF0EA5E9),
+                        icon: CupertinoIcons.checkmark_shield_fill,
+                        label: tr(
+                          context,
+                          'นโยบายความเป็นส่วนตัว',
+                          'Privacy Policy',
+                        ),
+                        onTap: () => Navigator.of(context).push(
+                          CupertinoPageRoute(
+                            builder: (_) => const PrivacyPolicyScreen(),
                           ),
-                          _SettingRow(
-                            iconColor: _danger,
-                            icon: CupertinoIcons.square_arrow_right,
-                            label: tr(context, 'ออกจากระบบ', 'Log Out'),
-                            onTap: _showLogoutSheet,
-                          ),
-                        ],
+                        ),
                       ),
-                    ),
+                      _SettingRow(
+                        iconColor: const Color(0xFF6B7280),
+                        icon: CupertinoIcons.app_fill,
+                        label: tr(
+                          context,
+                          'เกี่ยวกับแอปพลิเคชั่น',
+                          'About App',
+                        ),
+                        onTap: () => Navigator.of(context).push(
+                          CupertinoPageRoute(
+                            builder: (_) => const AboutAppScreen(),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                _stagger(
+                  2,
+                  4,
+                  _Section(
+                    title: tr(context, 'ช่วยเหลือ', 'Help'),
+                    rows: [
+                      _SettingRow(
+                        iconColor: const Color(0xFFF59E0B),
+                        icon: CupertinoIcons.exclamationmark_bubble_fill,
+                        label: tr(
+                          context,
+                          'รายงานปัญหาการใช้งาน',
+                          'Report Issue',
+                        ),
+                        onTap: () => Navigator.of(context).push(
+                          CupertinoPageRoute(
+                            builder: (_) => const ReportIssueScreen(),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                _stagger(
+                  3,
+                  4,
+                  _Section(
+                    title: tr(context, 'เข้าสู่ระบบ', 'Account'),
+                    rows: [
+                      _SettingRow(
+                        iconColor: const Color(0xFF9333EA),
+                        icon: CupertinoIcons.person_badge_minus_fill,
+                        label: tr(context, 'ลบบัญชี', 'Delete Account'),
+                        onTap: () => Navigator.of(context).push(
+                          CupertinoPageRoute(
+                            builder: (_) => const DeleteAccountScreen(),
+                          ),
+                        ),
+                      ),
+                      _SettingRow(
+                        iconColor: _danger,
+                        icon: CupertinoIcons.square_arrow_right,
+                        label: tr(context, 'ออกจากระบบ', 'Log Out'),
+                        onTap: _showLogoutSheet,
+                      ),
+                    ],
+                  ),
+                ),
                 // Company credit + app version.
                 Padding(
                   padding: const EdgeInsets.only(top: 24, bottom: 8),
@@ -448,8 +460,7 @@ class _PinnedTopBar extends StatelessWidget {
             ),
             child: Container(
               height: barHeight,
-              color:
-                  const Color(0xFFF4F8F5).withValues(alpha: 0.80 * progress),
+              color: const Color(0xFFF4F8F5).withValues(alpha: 0.80 * progress),
             ),
           ),
         ),
@@ -588,10 +599,7 @@ class _Section extends StatelessWidget {
                 for (int i = 0; i < rows.length; i++) ...[
                   rows[i],
                   if (i != rows.length - 1)
-                    Container(
-                      height: 1,
-                      color: const Color(0xFFE5E5E5),
-                    ),
+                    Container(height: 1, color: const Color(0xFFE5E5E5)),
                 ],
               ],
             ),
