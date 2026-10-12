@@ -159,10 +159,7 @@ class _ReminderCard extends StatelessWidget {
                 top: 0,
                 width: 165,
                 height: 140,
-                child: SvgPicture.asset(
-                  theme.deco,
-                  fit: BoxFit.contain,
-                ),
+                child: SvgPicture.asset(theme.deco, fit: BoxFit.contain),
               ),
               Positioned(
                 left: 16,

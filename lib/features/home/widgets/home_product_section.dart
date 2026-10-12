@@ -62,8 +62,11 @@ class HomeProductSection extends StatelessWidget {
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                    Icon(Icons.chevron_right,
-                        size: 16, color: AppColors.primary600),
+                    Icon(
+                      Icons.chevron_right,
+                      size: 16,
+                      color: AppColors.primary600,
+                    ),
                   ],
                 ),
               ),
@@ -126,7 +129,9 @@ class _ProductCard extends StatelessWidget {
                     left: 8,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 3),
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFFE62E05),
                         borderRadius: BorderRadius.circular(100),
@@ -148,7 +153,9 @@ class _ProductCard extends StatelessWidget {
                     right: 8,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 3),
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFFFEF3C7),
                         borderRadius: BorderRadius.circular(100),

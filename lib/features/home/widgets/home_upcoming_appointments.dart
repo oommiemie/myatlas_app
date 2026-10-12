@@ -68,77 +68,69 @@ class _UpcomingCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: CupertinoColors.white,
           borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF0891B2).withValues(alpha: 0.08),
-                blurRadius: 14,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: Stack(
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 120, 8),
-                    child: Text(
-                      item.title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: Color(0xFF1A1A1A),
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                      ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF0891B2).withValues(alpha: 0.08),
+              blurRadius: 14,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Stack(
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 120, 8),
+                  child: Text(
+                    item.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Color(0xFF1A1A1A),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
-                        gradient: const LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [Color(0xFF0891B2), Color(0xFF0369A1)],
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      gradient: const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [Color(0xFF0891B2), Color(0xFF0369A1)],
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _row(CupertinoIcons.square_grid_3x2_fill, item.subLeft),
+                        const SizedBox(height: 12),
+                        _row(
+                          CupertinoIcons.calendar,
+                          '${ThaiDate.format(item.date)}  ${item.time} น.',
                         ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _row(
-                            CupertinoIcons.square_grid_3x2_fill,
-                            item.subLeft,
-                          ),
-                          const SizedBox(height: 12),
-                          _row(
-                            CupertinoIcons.calendar,
-                            '${ThaiDate.format(item.date)}  ${item.time} น.',
-                          ),
-                          const SizedBox(height: 12),
-                          _row(
-                            CupertinoIcons.person_fill,
-                            item.subRight,
-                          ),
-                        ],
-                      ),
+                        const SizedBox(height: 12),
+                        _row(CupertinoIcons.person_fill, item.subRight),
+                      ],
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
+            ),
             Positioned(
               top: 16,
               right: 12,
               child: _AppointmentSlipThumbnail(
-                onTap: () => showHospitalAppointmentDetailSheet(
-                  context,
-                  item: item,
-                ),
+                onTap: () =>
+                    showHospitalAppointmentDetailSheet(context, item: item),
               ),
             ),
           ],

@@ -39,25 +39,35 @@ class WaterDetailScreen extends StatefulWidget {
   static const _water = Color(0xFF1E88E5);
 
   static const _thMonth = [
-    'ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.',
-    'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.',
+    'ม.ค.',
+    'ก.พ.',
+    'มี.ค.',
+    'เม.ย.',
+    'พ.ค.',
+    'มิ.ย.',
+    'ก.ค.',
+    'ส.ค.',
+    'ก.ย.',
+    'ต.ค.',
+    'พ.ย.',
+    'ธ.ค.',
   ];
   static const _thShort = ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'];
 
   static const _glassOptions = [150, 200, 250, 300, 350];
 
   static Widget _sectionTitle(String text) => Padding(
-        padding: const EdgeInsets.fromLTRB(4, 4, 4, 0),
-        child: Text(
-          text,
-          style: const TextStyle(
-            fontFamily: 'IBM Plex Sans Thai Looped',
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-            color: _ink,
-          ),
-        ),
-      );
+    padding: const EdgeInsets.fromLTRB(4, 4, 4, 0),
+    child: Text(
+      text,
+      style: const TextStyle(
+        fontFamily: 'IBM Plex Sans Thai Looped',
+        fontSize: 16,
+        fontWeight: FontWeight.w700,
+        color: _ink,
+      ),
+    ),
+  );
 
   static String formatMl(num v) {
     final s = v.round().toString();
@@ -154,7 +164,9 @@ class _WaterDetailScreenState extends State<WaterDetailScreen> {
                             glasses: glasses,
                           ),
                           const SizedBox(height: 16),
-                          WaterDetailScreen._sectionTitle('บันทึกการดื่มวันนี้'),
+                          WaterDetailScreen._sectionTitle(
+                            'บันทึกการดื่มวันนี้',
+                          ),
                           const SizedBox(height: 8),
                           _IntakeLog(glasses: glasses, mlPerGlass: _mlPerGlass),
                           const SizedBox(height: 16),
@@ -322,13 +334,33 @@ class _WaterChartCardState extends State<_WaterChartCard>
       case _Period.day:
         // 24 hourly buckets summing to today's consumption.
         const weights = [
-          0, 0, 0, 0, 0, 0, 2, 4, 5, 3, 4, 5,
-          6, 4, 3, 4, 5, 3, 4, 3, 2, 1, 0, 0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          2,
+          4,
+          5,
+          3,
+          4,
+          5,
+          6,
+          4,
+          3,
+          4,
+          5,
+          3,
+          4,
+          3,
+          2,
+          1,
+          0,
+          0,
         ];
         final total = weights.fold<int>(0, (a, b) => a + b);
-        final values = [
-          for (final w in weights) widget.consumedMl * w / total,
-        ];
+        final values = [for (final w in weights) widget.consumedMl * w / total];
         final labels = [
           for (var h = 0; h < 24; h++)
             h % 6 == 0 ? h.toString().padLeft(2, '0') : '',
@@ -347,7 +379,12 @@ class _WaterChartCardState extends State<_WaterChartCard>
           for (var i = 6; i >= 0; i--) _today.subtract(Duration(days: i)),
         ];
         final values = [
-          g * 0.72, g * 1.05, g * 0.84, g * 0.95, g * 0.62, g * 1.10,
+          g * 0.72,
+          g * 1.05,
+          g * 0.84,
+          g * 0.95,
+          g * 0.62,
+          g * 1.10,
           widget.consumedMl.toDouble(),
         ];
         final f = dates.first;
@@ -417,8 +454,8 @@ class _WaterChartCardState extends State<_WaterChartCard>
       headerLabel = 'รวมวันนี้';
       headerUnit = 'มล.';
     } else {
-      headerValue =
-          (s.values.reduce((a, b) => a + b) / s.values.length).round();
+      headerValue = (s.values.reduce((a, b) => a + b) / s.values.length)
+          .round();
       headerLabel = 'เฉลี่ย';
       headerUnit = 'มล./วัน';
     }
@@ -537,9 +574,10 @@ class _WaterChartCardState extends State<_WaterChartCard>
                       behavior: HitTestBehavior.opaque,
                       onTapDown: (d) {
                         final slot = c.maxWidth / s.values.length;
-                        final i = (d.localPosition.dx / slot)
-                            .floor()
-                            .clamp(0, s.values.length - 1);
+                        final i = (d.localPosition.dx / slot).floor().clamp(
+                          0,
+                          s.values.length - 1,
+                        );
                         setState(() => _touched = i == _touched ? null : i);
                       },
                       child: CustomPaint(
@@ -670,10 +708,9 @@ class _BarsPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     const labelH = 22.0;
     final chartH = size.height - labelH;
-    final maxV = [
-      ...values,
-      if (goal != null) goal!,
-    ].reduce((a, b) => a > b ? a : b) * 1.12;
+    final maxV =
+        [...values, if (goal != null) goal!].reduce((a, b) => a > b ? a : b) *
+        1.12;
     final slot = size.width / values.length;
     // Bars shrink to fit when there are many (day = 24, month = ~30).
     final barW = (slot * 0.55).clamp(3.0, 14.0);
@@ -963,7 +1000,11 @@ class _IntakeLog extends StatelessWidget {
                 colors: [Color(0xFF4FC3F7), Color(0xFF1E88E5)],
               ),
             ),
-            child: const Icon(Icons.local_drink, color: CupertinoColors.white, size: 20),
+            child: const Icon(
+              Icons.local_drink,
+              color: CupertinoColors.white,
+              size: 20,
+            ),
           ),
           const SizedBox(width: 12),
           const Expanded(
@@ -1009,8 +1050,9 @@ class _GoalCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = goalMl / 1000;
-    final litres =
-        l == l.roundToDouble() ? l.toStringAsFixed(0) : l.toStringAsFixed(1);
+    final litres = l == l.roundToDouble()
+        ? l.toStringAsFixed(0)
+        : l.toStringAsFixed(1);
     return Container(
       decoration: BoxDecoration(
         color: CupertinoColors.white,
@@ -1183,8 +1225,10 @@ Future<void> showWaterSettingsSheet({
                         // Balanced vertical padding (Thai looped font sits a
                         // touch high by default).
                         labelPadding: const EdgeInsets.symmetric(horizontal: 4),
-                        padding:
-                            const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 9,
+                        ),
                         visualDensity: VisualDensity.compact,
                         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         selectedColor: WaterDetailScreen._water,

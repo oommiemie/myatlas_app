@@ -82,10 +82,7 @@ class _HomePromoBannerState extends State<HomePromoBanner> {
                   horizontal: _horizontalMargin,
                   vertical: 4,
                 ),
-                child: _BannerCard(
-                  item: widget.items[i],
-                  radius: _radius,
-                ),
+                child: _BannerCard(item: widget.items[i], radius: _radius),
               ),
             ),
           ),

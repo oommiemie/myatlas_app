@@ -9,6 +9,7 @@ import '../../appointment/data/mock_data.dart';
 import '../../appointment/payment_screen.dart';
 import '../../medicine/theme/time_period.dart';
 import '../../medicine/widgets/decorative_elements.dart';
+import '../visit_journey_screen.dart';
 import 'home_hospital_queue_card.dart';
 
 // Sparkle icon from Figma (node 923:5161).
@@ -160,6 +161,8 @@ class _Page {
     required this.ink,
     this.isAi = false,
     this.isFamily = false,
+    this.isLive = false,
+    this.live,
     this.action,
     this.onAction,
     this.actionDone = false,
@@ -173,6 +176,8 @@ class _Page {
   final Color ink; // dark, hue-tinted text colour
   final bool isAi; // AI advice (sparkle) vs reminder (bell)
   final bool isFamily; // family card → care-heart icon
+  final bool isLive; // live visit journey → pulsing live dot
+  final Widget? live; // Live Activity strip shown instead of body + CTA
   final String? action; // CTA shown under the left text; null → none
   final VoidCallback? onAction; // null → not tappable (e.g. already done)
   final bool actionDone; // completed style (check)
@@ -214,6 +219,12 @@ const List<Color> _kQueueGrad = [Color(0xFFBEDCF7), Color(0xFFEAF4FD)];
 const Color _kQueueInk = Color(0xFF0D3B66);
 const Color _kQueueAccent = Color(0xFF1E88E5);
 
+// Live visit (Live Activity) palette — deep teal, matches the dark mini card.
+// Brand green of the app, so the live card reads as MyAtlas itself.
+const List<Color> _kLiveGrad = [Color(0xFFCBEBDF), Color(0xFFECF8F3)];
+const Color _kLiveInk = Color(0xFF0D453E);
+const Color _kLiveAccent = Color(0xFF1D8B6B);
+
 // Pending-payment palette — the receipt's brand green.
 const List<Color> _kPayGrad = [Color(0xFFCFEAE1), Color(0xFFECF7F3)];
 const Color _kPayInk = Color(0xFF0D453E);
@@ -252,8 +263,8 @@ class _AiAdviceCardState extends State<AiAdviceCard> {
 
   // Number of distinct pages (stable; content loops via modulo).
   int get _pageCount {
-    // queue + pending bill + 2 AI pages + family + med slots
-    var n = _kMedSlots.length + 5;
+    // live visit + queue + pending bill + 2 AI pages + family + med slots
+    var n = _kMedSlots.length + 6;
     if (_firstSoon(hospitalAppointments) != null) n++;
     if (_firstSoon(homeVisitAppointments) != null) n++;
     return n;
@@ -271,6 +282,12 @@ class _AiAdviceCardState extends State<AiAdviceCard> {
   void initState() {
     super.initState();
     _startAuto();
+    VisitJourneyDemo.instance.journey.addListener(_onJourney);
+  }
+
+  // Live Activity เปลี่ยนช่วง → วาด banner ใหม่
+  void _onJourney() {
+    if (mounted) setState(() {});
   }
 
   void _startAuto() {
@@ -290,6 +307,7 @@ class _AiAdviceCardState extends State<AiAdviceCard> {
 
   @override
   void dispose() {
+    VisitJourneyDemo.instance.journey.removeListener(_onJourney);
     _auto?.cancel();
     _ctrl.dispose();
     super.dispose();
@@ -311,6 +329,36 @@ class _AiAdviceCardState extends State<AiAdviceCard> {
 
   List<_Page> _buildPages() {
     final pages = <_Page>[];
+
+    // Live Activity — กำลังรับบริการที่ รพ. (เส้นทางจาก HOSxP แบบสด)
+    // อยู่ใบแรกเพราะเป็นเรื่องที่เกิดขึ้นตอนนี้ ผู้ป่วยต้องรู้ว่าต้องไปไหนต่อ
+    final live = VisitJourneyDemo.instance.journey.value;
+    pages.add(
+      _Page(
+        isLive: true,
+        label: live.finished ? 'รับบริการเสร็จแล้ว' : 'กำลังรับบริการ',
+        title: '${live.hospitalName} · คิว ${live.queueNo}',
+        body: [
+          '${live.hospitalName} · คิว ${live.queueNo}',
+          'รับบริการมา ${live.elapsedMinutes} นาที · '
+              'อัปเดต ${live.updatedAt} น.',
+        ].join('\n'),
+        grad: _kLiveGrad,
+        ink: _kLiveInk,
+        action: 'ดูเส้นทาง',
+        accent: _kLiveAccent,
+        onAction: () => Navigator.of(context).push(
+          MaterialPageRoute<void>(builder: (_) => const VisitJourneyScreen()),
+        ),
+        live: _LiveActivityStrip(
+          journey: live,
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(builder: (_) => const VisitJourneyScreen()),
+          ),
+        ),
+        right: _LiveStageTicket(journey: live),
+      ),
+    );
 
     // 0) Active hospital queue — moved here from the floating bar that used
     // to sit above the navbar. Most time-critical, so it leads.
@@ -566,7 +614,9 @@ class _AiAdviceCardState extends State<AiAdviceCard> {
           children: [
             // AI pages → sparkle; family → care-heart; reminders → bell.
             // (All replay their one-shot animation per page via the key.)
-            page.isAi
+            page.isLive
+                ? _LiveIcon(key: ValueKey('live$_index'))
+                : page.isAi
                 ? _SparkleIcon(key: ValueKey('sparkle$_index'))
                 : page.isFamily
                 ? _FamilyIcon(key: ValueKey('fam$_index'))
@@ -612,35 +662,40 @@ class _AiAdviceCardState extends State<AiAdviceCard> {
             ),
           ],
         ),
-        const SizedBox(height: 10),
-        // The body takes only the room its text needs, so the CTA sits
-        // directly under it. Copy longer than the cap is cut with an
-        // ellipsis so it can never push the button out of the card.
-        // Instant swap (no AnimatedSwitcher) so the body height doesn't
-        // briefly grow during transitions and shove the button around.
-        Flexible(
-          child: Text(
-            page.body,
-            maxLines: page.action != null ? 3 : 5,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: 12.5,
-              height: 1.5,
-              color: page.ink.withValues(alpha: 0.86),
-              fontWeight: FontWeight.w600,
-              fontVariations: const [FontVariation('wght', 600)],
+        if (page.live != null) ...[
+          const SizedBox(height: 8),
+          Expanded(child: page.live!),
+        ] else ...[
+          const SizedBox(height: 10),
+          // The body takes only the room its text needs, so the CTA sits
+          // directly under it. Copy longer than the cap is cut with an
+          // ellipsis so it can never push the button out of the card.
+          // Instant swap (no AnimatedSwitcher) so the body height doesn't
+          // briefly grow during transitions and shove the button around.
+          Flexible(
+            child: Text(
+              page.body,
+              maxLines: page.action != null ? 3 : 5,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 12.5,
+                height: 1.5,
+                color: page.ink.withValues(alpha: 0.86),
+                fontWeight: FontWeight.w600,
+                fontVariations: const [FontVariation('wght', 600)],
+              ),
             ),
           ),
-        ),
-        if (page.action != null) ...[
-          const SizedBox(height: 12),
-          _ActionButton(
-            key: ValueKey('act$_index'),
-            label: page.action!,
-            onTap: page.onAction,
-            done: page.actionDone,
-            color: page.accent,
-          ),
+          if (page.action != null) ...[
+            const SizedBox(height: 12),
+            _ActionButton(
+              key: ValueKey('act$_index'),
+              label: page.action!,
+              onTap: page.onAction,
+              done: page.actionDone,
+              color: page.accent,
+            ),
+          ],
         ],
       ],
     );
@@ -889,6 +944,112 @@ class _BellIconState extends State<_BellIcon>
           blendMode: BlendMode.srcIn,
           child: const Icon(
             Icons.notifications_active_rounded,
+            size: 24,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// ไอคอนโรงพยาบาลของการ์ด Live Activity — เด้งเข้ามาพร้อมประกายและ
+/// เต้นสองจังหวะแบบชีพจร (one-shot แบบเดียวกับกระดิ่ง/หัวใจ)
+class _LiveIcon extends StatefulWidget {
+  const _LiveIcon({super.key});
+
+  @override
+  State<_LiveIcon> createState() => _LiveIconState();
+}
+
+class _LiveIconState extends State<_LiveIcon>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _c = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1050),
+  )..forward();
+
+  static const _mint = Color(0xFF5FD3A8);
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  Widget _particle(int i, double dist, double opacity) {
+    final a = -math.pi / 2 + i * (math.pi / 3);
+    final size = 2.0 + 2.5 * opacity;
+    return Transform.translate(
+      offset: Offset(math.cos(a) * dist, math.sin(a) * dist),
+      child: Opacity(
+        opacity: opacity,
+        child: Container(
+          width: size,
+          height: size,
+          decoration: const BoxDecoration(shape: BoxShape.circle, color: _mint),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 24,
+      height: 24,
+      child: AnimatedBuilder(
+        animation: _c,
+        builder: (_, child) {
+          final v = _c.value;
+          final pt = Curves.easeOut.transform(v);
+          final dist = 18 * pt;
+          final pOp = (1 - pt).clamp(0.0, 1.0) * 0.95;
+          final flash = (1 - (v / 0.45).clamp(0.0, 1.0)) * 0.5;
+          final pop = Curves.elasticOut.transform(v.clamp(0.0, 1.0));
+          // ชีพจรสองจังหวะ แล้วนิ่ง
+          final beat = v < 0.5
+              ? 0.0
+              : math.sin((v - 0.5) / 0.5 * math.pi * 2).abs() * 0.18 * (1 - v);
+          return Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.center,
+            children: [
+              Opacity(
+                opacity: flash,
+                child: Transform.scale(
+                  scale: 1 + 1.2 * Curves.easeOut.transform(v),
+                  child: Container(
+                    width: 24,
+                    height: 24,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: RadialGradient(
+                        colors: [_mint, Color(0x005FD3A8)],
+                        stops: [0.3, 1.0],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              if (pOp > 0.01)
+                for (int i = 0; i < 6; i++) _particle(i, dist, pOp),
+              Transform.scale(
+                scale: ((0.2 + 0.8 * pop) + beat).clamp(0.0, 1.3),
+                child: child,
+              ),
+            ],
+          );
+        },
+        child: ShaderMask(
+          shaderCallback: (r) => const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF3CC08F), Color(0xFF1D8B6B), Color(0xFF0F6B51)],
+          ).createShader(r),
+          blendMode: BlendMode.srcIn,
+          child: const Icon(
+            Icons.local_hospital_rounded,
             size: 24,
             color: Colors.white,
           ),
@@ -1397,6 +1558,275 @@ class _QueueReminderCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// การ์ดขวาของหน้า Live Activity — "ต้องทำต่อ" บนพื้นเขียวพร้อมภาพโรงพยาบาล
+/// เรียงบนลงล่าง: หัวข้อเล็ก → ทำอะไร → กล่องขาว "ไปที่ไหน"
+/// ข้อความยาวจะย่อขนาดให้พอดีแทนการตัดทิ้ง
+class _LiveStageTicket extends StatelessWidget {
+  const _LiveStageTicket({required this.journey});
+  final VisitJourney journey;
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: LayoutBuilder(
+        builder: (context, c) {
+          final w = c.maxWidth;
+          return Stack(
+            fit: StackFit.expand,
+            children: [
+              // พื้นเขียวไล่เฉียง + ภาพโรงพยาบาล 3D มุมขวาล่าง
+              const DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Color(0xFF3CBF92), Color(0xFF1D8B6B)],
+                  ),
+                ),
+              ),
+              Positioned(
+                right: -w * 0.35,
+                bottom: 0,
+                width: w * 1.05,
+                child: Opacity(
+                  opacity: 0.55,
+                  child: Image.asset(
+                    'assets/Hospital 3d.png',
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+              // เงาไล่จากซ้ายให้ตัวหนังสือบนภาพอ่านชัด
+              const DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                    colors: [Color(0xE6229573), Color(0x00229573)],
+                    stops: [0.4, 1.0],
+                  ),
+                ),
+              ),
+              // เนื้อหาเรียงจากบนลงล่าง: หัวข้อเล็ก → ทำอะไร → ไปที่ไหน → หมายเหตุ
+              Padding(
+                padding: const EdgeInsets.all(10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          VisitJourney.stageIcons[journey.stage],
+                          size: 14,
+                          color: Colors.white.withValues(alpha: 0.8),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'ต้องทำต่อ',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white.withValues(alpha: 0.8),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        journey.nextAction,
+                        maxLines: 1,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                          fontVariations: [FontVariation('wght', 800)],
+                          color: Colors.white,
+                          height: 1.3,
+                        ),
+                      ),
+                    ),
+                    const Spacer(),
+                    // ไปที่ไหน — กล่องขาว ค่าหลักตัวใหญ่สีเขียว
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              journey.nextLabel,
+                              maxLines: 1,
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: _kLiveInk.withValues(alpha: 0.6),
+                              ),
+                            ),
+                          ),
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              journey.nextValue,
+                              maxLines: 1,
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w900,
+                                fontVariations: [FontVariation('wght', 900)],
+                                color: _kLiveAccent,
+                                height: 1.1,
+                                fontFeatures: [FontFeature.tabularFigures()],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// Live Activity ฝั่งซ้ายของ banner — แผงขาวโปร่งในโทนของหน้า
+/// เส้นความคืบหน้า 6 ช่วงพร้อมไอคอน (ช่วงปัจจุบันกระพริบ) ชื่อช่วงปัจจุบัน
+/// เวลาที่รับบริการมา และเวลาอัปเดตล่าสุด · แตะเพื่อดูเส้นทางเต็ม
+class _LiveActivityStrip extends StatelessWidget {
+  const _LiveActivityStrip({required this.journey, this.onTap});
+  final VisitJourney journey;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final j = journey;
+    final stage = j.stage;
+    final n = VisitJourney.stages.length;
+    final faint = _kLiveInk.withValues(alpha: 0.15);
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 6),
+        padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.7),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.white),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text(
+                  'ขั้นที่ ${stage + 1}/$n · ${VisitJourney.stages[stage]}',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    fontVariations: [FontVariation('wght', 800)],
+                    color: _kLiveInk,
+                  ),
+                ),
+                const Spacer(),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  size: 18,
+                  color: _kLiveInk.withValues(alpha: 0.5),
+                ),
+              ],
+            ),
+            const Spacer(),
+            // เส้นความคืบหน้า: ไอคอนแต่ละช่วงต่อกันด้วยเส้น
+            Row(
+              children: [
+                for (var i = 0; i < n; i++) ...[
+                  if (i > 0)
+                    Expanded(
+                      child: Container(
+                        height: 2,
+                        color: i <= stage ? _kLiveAccent : faint,
+                      ),
+                    ),
+                  if (i == stage)
+                    Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        const LiveDot(size: 16, color: _kLiveAccent),
+                        Icon(
+                          VisitJourney.stageIcons[i],
+                          size: 12,
+                          color: Colors.white,
+                        ),
+                      ],
+                    )
+                  else
+                    Container(
+                      width: 16,
+                      height: 16,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: i < stage ? _kLiveAccent : Colors.white,
+                        border: Border.all(
+                          color: i < stage ? _kLiveAccent : faint,
+                          width: 1.5,
+                        ),
+                      ),
+                      child: i < stage
+                          ? const Icon(
+                              Icons.check_rounded,
+                              size: 10,
+                              color: Colors.white,
+                            )
+                          : null,
+                    ),
+                ],
+              ],
+            ),
+            const Spacer(),
+            Row(
+              children: [
+                Text(
+                  'รับบริการมา ${j.elapsedMinutes} นาที',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    fontVariations: const [FontVariation('wght', 600)],
+                    color: _kLiveInk.withValues(alpha: 0.75),
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  'อัปเดต ${j.updatedAt} น.',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontVariations: const [FontVariation('wght', 500)],
+                    color: _kLiveInk.withValues(alpha: 0.55),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

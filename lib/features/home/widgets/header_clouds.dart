@@ -40,10 +40,38 @@ class _HeaderCloudsState extends State<HeaderClouds>
   // Same speed for all + evenly spread phases → constant spacing, never bunches.
   // Kept within the sky band (top) and not too many.
   static const _clouds = [
-    _Cloud(asset: 'assets/sky1.webp', dy: 6, width: 116, phase: 0.00, speed: 1, opacity: 0.90),
-    _Cloud(asset: 'assets/sky3.webp', dy: 40, width: 54, phase: 0.25, speed: 1, opacity: 0.82),
-    _Cloud(asset: 'assets/sky2.webp', dy: 20, width: 84, phase: 0.50, speed: 1, opacity: 0.80),
-    _Cloud(asset: 'assets/sky4.webp', dy: 48, width: 64, phase: 0.75, speed: 1, opacity: 0.75),
+    _Cloud(
+      asset: 'assets/sky1.webp',
+      dy: 6,
+      width: 116,
+      phase: 0.00,
+      speed: 1,
+      opacity: 0.90,
+    ),
+    _Cloud(
+      asset: 'assets/sky3.webp',
+      dy: 40,
+      width: 54,
+      phase: 0.25,
+      speed: 1,
+      opacity: 0.82,
+    ),
+    _Cloud(
+      asset: 'assets/sky2.webp',
+      dy: 20,
+      width: 84,
+      phase: 0.50,
+      speed: 1,
+      opacity: 0.80,
+    ),
+    _Cloud(
+      asset: 'assets/sky4.webp',
+      dy: 48,
+      width: 64,
+      phase: 0.75,
+      speed: 1,
+      opacity: 0.75,
+    ),
   ];
 
   @override
@@ -68,7 +96,8 @@ class _HeaderCloudsState extends State<HeaderClouds>
                     for (final cl in _clouds)
                       Positioned(
                         top: top + cl.dy,
-                        left: -cl.width +
+                        left:
+                            -cl.width +
                             ((_ctrl.value * cl.speed + cl.phase) % 1.0) *
                                 (w + cl.width),
                         child: Opacity(

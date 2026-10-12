@@ -103,23 +103,23 @@ class HomeSummaryDashboard extends StatelessWidget {
       );
     }
     return SizedBox(
-        height: 217,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(child: _mealCard()),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                children: [
-                  Expanded(child: _watchCard()),
-                  const SizedBox(height: 16),
-                  Expanded(child: _familyCard()),
-                ],
-              ),
+      height: 217,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(child: _mealCard()),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              children: [
+                Expanded(child: _watchCard()),
+                const SizedBox(height: 16),
+                Expanded(child: _familyCard()),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -148,8 +148,12 @@ class HomeSummaryDashboard extends StatelessWidget {
               top: 8,
               child: Transform.rotate(
                 angle: 22.11 * math.pi / 180,
-                child: Image.asset('assets/images/salad.png',
-                    width: 96, height: 96, fit: BoxFit.contain),
+                child: Image.asset(
+                  'assets/images/salad.png',
+                  width: 96,
+                  height: 96,
+                  fit: BoxFit.contain,
+                ),
               ),
             ),
             Padding(
@@ -181,41 +185,45 @@ class HomeSummaryDashboard extends StatelessWidget {
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(100),
                             child: BackdropFilter(
-                            filter: ui.ImageFilter.blur(
-                                sigmaX: 14, sigmaY: 14),
-                            child: Container(
-                            height: 36,
-                            alignment: Alignment.center,
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 10),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(100),
-                              color: Colors.white.withValues(alpha: 0.2),
-                              border: Border.all(
-                                  color: Colors.white.withValues(alpha: 0.25)),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                SvgPicture.string(
-                                  _kScanFoodSvg,
-                                  width: 20,
-                                  height: 20,
+                              filter: ui.ImageFilter.blur(
+                                sigmaX: 14,
+                                sigmaY: 14,
+                              ),
+                              child: Container(
+                                height: 36,
+                                alignment: Alignment.center,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
                                 ),
-                                const SizedBox(width: 5),
-                                Text(
-                                  '$scansUsed/$scansTotal',
-                                  style: const TextStyle(
-                                    fontFamily: 'Google Sans',
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w600,
-                                    height: 1,
-                                    color: Colors.white,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(100),
+                                  color: Colors.white.withValues(alpha: 0.2),
+                                  border: Border.all(
+                                    color: Colors.white.withValues(alpha: 0.25),
                                   ),
                                 ),
-                              ],
-                            ),
-                          ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    SvgPicture.string(
+                                      _kScanFoodSvg,
+                                      width: 20,
+                                      height: 20,
+                                    ),
+                                    const SizedBox(width: 5),
+                                    Text(
+                                      '$scansUsed/$scansTotal',
+                                      style: const TextStyle(
+                                        fontFamily: 'Google Sans',
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                        height: 1,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
                           ),
                         ),
@@ -247,8 +255,8 @@ class HomeSummaryDashboard extends StatelessWidget {
                               Expanded(child: _stat('$heightCm', 'cm')),
                               _vDivider(),
                               Expanded(
-                                child: _stat(
-                                    bmi.toStringAsFixed(1), 'BMI')),
+                                child: _stat(bmi.toStringAsFixed(1), 'BMI'),
+                              ),
                             ],
                           ),
                         ],
@@ -264,8 +272,7 @@ class HomeSummaryDashboard extends StatelessWidget {
     );
   }
 
-  Widget _vDivider() =>
-      Container(width: 1, height: 28, color: _border);
+  Widget _vDivider() => Container(width: 1, height: 28, color: _border);
 
   Widget _stat(String value, String label) {
     return Column(
@@ -318,7 +325,9 @@ class HomeSummaryDashboard extends StatelessWidget {
               SizedBox(
                 width: 66,
                 height: 66,
-                child: _WatchHalo(battery: (watchBattery / 100).clamp(0.0, 1.0)),
+                child: _WatchHalo(
+                  battery: (watchBattery / 100).clamp(0.0, 1.0),
+                ),
               ),
               const SizedBox(width: 6),
               Expanded(
@@ -338,8 +347,11 @@ class HomeSummaryDashboard extends StatelessWidget {
                     ),
                     Row(
                       children: [
-                        const Icon(Icons.battery_3_bar,
-                            size: 15, color: Color(0xFF222222)),
+                        const Icon(
+                          Icons.battery_3_bar,
+                          size: 15,
+                          color: Color(0xFF222222),
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           '$watchBattery %',
@@ -353,20 +365,18 @@ class HomeSummaryDashboard extends StatelessWidget {
                     ),
                     Row(
                       children: [
-                        Icon(Icons.bluetooth,
-                            size: 11,
-                            color: watchConnected
-                                ? _success600
-                                : _textTertiary),
+                        Icon(
+                          Icons.bluetooth,
+                          size: 11,
+                          color: watchConnected ? _success600 : _textTertiary,
+                        ),
                         const SizedBox(width: 3),
                         Text(
                           watchConnected ? 'เชื่อมต่ออยู่' : 'ไม่ได้เชื่อมต่อ',
                           style: TextStyle(
                             fontFamily: 'Google Sans',
                             fontSize: 9,
-                            color: watchConnected
-                                ? _success600
-                                : _textTertiary,
+                            color: watchConnected ? _success600 : _textTertiary,
                           ),
                         ),
                       ],
@@ -421,8 +431,11 @@ class HomeSummaryDashboard extends StatelessWidget {
                           ),
                         ),
                       ),
-                      const Icon(Icons.chevron_right,
-                          size: 16, color: Color(0xFF1A1A1A)),
+                      const Icon(
+                        Icons.chevron_right,
+                        size: 16,
+                        color: Color(0xFF1A1A1A),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 2),
@@ -635,11 +648,7 @@ class _WatchHalo extends StatelessWidget {
           ),
         ),
         // Real watch photo in the centre.
-        Image.asset(
-          'assets/watch.png',
-          width: 46,
-          fit: BoxFit.contain,
-        ),
+        Image.asset('assets/watch.png', width: 46, fit: BoxFit.contain),
       ],
     );
   }
@@ -703,7 +712,8 @@ class _WatchHaloPainter extends CustomPainter {
 
     // Yellow indicator dot at the tip of the battery progress.
     final tipAngle = start + sweep;
-    final tip = c + Offset(math.cos(tipAngle) * _rOuter, math.sin(tipAngle) * _rOuter);
+    final tip =
+        c + Offset(math.cos(tipAngle) * _rOuter, math.sin(tipAngle) * _rOuter);
     canvas.drawCircle(tip, 4.5, Paint()..color = Colors.white);
     canvas.drawCircle(tip, 3, Paint()..color = const Color(0xFFFFD60A));
   }

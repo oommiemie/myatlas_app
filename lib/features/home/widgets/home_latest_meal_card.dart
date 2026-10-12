@@ -83,10 +83,7 @@ class HomeLatestMealCard extends StatelessWidget {
               gradient: const LinearGradient(
                 begin: Alignment.centerRight,
                 end: Alignment.centerLeft,
-                colors: [
-                  Color(0xFF1D8B6B),
-                  Color(0xFF093327),
-                ],
+                colors: [Color(0xFF1D8B6B), Color(0xFF093327)],
                 stops: [0.16, 1.0],
               ),
               borderRadius: BorderRadius.circular(24),
@@ -107,11 +104,7 @@ class HomeLatestMealCard extends StatelessWidget {
             padding: const EdgeInsets.only(top: 12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _MealRow(),
-                const SizedBox(height: 12),
-                _MacroRow(),
-              ],
+              children: [_MealRow(), const SizedBox(height: 12), _MacroRow()],
             ),
           ),
         ],
@@ -155,10 +148,7 @@ class _MealRow extends StatelessWidget {
               children: [
                 Text(
                   'อาหารที่ทาน',
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: Color(0xCCFFFFFF),
-                  ),
+                  style: TextStyle(fontSize: 11, color: Color(0xCCFFFFFF)),
                 ),
                 SizedBox(height: 4),
                 Text(
@@ -337,18 +327,14 @@ class _MacroItem extends StatelessWidget {
             ),
             const SizedBox(width: 4),
             Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
               decoration: BoxDecoration(
                 color: pctColor,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
                 pct,
-                style: const TextStyle(
-                  fontSize: 10,
-                  color: Colors.white,
-                ),
+                style: const TextStyle(fontSize: 10, color: Colors.white),
               ),
             ),
           ],

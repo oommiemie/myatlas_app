@@ -122,210 +122,222 @@ class _HomeWaterIntakeCardState extends State<HomeWaterIntakeCard> {
       ),
       child: Column(
         children: [
-        GestureDetector(
-      onTap: _openDetail,
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Header
-          Row(
-            children: [
-              Container(
-                width: 24,
-                height: 24,
-                alignment: Alignment.center,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [_waterTop, _waterBottom],
+          GestureDetector(
+            onTap: _openDetail,
+            behavior: HitTestBehavior.opaque,
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
                   ),
-                ),
-                child: const Icon(Icons.water_drop,
-                    color: Colors.white, size: 13),
+                ],
               ),
-              const SizedBox(width: 8),
-              const Expanded(
-                child: Text(
-                  'ดื่มน้ำวันนี้',
-                  // Match the "กิจกรรม" header (size 12, w400, grey).
-                  style: TextStyle(
-                    fontFamily: 'IBM Plex Sans Thai Looped',
-                    fontSize: 12,
-                    fontWeight: FontWeight.w400,
-                    letterSpacing: 0.275,
-                    color: Color(0xFF6D756E),
-                    height: 1.33,
-                  ),
-                ),
-              ),
-              // Navigate affordance — the whole card opens the detail screen.
-              const Icon(Icons.chevron_right,
-                  size: 22, color: Color(0xFF8A97A3)),
-            ],
-          ),
-          const SizedBox(height: 6),
-          // Gauge + filling water drop + amount.
-          Center(
-            child: SizedBox(
-              width: 220,
-              height: 220,
-              child: Stack(
-                alignment: Alignment.center,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  TweenAnimationBuilder<double>(
-                    tween: Tween(begin: 0, end: _progress),
-                    duration: const Duration(milliseconds: 550),
-                    curve: Curves.easeOutCubic,
-                    builder: (_, p, __) => CustomPaint(
-                      size: const Size.square(220),
-                      painter: _GaugePainter(p),
+                  // Header
+                  Row(
+                    children: [
+                      Container(
+                        width: 24,
+                        height: 24,
+                        alignment: Alignment.center,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [_waterTop, _waterBottom],
+                          ),
+                        ),
+                        child: const Icon(
+                          Icons.water_drop,
+                          color: Colors.white,
+                          size: 13,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      const Expanded(
+                        child: Text(
+                          'ดื่มน้ำวันนี้',
+                          // Match the "กิจกรรม" header (size 12, w400, grey).
+                          style: TextStyle(
+                            fontFamily: 'IBM Plex Sans Thai Looped',
+                            fontSize: 12,
+                            fontWeight: FontWeight.w400,
+                            letterSpacing: 0.275,
+                            color: Color(0xFF6D756E),
+                            height: 1.33,
+                          ),
+                        ),
+                      ),
+                      // Navigate affordance — the whole card opens the detail screen.
+                      const Icon(
+                        Icons.chevron_right,
+                        size: 22,
+                        color: Color(0xFF8A97A3),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  // Gauge + filling water drop + amount.
+                  Center(
+                    child: SizedBox(
+                      width: 220,
+                      height: 220,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          TweenAnimationBuilder<double>(
+                            tween: Tween(begin: 0, end: _progress),
+                            duration: const Duration(milliseconds: 550),
+                            curve: Curves.easeOutCubic,
+                            builder: (_, p, __) => CustomPaint(
+                              size: const Size.square(220),
+                              painter: _GaugePainter(p),
+                            ),
+                          ),
+                          // Drop centered in the gauge.
+                          _WaterDrop(
+                            progress: _progress,
+                            complete: _consumedMl >= _goalMl,
+                          ),
+                          // Amount sits in the gauge's open bottom gap.
+                          Positioned(
+                            bottom: 8,
+                            left: 0,
+                            right: 0,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  _formatMl(_consumedMl),
+                                  style: const TextStyle(
+                                    fontFamily: 'IBM Plex Sans Thai Looped',
+                                    fontSize: 26,
+                                    fontWeight: FontWeight.w800,
+                                    height: 1.0,
+                                    color: _ink,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  '/${_formatMl(_goalMl)} มล.',
+                                  style: const TextStyle(
+                                    fontFamily: 'IBM Plex Sans Thai Looped',
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    color: Color(0xFF8A97A3),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                  // Drop centered in the gauge.
-                  _WaterDrop(
-                    progress: _progress,
-                    complete: _consumedMl >= _goalMl,
+                  const SizedBox(height: 12),
+                  // Controls: big "ดื่ม" button + small remove button.
+                  Row(
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: _add,
+                          behavior: HitTestBehavior.opaque,
+                          child: Container(
+                            height: 48,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(100),
+                              gradient: const LinearGradient(
+                                colors: [_waterTop, _waterBottom],
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: _waterBottom.withValues(alpha: 0.30),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.water_drop,
+                                  color: Colors.white,
+                                  size: 18,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'ดื่ม ($_mlPerGlass มล.)',
+                                  style: const TextStyle(
+                                    fontFamily: 'IBM Plex Sans Thai Looped',
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      GestureDetector(
+                        onTap: _remove,
+                        behavior: HitTestBehavior.opaque,
+                        child: Container(
+                          width: 48,
+                          height: 48,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: const Color(0xFFEFF6FA),
+                            border: Border.all(color: const Color(0xFFD9E8F0)),
+                          ),
+                          child: const Icon(
+                            Icons.remove,
+                            color: _waterBottom,
+                            size: 22,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  // Amount sits in the gauge's open bottom gap.
-                  Positioned(
-                    bottom: 8,
-                    left: 0,
-                    right: 0,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          _formatMl(_consumedMl),
-                          style: const TextStyle(
-                            fontFamily: 'IBM Plex Sans Thai Looped',
-                            fontSize: 26,
-                            fontWeight: FontWeight.w800,
-                            height: 1.0,
-                            color: _ink,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          '/${_formatMl(_goalMl)} มล.',
-                          style: const TextStyle(
-                            fontFamily: 'IBM Plex Sans Thai Looped',
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF8A97A3),
-                          ),
-                        ),
-                      ],
+                  const SizedBox(height: 10),
+                  Text(
+                    'แตะ "ดื่ม" เพื่อบันทึก · แก้วละ $_mlPerGlass มล. · เป้าหมาย $_litres ลิตร',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontFamily: 'IBM Plex Sans Thai Looped',
+                      fontSize: 11,
+                      color: Color(0xFF8A97A3),
                     ),
                   ),
                 ],
               ),
             ),
           ),
-          const SizedBox(height: 12),
-          // Controls: big "ดื่ม" button + small remove button.
-          Row(
-            children: [
-              Expanded(
-                child: GestureDetector(
-                  onTap: _add,
-                  behavior: HitTestBehavior.opaque,
-                  child: Container(
-                    height: 48,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(100),
-                      gradient: const LinearGradient(
-                        colors: [_waterTop, _waterBottom],
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: _waterBottom.withValues(alpha: 0.30),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.water_drop,
-                            color: Colors.white, size: 18),
-                        const SizedBox(width: 8),
-                        Text(
-                          'ดื่ม ($_mlPerGlass มล.)',
-                          style: const TextStyle(
-                            fontFamily: 'IBM Plex Sans Thai Looped',
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Row(
+              children: [
+                Expanded(
+                  child: _WaterSettingsButton(onTap: _openWaterSettings),
                 ),
-              ),
-              const SizedBox(width: 10),
-              GestureDetector(
-                onTap: _remove,
-                behavior: HitTestBehavior.opaque,
-                child: Container(
-                  width: 48,
-                  height: 48,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: const Color(0xFFEFF6FA),
-                    border: Border.all(color: const Color(0xFFD9E8F0)),
-                  ),
-                  child: const Icon(Icons.remove,
-                      color: _waterBottom, size: 22),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Text(
-            'แตะ "ดื่ม" เพื่อบันทึก · แก้วละ $_mlPerGlass มล. · เป้าหมาย $_litres ลิตร',
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontFamily: 'IBM Plex Sans Thai Looped',
-              fontSize: 11,
-              color: Color(0xFF8A97A3),
+              ],
             ),
           ),
         ],
-      ),
-      ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(top: 4),
-          child: Row(
-            children: [
-              Expanded(
-                child: _WaterSettingsButton(onTap: _openWaterSettings),
-              ),
-            ],
-          ),
-        ),
-      ],
       ),
     );
   }
@@ -351,8 +363,11 @@ Path _teardropPath(Size size) {
   return Path()
     ..moveTo(cx, 0)
     ..quadraticBezierTo(cx + rb * 0.95, cyBulb - rb * 0.55, cx + rb, cyBulb)
-    ..arcToPoint(Offset(cx - rb, cyBulb),
-        radius: Radius.circular(rb), clockwise: true)
+    ..arcToPoint(
+      Offset(cx - rb, cyBulb),
+      radius: Radius.circular(rb),
+      clockwise: true,
+    )
     ..quadraticBezierTo(cx - rb * 0.95, cyBulb - rb * 0.55, cx, 0)
     ..close();
 }
@@ -423,8 +438,9 @@ class _WaterDropState extends State<_WaterDrop>
             animation: _c,
             builder: (_, __) {
               final v = _c.value;
-              final check =
-                  Curves.easeOutBack.transform(((v - 0.78) / 0.22).clamp(0.0, 1.0));
+              final check = Curves.easeOutBack.transform(
+                ((v - 0.78) / 0.22).clamp(0.0, 1.0),
+              );
               return Stack(
                 alignment: Alignment.center,
                 children: [
@@ -447,8 +463,9 @@ class _WaterDropState extends State<_WaterDrop>
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFF1E88E5)
-                                    .withValues(alpha: 0.35),
+                                color: const Color(
+                                  0xFF1E88E5,
+                                ).withValues(alpha: 0.35),
                                 blurRadius: 8,
                               ),
                             ],

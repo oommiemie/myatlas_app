@@ -185,8 +185,11 @@ class HomeSleepSummaryCard extends StatelessWidget {
                       colors: [_rem, _deep],
                     ),
                   ),
-                  child: const Icon(Icons.nightlight_round,
-                      color: Colors.white, size: 13),
+                  child: const Icon(
+                    Icons.nightlight_round,
+                    color: Colors.white,
+                    size: 13,
+                  ),
                 ),
                 const SizedBox(width: 8),
                 const Expanded(
@@ -282,11 +285,13 @@ class HomeSleepSummaryCard extends StatelessWidget {
               children: [
                 for (int i = 0; i < stages.length; i++) ...[
                   if (i > 0) const SizedBox(width: 4),
-                  Expanded(child: _StageLegend(
-                    label: stages[i].$1,
-                    duration: _fmt(stages[i].$2),
-                    color: stages[i].$3,
-                  )),
+                  Expanded(
+                    child: _StageLegend(
+                      label: stages[i].$1,
+                      duration: _fmt(stages[i].$2),
+                      color: stages[i].$3,
+                    ),
+                  ),
                 ],
               ],
             ),
@@ -341,7 +346,8 @@ class HomeSleepDebtCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _InfoTooltip(
-      message: 'หนี้การนอน คือชั่วโมงที่คุณนอนขาดจากเป้าหมาย '
+      message:
+          'หนี้การนอน คือชั่วโมงที่คุณนอนขาดจากเป้าหมาย '
           'สะสมรวมกันตลอด 5 วันที่ผ่านมา\n\n'
           'ตอนนี้คุณนอนขาดไป ${_fmt(sleepDebtMin)} '
           'ลองเข้านอนเร็วขึ้นวันละ 30–40 นาที เพื่อทยอยชดเชย '
@@ -375,7 +381,8 @@ class HomeBedtimeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _InfoTooltip(
-      message: 'เข้านอนสม่ำเสมอ วัดจากเวลาเข้านอนเฉลี่ยของคุณ '
+      message:
+          'เข้านอนสม่ำเสมอ วัดจากเวลาเข้านอนเฉลี่ยของคุณ '
           'และค่าความแกว่งจากเวลานั้น\n\n'
           'ช่วง 5 วันที่ผ่านมาคุณเข้านอนราว $bedtime น. '
           'โดยแกว่งขึ้นลงเฉลี่ย $bedtimeVarianceMin นาที\n\n'
@@ -485,10 +492,7 @@ class _StatTile extends StatelessWidget {
                 ),
               ),
             ),
-            if (trailing != null) ...[
-              const SizedBox(width: 4),
-              trailing!,
-            ],
+            if (trailing != null) ...[const SizedBox(width: 4), trailing!],
           ],
         ),
         const SizedBox(height: 4),
